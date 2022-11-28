@@ -4,4 +4,7 @@ use anchor_lang::prelude::*;
 pub enum IdentifiersError {
     #[msg("Identifier publickey must begin with prefix - idX")]
     IdentifierPrefixMismatch,
+
+    #[msg("Numerical overflow!")]
+    NumericalOverflow,
 }
