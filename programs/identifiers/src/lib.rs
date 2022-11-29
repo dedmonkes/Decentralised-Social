@@ -4,9 +4,9 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 mod instructions;
 use instructions::{initialise_identifier::*, initialise_delegate_record::*, initialise_transfer_owner::*, reject_owner_transfer::*, complete_owner_transfer::*, verify_delegate_record::*};
 
-mod state;
-mod error;
-mod constants;
+pub mod state;
+pub mod error;
+pub mod constants;
 
 #[program]
 pub mod identifiers {
