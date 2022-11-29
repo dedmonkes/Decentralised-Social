@@ -14,6 +14,7 @@ pub mod profiles {
     pub fn create_profile(ctx: Context<CreateProfile>, username : String, display_name : String) -> Result<()> {
 
         //TODO regex check of usernames and display names
+        identifiers::state::is_valid_prefix(ctx.accounts.identifier.key())?;
 
         ctx.accounts.user_profile.identifier = ctx.accounts.identifier.key();
         ctx.accounts.user_profile.profile = Profile {
