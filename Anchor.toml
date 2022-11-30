@@ -3,6 +3,7 @@ seeds = false
 skip-lint = false
 [programs.localnet]
 identifiers = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+multigraph = "BStZRTvLZYK6rbGipkpwWSF82wPnFbTfH2fx1vbdpev1"
 
 [registry]
 url = "https://api.apr.dev"

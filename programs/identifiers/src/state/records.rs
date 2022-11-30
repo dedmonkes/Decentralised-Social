@@ -18,10 +18,12 @@ pub struct OwnerRecord {
 impl OwnerRecord {
     pub fn space() -> usize {
         8 +
+        std::mem::size_of::<Pubkey>() + // identifier
+
         1 + // is_delegate
         1 + // is_verfied
         std::mem::size_of::<Pubkey>() + // key
-        std::mem::size_of::<Option<Pubkey>>() + // key_account_owner,
+        std::mem::size_of::<Pubkey>() + // key_account_owner,
         64 + // reserved
         1 // bump
     }

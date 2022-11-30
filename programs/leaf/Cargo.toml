@@ -17,4 +17,7 @@ default = []
 
 [dependencies]
 anchor-lang = "0.25.0"
-identifiers = { path="../identifiers",  features = ["no-entrypoint"] }
+identifiers = { path="../identifiers",  features = ["no-entrypoint",  "cpi"] }
+multigraph = { path="../multigraph",  features = ["no-entrypoint",  "cpi"] }
+
+

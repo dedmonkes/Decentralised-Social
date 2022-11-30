@@ -1,126 +1,188 @@
+use std::str::FromStr;
+
 use anchor_lang::prelude::*;
-use identifiers::state::{Identifier, OwnerRecord};
+use identifiers::state::{OwnerRecord, Identifier};
+use multigraph::{cpi::accounts::{CreateEdge, CreateNode}, EdgeRelation};
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+// const SHADOW_DRIVE_PROGAM_ID : Pubkey = Pubkey::from_str("2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ").unwrap();
 
 #[program]
 pub mod leaf {
+
+    use multigraph::{NodeType, ConnectionType};
+
     use super::*;
 
-    pub fn create_node(ctx: Context<CreateNode>) -> Result<()> {
+    pub fn create_post(ctx: Context<CreatePost>) -> Result<()> {
+        let identifier = ctx.accounts.identifier.key();
         
-        identifiers::state::is_valid_prefix(ctx.accounts.identifier.key())?;
+        // Check prefix 
+        identifiers::state::is_valid_prefix(identifier)?;
+
+        ctx.accounts.post.identifier = ctx.accounts.identifier.key();
+        ctx.accounts.post.shadow_drive = ctx.accounts.shadow_drive.key();
+        ctx.accounts.post.created_at = Clock::get().unwrap().unix_timestamp;
+        ctx.accounts.post.bump = *ctx.bumps.get("post").unwrap();
+
+        msg!("Creating a ndoe in the social graph...");
+        let post_key = ctx.accounts.post.key();
+    
+        let seeds = vec![
+            b"post".as_ref(),
+            post_key.as_ref(),
+        ];
+
+        let signers = vec![seeds.as_slice()];
+
+        let cpi_program = ctx.accounts.multigraph.to_account_info();
+
+        let node_cpi_accounts =  CreateNode{
+            payer: ctx.accounts.payer.to_account_info(),
+            node: ctx.accounts.node.to_account_info(),
+            account : ctx.accounts.post.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info()
+        };
+        let node_cpi_ctx = CpiContext::new_with_signer(cpi_program.clone(), node_cpi_accounts, &signers);
+        
+        multigraph::cpi::create_node(node_cpi_ctx, NodeType::Post)?;
+
+        msg!("Created Node in social graph now adding edge...");
+
+        let edge_cpi_accounts =  CreateEdge{
+            payer: ctx.accounts.payer.to_account_info(),
+            edge: ctx.accounts.edge.to_account_info(),
+            to_account : ctx.accounts.post.to_account_info(),
+            from_account : ctx.accounts.identifier.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info()
+        };
+        let edge_cpi_ctx = CpiContext::new(cpi_program, edge_cpi_accounts);
+        
+        msg!("Graph populated with new post");
+
+        multigraph::cpi::create_edge(edge_cpi_ctx, ConnectionType::SocialRelation, EdgeRelation::Symmetric)?;
 
         Ok(())
     }
+
+    // pub fn create_user(ctx: Context<CreateUser>, did : Option<String>) -> Result<()>{
+
+    //     msg!("Created Node in social graph now adding edge...");
+
+    //     let cpi_program = ctx.accounts.multigraph.to_account_info();
+
+    //     let node_cpi_accounts =  CreateNode{
+    //         payer: ctx.accounts.payer.to_account_info(),
+    //         node: ctx.accounts.node.to_account_info(),
+    //         account : ctx.accounts.identifier.to_account_info(),
+    //         system_program: ctx.accounts.system_program.to_account_info()
+    //     };
+
+    //     let node_cpi_ctx = CpiContext::new(cpi_program, node_cpi_accounts);
+        
+
+    //     Ok(())
+    // }
 }
 
 #[derive(Accounts)]
-pub struct CreateNode<'info> {
+pub struct CreatePost<'info>{
     #[account(mut)]
     payer : Signer<'info>,
+
+    #[account(
+        address = owner_record.key
+    )]
     owner : Signer<'info>,
 
     #[account(
         init,
-        seeds = [b"node", identifier.key().as_ref()],
+        seeds = [b"post", identifier.key().as_ref()],
         bump,
-        space = Node::space(),
+        space = Post::space(),
         payer = payer
     )]
-    node : Account<'info, Node>,
+    post : Account<'info, Post>,
+
+    /// CHECK inside cpi to mulitgraph
+    node : AccountInfo<'info>,
+
+    /// CHECK inside cpi to mulitgraph
+    edge : AccountInfo<'info>,
 
     #[account(
         owner = identifiers::id()
     )]
     identifier : Account<'info, Identifier>,
+
+    #[account(
+        seeds = [b"owner-record", identifier.key().as_ref()],
+        bump = owner_record.bump,
+        constraint = owner_record.identifier == identifier.key()
+    )]
     owner_record : Account<'info, OwnerRecord>,
+
+    /// CHECK
+    #[account(
+        // owner = SHADOW_DRIVE_PROGAM_ID will put back in later 
+    )]
+    shadow_drive : AccountInfo<'info>,
+    ///CHECK
+    #[account(
+        executable,
+        address = multigraph::id()
+    )]
+    multigraph : AccountInfo<'info>,
     pub system_program: Program<'info, System>,
-
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
-pub enum EdgeType {
-    Follow,
-    Revive,
-    UpVote,
-    DownVote,
-    Love
+#[derive(Accounts)]
+pub struct CreateUser<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    
+    #[account()]
+    pub owner: Signer<'info>,
+
+    /// CHECK inside cpi to mulitgraph
+    node : AccountInfo<'info>,
+
+    #[account()]
+    pub identifier_signer : Signer<'info>,
+
+    /// CHECK in cpi
+    pub identifier : AccountInfo<'info>,
+
+    /// CHECK in cpi
+    pub owner_record : AccountInfo<'info>,
+
+    /// CHECK : any key can be used to recover account
+    pub recovery_key : AccountInfo<'info>,
+
+    ///CHECK
+    #[account(
+        executable,
+        address = multigraph::id()
+    )]
+    multigraph : AccountInfo<'info>,
+
+    pub system_program: Program<'info, System>,
 }
 
+// Post metadata 
 #[account]
-pub struct Edge {
-    edge_type: EdgeType,
-    to : Pubkey,
-    from : Pubkey,
-    created_at : i64,
-    removed_at : i64,
+pub struct Post {
+    identifier : Pubkey, //user identifier that posted content
+    shadow_drive : Pubkey,
+   	created_at : i64,
     bump : u8
 }
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
-pub enum NodeType {
-	Post,
-	User
-}
-
-#[account]
-pub struct Node {
-    node_type : NodeType,
-    identifier : Pubkey,
-    data : Option<Pubkey>,
-    created_at : i64,
-    bump : u8
-}
-
-// Future implementation may have encrypted data to allow private or restricted access of content
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
-pub enum Visibility {
-	PaidToView,
-	Public,
-	Protected
-}
-
-#[account]
-pub struct Data {
-    node : Pubkey,
-	// Shadow drive associated to the identifier
-	shadow_drive : Pubkey,
-	//Address of the data, this will be json file in shadow drive
-	data : Pubkey,
-	visbility : Visibility,
-	created_at : u32,
-    bump : u8
-}
-
-impl Edge {
+impl Post {
     pub fn space() -> usize {
         8 +
-        std::mem::size_of::<EdgeType>() + // edge type
-        std::mem::size_of::<Pubkey>() + // to node
-        std::mem::size_of::<Pubkey>() + // from node
-        std::mem::size_of::<i64>() + // created at
-        std::mem::size_of::<i64>() + // removed at
-        1 // bump
-    }
-}
-impl Node {
-    pub fn space() -> usize {
-        8 +
-        std::mem::size_of::<NodeType>() + // Node type
+        std::mem::size_of::<Pubkey>() + // Node type
         std::mem::size_of::<Pubkey>() + // identifier
-        std::mem::size_of::<Option<Pubkey>>() + // Data
         std::mem::size_of::<i64>() + // created_at
-        1 // bump
-    }
-}
-impl Data {
-    pub fn space() -> usize {
-        8 +
-        std::mem::size_of::<Pubkey>() + // node
-        std::mem::size_of::<Pubkey>() + // shadow drive,
-        std::mem::size_of::<Pubkey>() + // data address,
-        std::mem::size_of::<Visibility>() +
-        std::mem::size_of::<u32>() + // created at
         1 // bump
     }
 }

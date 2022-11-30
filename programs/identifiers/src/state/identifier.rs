@@ -26,17 +26,18 @@ impl Identifier {
         std::mem::size_of::<Option<Pubkey>>() + // recovery_key,
         std::mem::size_of::<u32>() + //recovery count
         128 + // reserved
-        did.unwrap_or("".to_string()).len()
+        std::mem::size_of::<Option<Pubkey>>()
     }
 }
 
 // TODO compare in bytes 
 pub fn is_valid_prefix( id : Pubkey) -> Result<()> {
     let id_string = id.to_string();
-    let prefix = &id_string[0..3];
+    let prefix = &id_string[0..2];
 
     match prefix {
-        "idX" => return Ok(()),
+        // Will be idX once we have time to optimize the miner via wasm
+        "id" => return Ok(()),
         _ => return Err(IdentifiersError::IdentifierPrefixMismatch.into())
     }
 }
