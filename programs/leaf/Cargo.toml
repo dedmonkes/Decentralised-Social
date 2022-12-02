@@ -16,7 +16,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.25.0"
+anchor-lang = { version = "0.25.0", features = ["init-if-needed"] }
 identifiers = { path="../identifiers",  features = ["no-entrypoint",  "cpi"] }
 multigraph = { path="../multigraph",  features = ["no-entrypoint",  "cpi"] }
 

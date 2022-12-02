@@ -2,14 +2,15 @@ use anchor_lang::prelude::*;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 mod instructions;
-use instructions::{initialise_identifier::*, initialise_delegate_record::*, initialise_transfer_owner::*, reject_owner_transfer::*, complete_owner_transfer::*, verify_delegate_record::*};
-
+use instructions::{initialise_identifier::*, initialise_delegate_record::*, initialise_transfer_owner::*, reject_owner_transfer::*, complete_owner_transfer::*, verify_delegate_record::*, create_edge::*};
+use multigraph::{ConnectionType, EdgeRelation};
 pub mod state;
 pub mod error;
 pub mod constants;
 
 #[program]
 pub mod identifiers {
+
 
     use super::*;
 
@@ -35,6 +36,10 @@ pub mod identifiers {
 
     pub fn verify_delegate(ctx: Context<VerifyDelegate>) -> Result<()> {
         instructions::verify_delegate(ctx)
+    }
+
+    pub fn create_edge(ctx: Context<CreateEdge>, connection_type : ConnectionType, edge_direction : EdgeRelation) -> Result<()> {
+        instructions::create_edge(ctx, connection_type, edge_direction)
     }
 
 

@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{TokenAccount, Mint};
 use identifiers::state::{Identifier, OwnerRecord};
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("8vkLd15JfYsCC8NRwJuvnjunKy4bnbk8kEzQifP9gvY5");
 
 #[program]
 pub mod profiles {
@@ -26,6 +26,7 @@ pub mod profiles {
 
         // User name record
         ctx.accounts.username_record.name = username;
+        ctx.accounts.username_record.user = ctx.accounts.user_profile.key();
         ctx.accounts.username_record.bump = *ctx.bumps.get("username_record").unwrap();
 
         Ok(())
@@ -46,7 +47,7 @@ pub struct CreateProfile<'info> {
     identifier : Account<'info, Identifier>,
     
     #[account(
-        constraint = owner_record.key == owner.key(),
+        constraint = owner_record.account == owner.key(),
         constraint = owner_record.identifier == identifier.key(),
         constraint = owner_record.is_verified == true,
         seeds = [b"owner-record", owner.key().as_ref()],
@@ -63,7 +64,7 @@ pub struct CreateProfile<'info> {
         payer = payer,
         space = User::space(&username, &display_name)
     )]
-    user_profile : Account<'info, User>,
+    user_profile : Box<Account<'info, User>>,
 
     #[account(
         init,
@@ -74,19 +75,19 @@ pub struct CreateProfile<'info> {
     )]
     username_record : Account<'info, Username>,
 
-    pfp_mint : Account<'info, Mint>,
+    pfp_mint : Box<Account<'info, Mint>>,
 
     #[account(
         mut,
         associated_token::mint = pfp_mint,
-        associated_token::authority = nft_holder_owner_record.key()
+        associated_token::authority = nft_holder_owner_record.account
     )]
-    pfp_token_account : Account<'info, TokenAccount>,
+    pfp_token_account : Box<Account<'info, TokenAccount>>,
 
     #[account(
         constraint = owner_record.identifier == identifier.key(),
         constraint = owner_record.is_verified == true,
-        seeds = [b"owner-record", owner_record.key.as_ref()],
+        seeds = [b"owner-record", owner_record.account.as_ref()],
         bump = owner_record.bump,
         seeds::program = identifiers::id(),
         owner = identifiers::id()
@@ -121,13 +122,15 @@ pub struct Username {
     bump: u8
 }
 
+
+
 impl User {
     pub fn space(username : &str, display_name : &str) -> usize {
         8 +
         std::mem::size_of::<Pubkey>() + // id
-        display_name.len() +
+        4 + display_name.len() +
         std::mem::size_of::<Pubkey>() + // collection
-        username.len() + // name
+        4 + username.len() + // name
         1 // bump
     }
 }
@@ -136,7 +139,7 @@ impl Username {
     pub fn space(username : &str) -> usize {
         8 +
         std::mem::size_of::<Pubkey>() + // user
-        username.len() + // name
+        4 + username.len() + // name
         1 // bump
     }
 }

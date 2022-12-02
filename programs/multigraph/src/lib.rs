@@ -28,8 +28,8 @@ pub mod multigraph {
         ctx.accounts.edge.connection_type = connection_type;
         ctx.accounts.edge.created_at = Clock::get().unwrap().unix_timestamp;
         ctx.accounts.edge.edge_direction = edge_direction;
-        ctx.accounts.edge.to = ctx.accounts.to_account.key();
-        ctx.accounts.edge.from = ctx.accounts.from_account.key();
+        ctx.accounts.edge.to = ctx.accounts.to_node.key();
+        ctx.accounts.edge.from = ctx.accounts.from_node.key();
         ctx.accounts.edge.removed_at = None;
         ctx.accounts.edge.bump = *ctx.bumps.get("edge").unwrap();
         Ok(())
@@ -62,11 +62,14 @@ pub struct CreateEdge<'info> {
     #[account(mut)]
     payer : Signer<'info>,
 
+    /// CHECK Aslong as we can prove ownership doesnt matter what the account is
+    from_account : Signer<'info>,
+
     #[account(
         init,
         seeds = [b"edge", 
-                from_account.key().as_ref(), 
-                to_account.key().as_ref(), 
+                from_node.key().as_ref(), 
+                to_node.key().as_ref(), 
                 &[connection_type as u8], 
                 &[edge_direction as u8]],
         bump,
@@ -76,10 +79,18 @@ pub struct CreateEdge<'info> {
     edge : Account<'info, Edge>,
 
     /// CHECK any account we want to express some connection to
-    to_account : AccountInfo<'info>,
+    #[account(
+        seeds = [b"node", to_node.account_address.as_ref()],
+        bump
+    )]
+    to_node : Account<'info, Node>,
 
-    /// CHECK Aslong as we can prove ownership doesnt matter what the account is
-    from_account : Signer<'info>,
+    #[account(
+        seeds = [b"node", from_node.account_address.as_ref()],
+        constraint = from_account.key() == from_node.account_address,
+        bump
+    )]
+    from_node: Account<'info, Node>,
     pub system_program: Program<'info, System>,
 
 }

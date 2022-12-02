@@ -15,7 +15,7 @@ pub struct VerifyDelegate<'info> {
     pub payer : Signer<'info>,
 
     #[account(
-        address = delegate_record.key
+        address = delegate_record.account
     )]
     pub delegate : Signer<'info>,
 

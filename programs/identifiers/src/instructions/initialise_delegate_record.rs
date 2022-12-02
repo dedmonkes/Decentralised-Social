@@ -8,7 +8,7 @@ pub fn initialise_delegate(ctx: Context<InitializeDelegate>) -> Result<()> {
     ctx.accounts.delegate_record.identifier = ctx.accounts.identifier.key();
     ctx.accounts.delegate_record.is_delegate = true;
     ctx.accounts.delegate_record.is_verified = false;
-    ctx.accounts.delegate_record.key = ctx.accounts.delegate.key();
+    ctx.accounts.delegate_record.account = ctx.accounts.delegate.key();
     ctx.accounts.delegate_record.key_account_owner = ctx.accounts.delegate.owner.key();
     ctx.accounts.delegate_record.bump = *ctx.bumps.get("delegate_record").unwrap();
 
@@ -25,7 +25,7 @@ pub struct InitializeDelegate<'info> {
         constraint = owner.key() == identifier.owner,
         constraint = identifier.is_in_recovery == false
     )]
-    pub identifier : Account<'info, Identifier>,
+    pub identifier : Account<'info, Identity>,
 
     #[account(
         init,

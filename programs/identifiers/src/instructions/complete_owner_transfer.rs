@@ -30,7 +30,7 @@ pub struct CompleteOwnerTransfer<'info> {
         constraint = identifier.is_in_recovery == true,
         constraint = recovery_key.key() == identifier.owner
     )]
-    pub identifier : Account<'info, Identifier>,
+    pub identifier : Account<'info, Identity>,
 
     #[account(
         mut,

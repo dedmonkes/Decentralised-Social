@@ -8,7 +8,7 @@ pub struct OwnerRecord {
     pub is_delegate : bool,
 	// Have we signed using the account getting delegated to avoid spoofing
 	pub is_verified : bool,
-	pub key : Pubkey,
+	pub account : Pubkey,
 	// Program that owns the account, system for wallet address or programId of pda owner
 	pub key_account_owner : Pubkey,
     pub reserved : [u8; 64],

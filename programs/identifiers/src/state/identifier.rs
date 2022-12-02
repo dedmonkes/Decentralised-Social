@@ -2,10 +2,27 @@
 use anchor_lang::prelude::*;
 
 use crate::error::IdentifiersError;
+
+// Pubkey generated and passed in with prefix of idX
 #[account]
 pub struct Identifier {
+
+    pub identity_pda : Pubkey,
+
+}
+
+impl Identifier {
+    pub fn space() -> usize {
+        8 +
+        std::mem::size_of::<Pubkey>()  // id
+    }   
+}
+
+// Used to sign for cpi calls to prove ownership of identifier
+#[account]
+pub struct Identity {
     // Pubkey generated and passed in with prefix of idX
-    pub id : Pubkey,
+    pub identifier : Pubkey,
     pub owner : Pubkey,
     pub is_in_recovery : bool,
     pub recovery_key : Option<Pubkey>,
@@ -15,10 +32,11 @@ pub struct Identifier {
 	// but need to consult brian for his expertise
 	// http://g.identity.com/sol-did/
     pub did : Option<String>,
+    pub bump : u8
 }
 
-impl Identifier {
-    pub fn space(did : Option<String>) -> usize {
+impl Identity {
+    pub fn space() -> usize {
         8 +
         std::mem::size_of::<Pubkey>() + // id
         std::mem::size_of::<Pubkey>() + // owner
@@ -26,7 +44,8 @@ impl Identifier {
         std::mem::size_of::<Option<Pubkey>>() + // recovery_key,
         std::mem::size_of::<u32>() + //recovery count
         128 + // reserved
-        std::mem::size_of::<Option<Pubkey>>()
+        std::mem::size_of::<Option<Pubkey>>() +
+        1
     }
 }
 
@@ -42,3 +61,14 @@ pub fn is_valid_prefix( id : Pubkey) -> Result<()> {
     }
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+pub enum ConnectionType {
+    SocialRelation,
+    Interaction
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+pub enum EdgeRelation {
+    Asymmetric,
+    Symmetric
+}

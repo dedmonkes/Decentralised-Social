@@ -4,9 +4,18 @@ skip-lint = false
 [programs.localnet]
 identifiers = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 multigraph = "BStZRTvLZYK6rbGipkpwWSF82wPnFbTfH2fx1vbdpev1"
+profiles = "8vkLd15JfYsCC8NRwJuvnjunKy4bnbk8kEzQifP9gvY5"
+leaf = "DxjuPtmoxHYvnnyAwUKmgdr475Hx1ZPsjdEf1HS7MEK"
+
 
 [registry]
 url = "https://api.apr.dev"
+
+[test.validator]
+url = "https://api.mainnet-beta.solana.com"
+
+[[test.validator.clone]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 
 [provider]
 cluster = "localnet"

@@ -28,7 +28,7 @@ pub struct RejectOwnerTransfer<'info> {
         constraint = identifier.is_in_recovery == true,
         constraint = owner.key() == identifier.owner
     )]
-    pub identifier : Account<'info, Identifier>,
+    pub identifier : Account<'info, Identity>,
 
     #[account(
         seeds = [b"owner-record", identifier.owner.as_ref()],
