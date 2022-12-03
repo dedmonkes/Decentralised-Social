@@ -1,9 +1,8 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{identifier::*, OwnerRecord};
+use crate::state::{OwnerRecord};
 
 pub fn verify_delegate(ctx: Context<VerifyDelegate>) -> Result<()> {
-    
     ctx.accounts.delegate_record.is_verified = true;
 
     Ok(())
@@ -12,18 +11,18 @@ pub fn verify_delegate(ctx: Context<VerifyDelegate>) -> Result<()> {
 #[derive(Accounts)]
 pub struct VerifyDelegate<'info> {
     #[account(mut)]
-    pub payer : Signer<'info>,
+    pub payer: Signer<'info>,
 
     #[account(
-        address = delegate_record.key
+        address = delegate_record.account
     )]
-    pub delegate : Signer<'info>,
+    pub delegate: Signer<'info>,
 
     #[account(
         mut,
         seeds = [b"owner-record", delegate.key().as_ref()],
         bump = delegate_record.bump,
-        constraint = delegate_record.is_delegate == true
+        constraint = delegate_record.is_delegate
     )]
-    pub delegate_record : Account<'info, OwnerRecord>,
+    pub delegate_record: Account<'info, OwnerRecord>,
 }
