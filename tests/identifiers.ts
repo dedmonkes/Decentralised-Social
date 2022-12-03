@@ -178,15 +178,6 @@ describe("identifiers", () => {
     ],
       leafProgram.programId
     )
-    const [edge] = publicKey.findProgramAddressSync([
-      Buffer.from("edge"),
-      identifier.publicKey.toBuffer(),
-      Uint8Array.from([1]),
-      Uint8Array.from([1])
-    ],
-      multigraphProgram.programId
-    )
-
     const [toNode] = publicKey.findProgramAddressSync([
       Buffer.from("node"),
       post.toBuffer(),
@@ -194,9 +185,21 @@ describe("identifiers", () => {
       multigraphProgram.programId
     )
 
+    const [edge] = publicKey.findProgramAddressSync([
+      Buffer.from("edge"),
+      userNodeAddress.toBuffer(),
+      toNode.toBuffer(),
+      Uint8Array.from([0]),
+      Uint8Array.from([1])
+    ],
+      multigraphProgram.programId
+    )
+
+
     console.log("Post PDA ", post.toBase58())
     console.log("post node ", toNode.toBase58())
     console.log("user Node", userNodeAddress.toBase58())
+    console.log("edge ", edge.toBase58())
 
     await leafProgram.methods.createUser().accountsStrict({
       payer: identifierProgram.provider.publicKey,

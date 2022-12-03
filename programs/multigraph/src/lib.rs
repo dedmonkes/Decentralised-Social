@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 declare_id!("BStZRTvLZYK6rbGipkpwWSF82wPnFbTfH2fx1vbdpev1");
 
 // Multigraph implementation for global onchain social graphs
-// Ties are expressed between accounts, offchain algorythms can be 
+// Ties are expressed between accounts, offchain algorythms can be
 // implemented to filter the data that does not associate with the applications implementation
 // by whitelisting program ID's for metadata fetching
 
@@ -13,8 +13,7 @@ declare_id!("BStZRTvLZYK6rbGipkpwWSF82wPnFbTfH2fx1vbdpev1");
 pub mod multigraph {
     use super::*;
 
-    pub fn create_node(ctx: Context<CreateNode>, node_type : NodeType) -> Result<()> {
-
+    pub fn create_node(ctx: Context<CreateNode>, node_type: NodeType) -> Result<()> {
         ctx.accounts.node.account_address = ctx.accounts.account.key();
         ctx.accounts.node.node_type = node_type;
         ctx.accounts.node.program_id = ctx.accounts.account.owner.key();
@@ -24,7 +23,11 @@ pub mod multigraph {
         Ok(())
     }
 
-    pub fn create_edge(ctx: Context<CreateEdge>, connection_type : ConnectionType, edge_direction : EdgeRelation) -> Result<()> {
+    pub fn create_edge(
+        ctx: Context<CreateEdge>,
+        connection_type: ConnectionType,
+        edge_direction: EdgeRelation,
+    ) -> Result<()> {
         ctx.accounts.edge.connection_type = connection_type;
         ctx.accounts.edge.created_at = Clock::get().unwrap().unix_timestamp;
         ctx.accounts.edge.edge_direction = edge_direction;
@@ -39,7 +42,7 @@ pub mod multigraph {
 #[derive(Accounts)]
 pub struct CreateNode<'info> {
     #[account(mut)]
-    payer : Signer<'info>,
+    payer: Signer<'info>,
 
     #[account(
         init,
@@ -48,22 +51,21 @@ pub struct CreateNode<'info> {
         space = Node::space(),
         payer = payer
     )]
-    node : Account<'info, Node>,
+    node: Account<'info, Node>,
 
     /// CHECK Aslong as we can prove ownership doesnt matter what the account is
-    account : Signer<'info>,
+    account: Signer<'info>,
     pub system_program: Program<'info, System>,
-
 }
 
 #[derive(Accounts)]
 #[instruction(connection_type : ConnectionType, edge_direction : EdgeRelation)]
 pub struct CreateEdge<'info> {
     #[account(mut)]
-    payer : Signer<'info>,
+    payer: Signer<'info>,
 
     /// CHECK Aslong as we can prove ownership doesnt matter what the account is
-    from_account : Signer<'info>,
+    from_account: Signer<'info>,
 
     #[account(
         init,
@@ -76,14 +78,14 @@ pub struct CreateEdge<'info> {
         space = Edge::space(),
         payer = payer
     )]
-    edge : Account<'info, Edge>,
+    edge: Account<'info, Edge>,
 
     /// CHECK any account we want to express some connection to
     #[account(
         seeds = [b"node", to_node.account_address.as_ref()],
         bump
     )]
-    to_node : Account<'info, Node>,
+    to_node: Account<'info, Node>,
 
     #[account(
         seeds = [b"node", from_node.account_address.as_ref()],
@@ -92,53 +94,52 @@ pub struct CreateEdge<'info> {
     )]
     from_node: Account<'info, Node>,
     pub system_program: Program<'info, System>,
-
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
 pub enum ConnectionType {
     SocialRelation,
-    Interaction
+    Interaction,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
 pub enum EdgeRelation {
     Asymmetric,
-    Symmetric
+    Symmetric,
 }
 
 #[account]
 pub struct Edge {
     connection_type: ConnectionType,
-    edge_direction : EdgeRelation,
-    to : Pubkey,
-    from : Pubkey,
-    created_at : i64,
-    removed_at : Option<i64>,
-    bump : u8
+    edge_direction: EdgeRelation,
+    to: Pubkey,
+    from: Pubkey,
+    created_at: i64,
+    removed_at: Option<i64>,
+    bump: u8,
 }
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
 pub enum NodeType {
-	Post,
-	User
+    Post,
+    User,
 }
 
 #[account]
 pub struct Node {
-    node_type : NodeType,
-    account_address : Pubkey, // user identifier
-    program_id : Pubkey, // Owner of the account associated
+    node_type: NodeType,
+    account_address: Pubkey, // user identifier
+    program_id: Pubkey,      // Owner of the account associated
     // data : Option<Pubkey>,
-    created_at : i64,
-    bump : u8
+    created_at: i64,
+    bump: u8,
 }
 
 // Future implementation may have encrypted data to allow private or restricted access of content
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
 pub enum Visibility {
-	PaidToView,
-	Public,
-	Protected
+    PaidToView,
+    Public,
+    Protected,
 }
 
 // #[account]
