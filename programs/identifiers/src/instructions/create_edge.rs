@@ -1,13 +1,12 @@
 
 use anchor_lang::prelude::*;
 use multigraph::{
-    cpi::accounts::{CreateEdge as CreateEdgeGraph, CreateNode},
+    cpi::accounts::{CreateEdge as CreateEdgeGraph},
     ConnectionType, EdgeRelation,
 };
 
 use crate::{
-    id,
-    state::{Identifier, Identity, OwnerRecord},
+    state::{Identity, OwnerRecord},
 };
 
 pub fn create_edge(
@@ -15,7 +14,7 @@ pub fn create_edge(
     connection_type: ConnectionType,
     edge_direction: EdgeRelation,
 ) -> Result<()> {
-    let identity_key = ctx.accounts.identity.key();
+    let _identity_key = ctx.accounts.identity.key();
     let identifier_key = ctx.accounts.identity.identifier;
     let bump = [ctx.accounts.identity.bump as u8];
     let cpi_program = ctx.accounts.multigraph.to_account_info();
@@ -73,7 +72,7 @@ pub struct CreateEdge<'info> {
 
     #[account(
         constraint = owner_record.identifier == identity.identifier.key(),
-        constraint = owner_record.is_verified == true,
+        constraint = owner_record.is_verified,
         seeds = [b"owner-record", owner_record.account.as_ref()],
         bump = owner_record.bump,
     )]

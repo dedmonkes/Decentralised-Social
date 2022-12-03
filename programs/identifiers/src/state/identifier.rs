@@ -52,18 +52,18 @@ pub fn is_valid_prefix(id: Pubkey) -> Result<()> {
 
     match prefix {
         // Will be idX once we have time to optimize the miner via wasm
-        "id" => return Ok(()),
-        _ => return Err(IdentifiersError::IdentifierPrefixMismatch.into()),
+        "id" => Ok(()),
+        _ => Err(IdentifiersError::IdentifierPrefixMismatch.into()),
     }
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum ConnectionType {
     SocialRelation,
     Interaction,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum EdgeRelation {
     Asymmetric,
     Symmetric,

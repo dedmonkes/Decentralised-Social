@@ -52,7 +52,7 @@ pub struct CreateProfile<'info> {
     #[account(
         constraint = owner_record.account == owner.key(),
         constraint = owner_record.identifier == identifier.key(),
-        constraint = owner_record.is_verified == true,
+        constraint = owner_record.is_verified,
         seeds = [b"owner-record", owner.key().as_ref()],
         bump = owner_record.bump,
         seeds::program = identifiers::id(),
@@ -89,7 +89,7 @@ pub struct CreateProfile<'info> {
 
     #[account(
         constraint = owner_record.identifier == identifier.key(),
-        constraint = owner_record.is_verified == true,
+        constraint = owner_record.is_verified,
         seeds = [b"owner-record", owner_record.account.as_ref()],
         bump = owner_record.bump,
         seeds::program = identifiers::id(),
@@ -102,7 +102,7 @@ pub struct CreateProfile<'info> {
 
 // State
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Profile {
     display_name: String,
     pfp: Pubkey,

@@ -22,7 +22,7 @@ pub struct InitializeDelegate<'info> {
 
     #[account(
         constraint = owner.key() == identifier.owner,
-        constraint = identifier.is_in_recovery == false
+        constraint = !identifier.is_in_recovery
     )]
     pub identifier: Account<'info, Identity>,
 

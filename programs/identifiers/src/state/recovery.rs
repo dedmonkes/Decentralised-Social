@@ -2,7 +2,7 @@ use anchor_lang::{account, prelude::Pubkey, prelude::*, AnchorDeserialize, Ancho
 
 use crate::id;
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum IdRecoveryManagerState {
     Waiting,
     Claimed,
@@ -39,6 +39,6 @@ impl IdRecoveryManager {
     }
 }
 
-pub fn get_recover_manager(identifer_address: Pubkey, count: u32) -> Pubkey {
+pub fn get_recover_manager(_identifer_address: Pubkey, count: u32) -> Pubkey {
     Pubkey::find_program_address(&[b"recovery-manager", count.to_le_bytes().as_ref()], &id()).0
 }

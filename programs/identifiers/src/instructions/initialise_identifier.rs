@@ -2,8 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::state::{identifier::*, OwnerRecord};
 use multigraph::{
-    cpi::accounts::{CreateEdge, CreateNode},
-    EdgeRelation, NodeType,
+    cpi::accounts::{CreateNode}, NodeType,
 };
 
 pub fn initialise_identifier(

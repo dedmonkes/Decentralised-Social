@@ -48,9 +48,9 @@ pub struct InitialiseTransferOwner<'info> {
 
     #[account(
         seeds = [b"owner-record", identity.owner.as_ref()],
-        constraint = owner_record.is_delegate == false,
+        constraint = !owner_record.is_delegate,
         constraint = owner_record.account == identity.identifier.key(),
-        constraint = owner_record.is_verified == true,
+        constraint = owner_record.is_verified,
         bump = owner_record.bump
     )]
     pub owner_record: Account<'info, OwnerRecord>,

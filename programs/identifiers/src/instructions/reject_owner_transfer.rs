@@ -24,7 +24,7 @@ pub struct RejectOwnerTransfer<'info> {
 
     #[account(
         mut,
-        constraint = identifier.is_in_recovery == true,
+        constraint = identifier.is_in_recovery,
         constraint = owner.key() == identifier.owner
     )]
     pub identifier: Account<'info, Identity>,

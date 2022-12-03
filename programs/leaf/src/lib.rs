@@ -1,4 +1,4 @@
-use std::str::FromStr;
+
 
 use anchor_lang::prelude::*;
 use identifiers::state::{Identifier, Identity, OwnerRecord};
@@ -130,7 +130,7 @@ pub struct CreatePost<'info> {
 
     #[account(
         constraint = owner_record.identifier == identity.identifier.key(),
-        constraint = owner_record.is_verified == true,
+        constraint = owner_record.is_verified,
         seeds = [b"owner-record", owner_record.account.as_ref()],
         bump = owner_record.bump,
         seeds::program = identifiers::id(),
@@ -184,7 +184,7 @@ pub struct CreateUser<'info> {
 
     #[account(
         constraint = owner_record.identifier == identifier.key(),
-        constraint = owner_record.is_verified == true,
+        constraint = owner_record.is_verified,
         seeds = [b"owner-record", owner_record.account.as_ref()],
         bump = owner_record.bump,
         seeds::program = identifiers::id(),

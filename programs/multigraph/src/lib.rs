@@ -1,4 +1,4 @@
-use std::str::FromStr;
+
 
 use anchor_lang::prelude::*;
 
@@ -96,13 +96,13 @@ pub struct CreateEdge<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum ConnectionType {
     SocialRelation,
     Interaction,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum EdgeRelation {
     Asymmetric,
     Symmetric,
@@ -118,7 +118,7 @@ pub struct Edge {
     removed_at: Option<i64>,
     bump: u8,
 }
-#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum NodeType {
     Post,
     User,
@@ -135,7 +135,7 @@ pub struct Node {
 }
 
 // Future implementation may have encrypted data to allow private or restricted access of content
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum Visibility {
     PaidToView,
     Public,
