@@ -3,17 +3,16 @@ use anchor_lang::prelude::*;
 pub mod error;
 pub mod state;
 mod instructions;
-
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+use instructions::{
+    create_organisation::*
+};
+declare_id!("DBVmushm1XMc3kJS9Pc5eTaFYYbEZVow9HB4NyW5mJuD");
 
 #[program]
 pub mod align_governance {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        Ok(())
+    pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
+        instructions::create_organisation(ctx)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}

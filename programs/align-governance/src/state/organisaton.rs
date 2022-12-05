@@ -4,15 +4,17 @@ use anchor_lang::prelude::*;
 pub struct Organisation {
     pub identifier : Pubkey,
 	pub collection_mint : Pubkey,
-	pub name : String,
+    pub sub_organisation_count : u8, 
+    pub bump : u8
 
 }
 
 impl Organisation {
-    pub fn space(name : &str) -> usize{
+    pub fn space() -> usize{
         8 +
         32 +
         32 +
-        4+ name.len()
+        1 +
+        1
     }
 }

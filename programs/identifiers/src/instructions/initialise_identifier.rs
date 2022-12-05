@@ -38,7 +38,7 @@ pub fn initialise_identifier(
     let cpi_program = ctx.accounts.multigraph.to_account_info();
 
     let identity_key = ctx.accounts.identifier.key();
-    msg!("{}", ctx.accounts.identity.bump as u8);
+
     let bump = [ctx.accounts.identity.bump as u8];
 
     let seeds = vec![b"identity".as_ref(), identity_key.as_ref(), &bump];
