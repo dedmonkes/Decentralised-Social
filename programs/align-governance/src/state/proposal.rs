@@ -26,7 +26,6 @@ pub struct Proposal {
     pub id : u64,
     pub shadow_drive : Pubkey,
     pub bump : u8
-
 }
 
 impl Proposal {

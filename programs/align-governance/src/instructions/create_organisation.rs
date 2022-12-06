@@ -65,7 +65,7 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
 
     // Set election manager for council
 
-    ctx.accounts.election_manager
+    ctx.accounts.election_manager.bump = *ctx.bumps.get("election_manager").unwrap();
 
 
     Ok(())
@@ -85,7 +85,7 @@ pub struct CreateOrganisation<'info> {
         space = Organisation::space(),
         payer = payer,
     )]
-    pub organisation : Account<'info, Organisation>,
+    pub organisation : Box<Account<'info, Organisation>>,
 
     #[account(
         init,
@@ -94,7 +94,7 @@ pub struct CreateOrganisation<'info> {
         space = CouncilManager::space(),
         payer = payer,
     )]
-    pub council_manager : Account<'info, CouncilManager>,
+    pub council_manager : Box<Account<'info, CouncilManager>>,
 
     #[account(
         init,
@@ -103,7 +103,7 @@ pub struct CreateOrganisation<'info> {
         space = CouncilGovernanceAccount::space(),
         payer = payer,
     )]
-    pub council_governance : Account<'info, CouncilGovernanceAccount>,
+    pub council_governance : Box<Account<'info, CouncilGovernanceAccount>>,
 
     #[account(
         init,
@@ -112,7 +112,7 @@ pub struct CreateOrganisation<'info> {
         space = ElectionManager::space(),
         payer = payer,
     )]
-    pub election_manager : Account<'info, ElectionManager>,
+    pub election_manager : Box<Account<'info, ElectionManager>>,
 
     #[account()]
     pub identifier_signer: Signer<'info>,

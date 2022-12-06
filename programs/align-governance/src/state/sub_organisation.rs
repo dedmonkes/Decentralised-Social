@@ -27,7 +27,6 @@ pub struct SubOrganisation {
     pub filled_council_seats : u8,
     pub council_manager : Pubkey,
     pub bump : u8
-
 }
 
 impl SubOrganisation {

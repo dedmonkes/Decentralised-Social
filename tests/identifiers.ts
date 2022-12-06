@@ -92,6 +92,7 @@ describe("identifiers", () => {
   it("Create user profile for identifier", async () => {
     console.log(profilesProgram.programId.toBase58())
     console.log("Minting a pfp..")
+    
     const mintKeypair = new anchor.web3.Keypair();
     await mintNft(mintKeypair, identifierProgram.provider)
     console.log("Creating a profile..")

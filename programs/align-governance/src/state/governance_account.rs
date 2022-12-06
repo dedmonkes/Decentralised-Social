@@ -18,6 +18,7 @@ impl CouncilGovernanceAccount {
         32 +
         std::mem::size_of::<u32>() + //recovery count 
         std::mem::size_of::<u64>() + //recovery count
+        1 +
         1
     }
 }

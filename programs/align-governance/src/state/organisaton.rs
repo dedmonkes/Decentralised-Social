@@ -6,7 +6,6 @@ pub struct Organisation {
 	pub collection_mint : Pubkey,
     pub sub_organisation_count : u8, 
     pub bump : u8
-
 }
 
 impl Organisation {
