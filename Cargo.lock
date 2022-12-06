@@ -23,6 +23,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "align-governance"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "identifiers",
+ "multigraph",
+]
+
+[[package]]
 name = "anchor-attribute-access-control"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

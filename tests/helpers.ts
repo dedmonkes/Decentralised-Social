@@ -1,6 +1,28 @@
 import { Provider, utils, web3 } from "@project-serum/anchor";
 import {createCreateMasterEditionV3Instruction, createCreateMetadataAccountV3Instruction, CreateMasterEditionArgs, CreateMasterEditionV3InstructionAccounts, CreateMetadataAccountArgsV2, CreateMetadataAccountArgsV3, CreateMetadataAccountV3InstructionAccounts, PROGRAM_ADDRESS} from "@metaplex-foundation/mpl-token-metadata"
 import {createAssociatedTokenAccountInstruction, createInitializeMintInstruction, createMintToCheckedInstruction, getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MintLayout, TOKEN_PROGRAM_ID} from "@solana/spl-token"
+
+export const mineIdentifier = () => {
+  let iteration = Math.random() * 10000000 ;
+  console.log("Mining for prefix idX...")
+
+  while (true) {
+    let start = performance.now();
+    if (iteration % 10000 == 0) {
+      console.log("Iteration :", iteration)
+      console.log("Average time per 10000 iterations", (performance.now() - start) / (iteration / 10000))
+    }
+    const keypair = web3.Keypair.generate()
+
+    if (keypair.publicKey.toBase58().startsWith("id")) {
+      console.log("Found key ", keypair.publicKey.toBase58(), keypair.publicKey.toBytes())
+
+      return keypair
+    }
+    iteration = iteration + 1
+  }
+}
+
 export const getMetadataAddress = async (mint: web3.PublicKey) => {
     const [address, bump] = await web3.PublicKey.findProgramAddress(
       [

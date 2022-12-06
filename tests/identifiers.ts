@@ -3,11 +3,12 @@ import { Program } from "@project-serum/anchor";
 import { publicKey } from "@project-serum/anchor/dist/cjs/utils";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { util } from "chai";
+import { AlignGovernance } from "../target/types/align_governance";
 import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
-import { mintNft } from "./helpers";
+import { mineIdentifier, mintNft } from "./helpers";
 
 describe("identifiers", () => {
   // Configure the client to use the local cluster.
@@ -17,28 +18,7 @@ describe("identifiers", () => {
   const multigraphProgram = anchor.workspace.Multigraph as Program<Multigraph>
   const profilesProgram = anchor.workspace.Profiles as Program<Profiles>
   const leafProgram = anchor.workspace.Leaf as Program<Leaf>
-
-  const mineIdentifier = () => {
-    let iteration = 0;
-    console.log("Mining for prefix idX...")
-
-    while (true) {
-      let start = performance.now();
-      if (iteration % 10000 == 0) {
-        console.log("Iteration :", iteration)
-        console.log("Average time per 10000 iterations", (performance.now() - start) / (iteration / 10000))
-      }
-      const keypair = anchor.web3.Keypair.generate()
-      // if (keypair.publicKey.toBuffer().subarray(0, 2).compare(Buffer.from([0x0a, 0xaa])) === 0){
-      if (keypair.publicKey.toBase58().startsWith("id")) {
-        // 0a aa
-        console.log("Found key ", keypair.publicKey.toBase58(), keypair.publicKey.toBytes())
-
-        return keypair
-      }
-      iteration = iteration + 1
-    }
-  }
+  const alignProgram = anchor.workspace.AlignGovernance as Program<AlignGovernance>
 
   const identifier = mineIdentifier()
 
@@ -112,6 +92,7 @@ describe("identifiers", () => {
   it("Create user profile for identifier", async () => {
     console.log(profilesProgram.programId.toBase58())
     console.log("Minting a pfp..")
+    
     const mintKeypair = new anchor.web3.Keypair();
     await mintNft(mintKeypair, identifierProgram.provider)
     console.log("Creating a profile..")
