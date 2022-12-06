@@ -25,6 +25,9 @@ pub struct Proposal {
     pub servicer : Option<Pubkey>, // idenitfier of person to service the proposal
     pub id : u64,
     pub shadow_drive : Pubkey,
+    pub council_review_rating : u8,
+    pub upvotes : u16,
+    pub downvotes : u16,
     pub bump : u8
 }
 
@@ -43,6 +46,9 @@ impl Proposal {
         std::mem::size_of::<Option<Pubkey>>() +
         std::mem::size_of::<u64>() + //id
         32 +
+        1 +
+        std::mem::size_of::<u16>() + //id
+        std::mem::size_of::<u16>() + //id
         1
     }
 }
