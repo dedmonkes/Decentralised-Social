@@ -12,3 +12,6 @@ pub mod join_organisation;
 
 pub use create_token_governance::*;
 pub mod create_token_governance;
+
+pub use stage_proposal_for_ranking::*;
+pub mod stage_proposal_for_ranking;

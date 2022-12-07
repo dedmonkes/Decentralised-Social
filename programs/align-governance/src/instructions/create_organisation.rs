@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use identifiers::{cpi::accounts::InitializeIdentifier, state::is_valid_prefix};
-use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, NativeTreasuryAccount, NativeTreasuryGovernance}, error::AlignError};
+use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, NativeTreasuryAccount}, error::AlignError};
 
 pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
     
@@ -67,6 +67,12 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
 
     ctx.accounts.election_manager.bump = *ctx.bumps.get("election_manager").unwrap();
 
+    // init native tresury
+
+    ctx.accounts.native_treasury_account.organisation = ctx.accounts.organisation.key();
+    ctx.accounts.native_treasury_account.voting_proposal_count = 0;
+    ctx.accounts.native_treasury_account.total_proposals = 0;
+    ctx.accounts.native_treasury_account.bump = *ctx.bumps.get("native_treasury_account").unwrap();
 
     Ok(())
 

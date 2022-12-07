@@ -43,24 +43,5 @@ impl TokenAccountGovernance {
     }
 }
 
-#[account]
-pub struct NativeTreasuryGovernance {
-    pub organisation : Pubkey,
-    pub account : Pubkey,
-    pub voting_proposal_count : u32,
-    pub total_proposals : u64,
-    pub bump : u8
-}
-
-impl NativeTreasuryGovernance {
-    pub fn space() -> usize{
-        8 +
-        32 +
-        32 +
-        std::mem::size_of::<u32>() + //recovery count
-        std::mem::size_of::<u64>() + //recovery count
-        1
-    }
-}
 
 

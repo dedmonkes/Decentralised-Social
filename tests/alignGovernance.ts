@@ -233,5 +233,43 @@ describe("Align Governance Inergration Tests", () => {
 
     })
 
+    it("Create Proposal", async () => {
+
+        const [nativeTreasuryAddress] = publicKey.findProgramAddressSync([
+            Buffer.from("proposal"),
+            organisation.toBuffer()
+        ],
+            alignProgram.programId
+        )
+
+        await alignProgram.methods.createProposal()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: councilOwnerRecord,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                reputationManager: reputationManagerAddress,
+                shadowDrive: web3.Keypair.generate().publicKey,
+                councilManager,
+                proposal: "",
+                governance: "",
+                servicerIdenitifier: ""
+            })
+            .signers([councilKeypair])
+            .rpc()
+
+
+        console.log("Fetching Organisation Accounts")
+
+        const edgeAccount = await multigraphProgram.account.edge.fetch(edgeAddress)
+        console.log(JSON.parse(JSON.stringify(edgeAccount)))
+
+        const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
+        console.log(JSON.parse(JSON.stringify(repAccount)))
+
+
+    })
+
 
 })
