@@ -1,15 +1,64 @@
 use crate::{
+    constants::{DEFAULT_CAPTIAL_REP_WEIGHT, DEFAULT_CONTRIBUTION_REP_WEIGHT},
     error::AlignError,
     state::{
-        CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
-        Organisation,
+        CapitalReputation, ContributionReputation, CouncilGovernanceAccount, CouncilManager,
+        CouncilManagerState, ElectionManager, Organisation, ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use identifiers::{cpi::accounts::InitializeIdentifier, state::{is_valid_prefix, OwnerRecord, Identity}};
+use identifiers::{
+    cpi::accounts::InitializeIdentifier,
+    state::{is_valid_prefix, Identity, OwnerRecord},
+};
+use multigraph::{ConnectionType, EdgeRelation};
 
+// TODO : Add collection gate, init reputation manager
 pub fn join_organisation(ctx: Context<JoinOrganisation>) -> Result<()> {
+    // Initialise reputation manager
+
+    ctx.accounts.reputation_manager.identifier = ctx.accounts.identity.identifier.key();
+    ctx.accounts.reputation_manager.organisation = ctx.accounts.organisation.key();
+
+    ctx.accounts.reputation_manager.capital_reputation = CapitalReputation {
+        amount: 0,
+        weight: DEFAULT_CAPTIAL_REP_WEIGHT,
+    };
+
+    ctx.accounts.reputation_manager.contribution_reputation = ContributionReputation {
+        proposal_votes: 0,
+        serviced_proposals: 0,
+        aggregated_proposal_outcomes: 0,
+        proposals_created: 0,
+        weight: DEFAULT_CONTRIBUTION_REP_WEIGHT,
+    };
+
+    ctx.accounts.reputation_manager.reputation = 0;
+
+    let cpi_program = ctx.accounts.multigraph.to_account_info();
+
+    let edge_cpi_accounts = identifiers::cpi::accounts::CreateEdge {
+        payer: ctx.accounts.payer.to_account_info(),
+        edge: ctx.accounts.edge.to_account_info(),
+        to_node: ctx.accounts.to_node.to_account_info(),
+        from_node: ctx.accounts.from_node.to_account_info(),
+        identity: ctx.accounts.identity.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+        multigraph: ctx.accounts.multigraph.to_account_info(),
+        owner: ctx.accounts.owner.to_account_info(),
+        owner_record: ctx.accounts.owner_record.to_account_info(),
+    };
+    let edge_cpi_ctx = CpiContext::new(cpi_program, edge_cpi_accounts);
+
+    msg!("Graph populated with edge between DAO and user");
+
+    identifiers::cpi::create_edge(
+        edge_cpi_ctx,
+        ConnectionType::SocialRelation,
+        EdgeRelation::Symmetric,
+    )?;
+
     Ok(())
 }
 
@@ -19,10 +68,22 @@ pub struct JoinOrganisation<'info> {
     pub payer: Signer<'info>,
 
     #[account(
-
+        address = owner_record.account
     )]
+    owner: Signer<'info>,
+
+    #[account()]
     pub organisation: Box<Account<'info, Organisation>>,
 
+    #[account(
+        init,
+        seeds=[b"reputation-manager", organisation.key().as_ref()],
+        bump,
+        payer = payer,
+        space = ReputationManager::space()
+    )
+    ]
+    pub reputation_manager: Box<Account<'info, ReputationManager>>,
     /// CHECK inside cpi to multigraph
     #[account(mut)]
     to_node: AccountInfo<'info>,
@@ -62,6 +123,6 @@ pub struct JoinOrganisation<'info> {
      executable,
      address = identifiers::id()
     )]
-    idenitfier_program: AccountInfo<'info>,
+    identifier_program: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }

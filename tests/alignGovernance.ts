@@ -80,7 +80,7 @@ describe("Align Governance Inergration Tests", () => {
         identifierProgram.programId
     )
 
-    const [userNodeAddress] = publicKey.findProgramAddressSync([
+    const [orgNodeAddress] = publicKey.findProgramAddressSync([
         Buffer.from("node"),
         identity.toBuffer()
     ],
@@ -93,6 +93,25 @@ describe("Align Governance Inergration Tests", () => {
     ],
         multigraphProgram.programId
     )
+
+    const [edgeAddress] = publicKey.findProgramAddressSync([
+        Buffer.from("edge"),
+        councilNodeAddress.toBuffer(),
+        orgNodeAddress.toBuffer(),
+        Uint8Array.from([0]),
+        Uint8Array.from([1])
+    ],
+        multigraphProgram.programId
+    )
+
+    const [reputationManagerAddress] = publicKey.findProgramAddressSync([
+        Buffer.from("reputation-manager"),
+        organisation.toBuffer()
+    ],
+        alignProgram.programId
+    )
+
+
 
 
 
@@ -130,7 +149,7 @@ describe("Align Governance Inergration Tests", () => {
                 payer: profilesProgram.provider.publicKey,
                 identifierSigner: identifier.publicKey,
                 identifier: identifier.publicKey,
-                node: userNodeAddress,
+                node: orgNodeAddress,
                 ownerRecord,
                 recoveryKey: new anchor.web3.Keypair().publicKey,
                 multigraph: multigraphProgram.programId,
@@ -163,7 +182,7 @@ describe("Align Governance Inergration Tests", () => {
         const identityAccount = await identifierProgram.account.identity.fetch(identity)
         console.log(JSON.parse(JSON.stringify(identityAccount)))
 
-        const nodeAccount = await multigraphProgram.account.node.fetch(userNodeAddress)
+        const nodeAccount = await multigraphProgram.account.node.fetch(orgNodeAddress)
         console.log(JSON.parse(JSON.stringify(nodeAccount)))
 
         const ownerAccount = await identifierProgram.account.ownerRecord.fetch(ownerRecord)
@@ -171,6 +190,39 @@ describe("Align Governance Inergration Tests", () => {
 
         const orgAccount = await alignProgram.account.organisation.fetch(organisation)
         console.log(JSON.parse(JSON.stringify(orgAccount)))
+
+
+    })
+
+    it("Join organisation", async () => {
+
+        const tx = await alignProgram.methods.joinOrganisation()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                fromNode: councilNodeAddress,
+                ownerRecord : councilOwnerRecord,
+                multigraph: multigraphProgram.programId,
+                identifierProgram: identifierProgram.programId,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                owner: councilKeypair.publicKey,
+                edge: edgeAddress,
+                reputationManager: reputationManagerAddress,
+                shadowDrive: web3.Keypair.generate().publicKey,
+                toNode: orgNodeAddress
+            })
+            .signers([councilKeypair])
+            .rpc()
+
+
+        console.log("Fetching Organisation Accounts")
+
+        const edgeAccount = await multigraphProgram.account.edge.fetch(edgeAddress)
+        console.log(JSON.parse(JSON.stringify(edgeAccount)))
+
+        const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
+        console.log(JSON.parse(JSON.stringify(repAccount)))
 
 
     })
