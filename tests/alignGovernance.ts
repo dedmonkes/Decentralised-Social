@@ -110,7 +110,12 @@ describe("Align Governance Inergration Tests", () => {
     ],
         alignProgram.programId
     )
-
+    const [nativeTreasuryAddress] = publicKey.findProgramAddressSync([
+        Buffer.from("native-treasury"),
+        organisation.toBuffer()
+    ],
+        alignProgram.programId
+    )
 
 
 
@@ -160,7 +165,8 @@ describe("Align Governance Inergration Tests", () => {
                 identity,
                 councilManager,
                 councilGovernance,
-                electionManager
+                electionManager,
+                nativeTreasuryAccount: nativeTreasuryAddress
             })
             .remainingAccounts([{
                 isSigner: false,

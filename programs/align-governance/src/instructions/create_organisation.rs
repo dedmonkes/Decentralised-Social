@@ -107,19 +107,9 @@ pub struct CreateOrganisation<'info> {
 
     #[account(
         init,
-        seeds = [b"governance", native_treasury_account.key().as_ref()],
-        bump,
-        space = NativeTreasuryGovernance::space(),
-        payer = payer,
-    )]
-    pub native_treasury_governance : Box<Account<'info, NativeTreasuryGovernance>>,
-
-    #[account(
-        init,
         seeds = [b"native-treasury", organisation.key().as_ref()],
         bump,
         space = NativeTreasuryAccount::space(),
-        owner = native_treasury_governance.key(),
         payer = payer
     )]
     pub native_treasury_account : Box<Account<'info, NativeTreasuryAccount>>,
