@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use identifiers::{cpi::accounts::InitializeIdentifier, state::is_valid_prefix};
-use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager}, error::AlignError};
+use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, NativeTreasuryAccount}, error::AlignError};
 
 pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
     
@@ -101,9 +101,19 @@ pub struct CreateOrganisation<'info> {
         seeds = [b"council-governance", organisation.key().as_ref()],
         bump,
         space = CouncilGovernanceAccount::space(),
+        owner = council_governance,
         payer = payer,
     )]
     pub council_governance : Box<Account<'info, CouncilGovernanceAccount>>,
+
+    #[account(
+        init,
+        seeds = [b"native-treasury", organisation.key().as_ref()],
+        bump,
+        space = NativeTreasuryAccount::space(),
+        payer = payer
+    )]
+    pub native_treasury_account : Box<Account<'info, NativeTreasuryAccount>>,
 
     #[account(
         init,

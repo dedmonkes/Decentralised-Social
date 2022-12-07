@@ -35,6 +35,7 @@ pub fn join_organisation(ctx: Context<JoinOrganisation>) -> Result<()> {
     };
 
     ctx.accounts.reputation_manager.reputation = 0;
+    ctx.accounts.reputation_manager.bump = *ctx.bumps.get("reputation_manager").unwrap();
 
     let cpi_program = ctx.accounts.multigraph.to_account_info();
 

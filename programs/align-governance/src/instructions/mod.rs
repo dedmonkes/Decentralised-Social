@@ -9,3 +9,6 @@ pub mod create_proposal;
 
 pub use join_organisation::*;
 pub mod join_organisation;
+
+pub use create_token_governance::*;
+pub mod create_token_governance;

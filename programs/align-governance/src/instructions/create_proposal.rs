@@ -1,10 +1,30 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use identifiers::{cpi::accounts::InitializeIdentifier, state::is_valid_prefix};
-use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, TokenAccountGovernance}, error::AlignError};
+use identifiers::{cpi::accounts::InitializeIdentifier, state::{is_valid_prefix, OwnerRecord, Identity, Identifier}};
+use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, TokenAccountGovernance, ReputationManager, Proposal, ProposalState}, error::AlignError, constants::MIN_REP_TO_CREATE_PROPOSAL};
 
+
+// TODO add link in graph to show proposal
 pub fn create_proposal(ctx: Context<CreateProposal>) -> Result<()> {
     
+    ctx.accounts.proposal.state = ProposalState::Draft;
+    ctx.accounts.proposal.organisation = ctx.accounts.organisation.key();
+    ctx.accounts.proposal.sub_org_type = None;
+    ctx.accounts.proposal.proposer = ctx.accounts.identity.identifier;
+    ctx.accounts.proposal.governance = ctx.accounts.governance.key();
+    ctx.accounts.proposal.ranking_at = None;
+    ctx.accounts.proposal.voting_at = None;
+    ctx.accounts.proposal.denied_at = None;
+    ctx.accounts.proposal.draft_at = Clock::get().unwrap().unix_timestamp;
+    ctx.accounts.proposal.servicer = Some(ctx.accounts.servicer_idenitifier.key()); // TODO make this an optional remaining account
+    ctx.accounts.proposal.id = ctx.accounts.governance.total_proposals;
+    ctx.accounts.proposal.shadow_drive = ctx.accounts.shadow_drive.key();
+    ctx.accounts.proposal.council_review_rating = None;
+    ctx.accounts.proposal.upvotes = 0;
+    ctx.accounts.proposal.downvotes = 0;
+    ctx.accounts.proposal.bump = *ctx.bumps.get("proposal").unwrap();
+
+    ctx.accounts.governance.total_proposals = ctx.accounts.governance.total_proposals.checked_add(1).unwrap();
 
     Ok(())
 
@@ -19,59 +39,49 @@ pub struct CreateProposal<'info> {
     #[account()]
     pub organisation : Box<Account<'info, Organisation>>,
 
+    #[account(
+        mut,
+        constraint = governance.organisation == organisation.key()
+    )]
+    pub governance : Box<Account<'info, TokenAccountGovernance>>,
 
     #[account(
-        seeds = [b"token-governance", organisation.key().as_ref()],
-        bump = token_governance.bump,
+        constraint = reputation_manager.identifier == identity.identifier,
+        constraint = reputation_manager.reputation >= MIN_REP_TO_CREATE_PROPOSAL
     )]
-    pub token_governance : Box<Account<'info, TokenAccountGovernance>>,
+    pub reputation_manager: Box<Account<'info, ReputationManager>>,
+
+    #[account(
+        constraint = council_manager.organisation == organisation.key(),
+    )]
+    pub council_manager: Box<Account<'info, CouncilManager>>,
 
     #[account(
         init,
-        seeds = [b"election-manager", organisation.key().as_ref()],
+        seeds = [b"proposal", governance.key().as_ref(), governance.total_proposals.to_le_bytes().as_ref() ],
         bump,
-        space = ElectionManager::space(),
-        payer = payer,
+        space = Proposal::space(),
+        payer = payer
     )]
-    pub election_manager : Box<Account<'info, ElectionManager>>,
+    pub proposal : Box<Account<'info, Proposal>>,
 
-    #[account()]
-    pub identifier_signer: Signer<'info>,
+    pub servicer_idenitifier : Box<Account<'info, Identifier>>,
 
     /// CHECK : Checked in Identifier CPI
-    #[account(mut)]
-    pub identifier: AccountInfo<'info>,
+    identity: Account<'info, Identity>,
 
-    #[account(mut)]
-    /// CHECK : Checked in Identifier CPI
-    identity: AccountInfo<'info>,
-
-    #[account(mut)]
-    /// CHECK inside cpi to mulitgraph
-    node: AccountInfo<'info>,
-
-    #[account(mut)]
-    /// CHECK : Checked in Identifier CPI
-    pub owner_record: AccountInfo<'info>,
-
-    /// CHECK : any key can be used to recover account
-    pub recovery_key: AccountInfo<'info>,
-
-    ///CHECK
     #[account(
-        executable,
-        address = multigraph::id()
+        constraint = owner_record.identifier == identity.identifier.key(),
+        constraint = owner_record.is_verified,
+        seeds = [b"owner-record", owner_record.account.as_ref()],
+        bump = owner_record.bump,
+        seeds::program = identifiers::id(),
     )]
-    multigraph: AccountInfo<'info>,
+    /// CHECK : Checked in Identifier CPI
+    pub owner_record: Account<'info, OwnerRecord>,
 
-    collection_mint: Box<Account<'info, Mint>>,
-
-    ///CHECK
-    #[account(
-        executable,
-        address = identifiers::id()
-    )]
-    identifier_program: AccountInfo<'info>,
+    /// CHECK 
+    pub shadow_drive: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 
