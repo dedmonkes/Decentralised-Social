@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{OwnerRecord};
+use crate::state::OwnerRecord;
 
 pub fn verify_delegate(ctx: Context<VerifyDelegate>) -> Result<()> {
     ctx.accounts.delegate_record.is_verified = true;

@@ -1,19 +1,13 @@
+use crate::state::Organisation;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use identifiers::cpi::accounts::InitializeIdentifier;
-use crate::state::Organisation;
 
-pub fn create_sub_organisation(ctx: Context<CreateSubOrganisation>) -> Result<()> {
-
-    
-
+pub fn create_sub_organisation(_ctx: Context<CreateSubOrganisation>) -> Result<()> {
     Ok(())
-
 }
 
 #[derive(Accounts)]
 pub struct CreateSubOrganisation<'info> {
-
     #[account(mut)]
     pub payer: Signer<'info>,
 
@@ -24,7 +18,7 @@ pub struct CreateSubOrganisation<'info> {
         space = Organisation::space(),
         payer = payer,
     )]
-    pub organisation : Account<'info, Organisation>,
+    pub organisation: Account<'info, Organisation>,
 
     #[account()]
     pub identifier_signer: Signer<'info>,
@@ -65,6 +59,4 @@ pub struct CreateSubOrganisation<'info> {
     identifier_program: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
-
-
 }

@@ -1,13 +1,7 @@
-
 use anchor_lang::prelude::*;
-use multigraph::{
-    cpi::accounts::{CreateEdge as CreateEdgeGraph},
-    ConnectionType, EdgeRelation,
-};
+use multigraph::{cpi::accounts::CreateEdge as CreateEdgeGraph, ConnectionType, EdgeRelation};
 
-use crate::{
-    state::{Identity, OwnerRecord},
-};
+use crate::state::{Identity, OwnerRecord};
 
 pub fn create_edge(
     ctx: Context<CreateEdge>,

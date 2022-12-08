@@ -9,11 +9,12 @@ crate-type = ["cdylib", "lib"]
 name = "align_governance"
 
 [features]
+default = ["int_log"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
-default = []
+int_log = []
 
 [dependencies]
 anchor-lang = "0.25.0"

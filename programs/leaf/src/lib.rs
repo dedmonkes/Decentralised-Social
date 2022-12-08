@@ -1,5 +1,3 @@
-
-
 use anchor_lang::prelude::*;
 use identifiers::state::{Identifier, Identity, OwnerRecord};
 use multigraph::{cpi::accounts::CreateNode, EdgeRelation};
