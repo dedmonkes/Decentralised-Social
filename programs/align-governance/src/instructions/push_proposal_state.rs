@@ -1,12 +1,8 @@
 use crate::{
     error::AlignError,
-    state::{
-        Proposal, ProposalState,
-    },
+    state::{Proposal, ProposalState},
 };
 use anchor_lang::prelude::*;
-
-
 
 // TODO add link in graph to show proposal & collection metatdata check
 pub fn push_proposal_state(ctx: Context<PushProposalState>) -> Result<()> {

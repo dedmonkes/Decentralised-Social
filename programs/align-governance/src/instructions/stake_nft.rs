@@ -2,25 +2,25 @@ use crate::{
     constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        ContributionRecord, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, RankVoteType, ReputationManager,
+        ContributionRecord, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
+        RankVoteType, ReputationManager,
     },
 };
-use anchor_lang::{prelude::*};
+use anchor_lang::prelude::*;
 
-use anchor_spl::token::{Mint, TokenAccount, Token, Transfer, self};
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use identifiers::state::{Identity, OwnerRecord};
-use mpl_token_metadata::{assertions::collection::assert_master_edition, state::{Metadata, TokenMetadataAccount}};
+use mpl_token_metadata::{
+    assertions::collection::assert_master_edition,
+    state::{Metadata, TokenMetadataAccount},
+};
 
-// This could either later be a plugin enabling projects to use there own staking contracts to 
+// This could either later be a plugin enabling projects to use there own staking contracts to
 // or we implement a common pda record for each nft (less efficient in cost) that staking contracts
 // can pull the information from for emissions
 pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
-    
-    let metadata: Metadata = mpl_token_metadata::state::Metadata::from_account_info(
-        &ctx.accounts.nft_metadata,
-    )?;
-
+    let metadata: Metadata =
+        mpl_token_metadata::state::Metadata::from_account_info(&ctx.accounts.nft_metadata)?;
 
     assert_master_edition(&metadata, &ctx.accounts.nft_master_edition)?;
     assert!(metadata.collection_details.is_none());
@@ -45,26 +45,44 @@ pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
             from: ctx.accounts.nft_token_account.to_account_info(),
             to: ctx.accounts.nft_vault.to_account_info(),
             authority: ctx.accounts.owner.to_account_info(),
-        }    
+        },
     );
 
-    token::transfer(
-        transfer_into_vault_context,
-        1,
-    )?;
+    token::transfer(transfer_into_vault_context, 1)?;
 
     msg!("Staking successfull!");
 
-    ctx.accounts.reputation_manager.capital_reputation.amount = ctx.accounts.reputation_manager.capital_reputation.amount.checked_add(1).unwrap();
-    
-    msg!("Recalculating reputation..");
-    let capital_rep_total: u64 = ctx.accounts.reputation_manager.capital_reputation
-    .weight
-    .checked_mul(ctx.accounts.reputation_manager.capital_reputation.amount.try_into().unwrap())
-    .unwrap()
-    .into();
+    ctx.accounts.reputation_manager.capital_reputation.amount = ctx
+        .accounts
+        .reputation_manager
+        .capital_reputation
+        .amount
+        .checked_add(1)
+        .unwrap();
 
-    ctx.accounts.reputation_manager.reputation = ctx.accounts.reputation_manager.reputation.checked_add(capital_rep_total).unwrap();
+    msg!("Recalculating reputation..");
+    let capital_rep_total: u64 = ctx
+        .accounts
+        .reputation_manager
+        .capital_reputation
+        .weight
+        .checked_mul(
+            ctx.accounts
+                .reputation_manager
+                .capital_reputation
+                .amount
+                .try_into()
+                .unwrap(),
+        )
+        .unwrap()
+        .into();
+
+    ctx.accounts.reputation_manager.reputation = ctx
+        .accounts
+        .reputation_manager
+        .reputation
+        .checked_add(capital_rep_total)
+        .unwrap();
 
     Ok(())
 }
@@ -108,7 +126,6 @@ pub struct StakeNft<'info> {
         seeds::program = identifiers::id(),
     )]
     pub owner_record: Account<'info, OwnerRecord>,
-    
 
     // Once we have degelated authority between owner account of
     // identifiers we can stake nfts from other linked accounts with the same
@@ -137,7 +154,7 @@ pub struct StakeNft<'info> {
         owner = mpl_token_metadata::ID.key(),
         seeds::program = mpl_token_metadata::id()
     )]
-    nft_metadata : AccountInfo<'info>,
+    nft_metadata: AccountInfo<'info>,
 
     /// CHECK inside instruction
     #[account(
@@ -151,5 +168,4 @@ pub struct StakeNft<'info> {
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
-
 }
