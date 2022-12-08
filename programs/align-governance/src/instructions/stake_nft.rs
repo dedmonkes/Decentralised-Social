@@ -1,9 +1,7 @@
 use crate::{
-    constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        ContributionRecord, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        RankVoteType, ReputationManager,
+        Organisation, ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
@@ -27,7 +25,7 @@ pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
 
     match metadata.collection {
         Some(collection) => {
-            if collection.verified != true {
+            if !collection.verified {
                 return Err(AlignError::UnverifiedNFT.into());
             }
             if collection.key != ctx.accounts.organisation.collection_mint {

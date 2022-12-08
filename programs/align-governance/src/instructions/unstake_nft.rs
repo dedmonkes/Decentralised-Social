@@ -1,9 +1,6 @@
 use crate::{
-    constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
-    error::AlignError,
     state::{
-        ContributionRecord, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        RankVoteType, ReputationManager,
+        Organisation, ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
@@ -15,7 +12,7 @@ use anchor_spl::{
 use identifiers::state::{Identity, OwnerRecord};
 
 pub fn unstake_nft(ctx: Context<UnstakeNft>) -> Result<()> {
-    let organisation = ctx.accounts.organisation.key();
+    let _organisation = ctx.accounts.organisation.key();
     let identity = ctx.accounts.identity.key();
     let bump = &[ctx.accounts.reputation_manager.bump];
 

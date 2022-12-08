@@ -1,9 +1,8 @@
 use crate::{
-    constants::MIN_REP_TO_CREATE_PROPOSAL,
     error::AlignError,
     state::{
         CouncilManager, CouncilVote, CouncilVoteRecord, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, ReputationManager,
+        Proposal, ProposalState,
     },
 };
 use anchor_lang::prelude::*;
