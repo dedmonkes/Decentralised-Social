@@ -2,13 +2,13 @@ use crate::{
     constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        reputation, ContributionRecord, CouncilManager, NativeTreasuryAccount, Organisation,
+        ContributionRecord, NativeTreasuryAccount, Organisation,
         Proposal, ProposalState, RankVoteType, ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
 
-use identifiers::state::{Identifier, Identity, OwnerRecord};
+use identifiers::state::{Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal & collection metatdata check
 pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -> Result<()> {

@@ -1,14 +1,12 @@
 use crate::{
-    constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        reputation, ContributionRecord, CouncilManager, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, RankVoteType, ReputationManager,
+        Proposal, ProposalState,
     },
 };
 use anchor_lang::prelude::*;
 
-use identifiers::state::{Identifier, Identity, OwnerRecord};
+
 
 // TODO add link in graph to show proposal & collection metatdata check
 pub fn push_proposal_state(ctx: Context<PushProposalState>) -> Result<()> {

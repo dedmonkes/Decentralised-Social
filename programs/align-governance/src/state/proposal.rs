@@ -8,6 +8,7 @@ pub enum RankVoteType {
     Downvote,
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum CouncilVote {
     Yes,
     No,

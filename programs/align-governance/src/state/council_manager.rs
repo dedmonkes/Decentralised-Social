@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+use super::CouncilVote;
+
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum CouncilManagerState {
     Electing,
@@ -30,6 +32,24 @@ impl CouncilManager {
         1 +
         32 +
         std::mem::size_of::<Option<i64>>() + //recovery count
+        1
+    }
+}
+
+#[account]
+pub struct CouncilVoteRecord {
+    pub organisation: Pubkey, // Sub org or Organisation
+    pub proposal : Pubkey,
+    pub vote : CouncilVote,
+    pub bump: u8,
+}
+
+impl CouncilVoteRecord {
+    pub fn space() -> usize {
+        8 +
+        32 +
+        32 +
+        std::mem::size_of::<CouncilVote>() + //recovery count
         1
     }
 }

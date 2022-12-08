@@ -2,34 +2,27 @@ use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
     error::AlignError,
     state::{
-        ContributionRecord, CouncilManager, CouncilVote, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, RankVoteType, ReputationManager,
+        CouncilManager, CouncilVote, NativeTreasuryAccount, Organisation,
+        Proposal, ProposalState, ReputationManager, CouncilVoteRecord,
     },
 };
-use anchor_lang::{prelude::*, solana_program::vote};
+use anchor_lang::{prelude::*};
 
-use identifiers::state::{Identifier, Identity, OwnerRecord};
+use identifiers::state::{Identity, OwnerRecord};
 
-// TODO add link in graph to show proposal & collection metatdata check
 pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) -> Result<()> {
+
+    // initialize council vote record
+    ctx.accounts.council_vote_record.organisation = ctx.accounts.proposal.organisation;
+    ctx.accounts.council_vote_record.proposal = ctx.accounts.proposal.key();
+    ctx.accounts.council_vote_record.vote = vote_type;
+    ctx.accounts.council_vote_record.bump = *ctx.bumps.get("council_vote_record").unwrap();
+
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
     let threshold = ctx.accounts.governance.council_threshold;
     let council_seats = ctx.accounts.council_manager.council_count;
 
     let council_idenitfiers = &ctx.accounts.council_manager.council_identifiers;
-
-    // Check proposal hasnt gone past voting date
-    require!(
-        current_timestamp
-            > ctx
-                .accounts
-                .proposal
-                .ranking_at
-                .unwrap()
-                .checked_add(60 * 60 * 24 * 7)
-                .unwrap(),
-        AlignError::RankingPeriodLapsed
-    );
 
     require!(
         council_idenitfiers.contains(&ctx.accounts.identity.identifier),
@@ -117,16 +110,18 @@ pub struct CastCouncilVote<'info> {
     pub governance: Box<Account<'info, NativeTreasuryAccount>>,
 
     #[account(
-        mut,
-        constraint = reputation_manager.identifier == identity.identifier,
-        constraint = reputation_manager.reputation >= MIN_REP_TO_CREATE_PROPOSAL
-    )]
-    pub reputation_manager: Box<Account<'info, ReputationManager>>,
-
-    #[account(
         constraint = council_manager.organisation == organisation.key(),
     )]
     pub council_manager: Box<Account<'info, CouncilManager>>,
+
+    #[account(
+        init,
+        seeds = [b"council-vote-record", proposal.key().as_ref()],
+        bump,
+        payer = payer,
+        space = CouncilVoteRecord::space()
+    )]
+    pub council_vote_record: Box<Account<'info, CouncilVoteRecord>>,
 
     #[account(
         mut,
