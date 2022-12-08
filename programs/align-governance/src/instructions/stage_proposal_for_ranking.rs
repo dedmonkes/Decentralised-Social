@@ -1,14 +1,10 @@
 use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
-    state::{
-        NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager,
-    },
+    state::{NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager},
 };
 use anchor_lang::prelude::*;
 
-use identifiers::{
-    state::{Identifier, Identity, OwnerRecord},
-};
+use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal
 pub fn stage_proposal_for_ranking(ctx: Context<StageProposalForRanking>) -> Result<()> {

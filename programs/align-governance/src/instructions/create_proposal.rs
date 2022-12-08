@@ -1,15 +1,13 @@
 use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
     state::{
-        CouncilManager,
-        NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager,
+        CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
+        ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
 
-use identifiers::{
-    state::{Identifier, Identity, OwnerRecord},
-};
+use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal
 pub fn create_proposal(ctx: Context<CreateProposal>) -> Result<()> {

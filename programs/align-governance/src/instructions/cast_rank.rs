@@ -2,15 +2,13 @@ use crate::{
     constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        ContributionRecord, CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        RankVoteType, ReputationManager, reputation,
+        reputation, ContributionRecord, CouncilManager, NativeTreasuryAccount, Organisation,
+        Proposal, ProposalState, RankVoteType, ReputationManager,
     },
 };
-use anchor_lang::{prelude::*};
+use anchor_lang::prelude::*;
 
-use identifiers::{
-    state::{Identifier, Identity, OwnerRecord},
-};
+use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal & collection metatdata check
 pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -> Result<()> {
@@ -27,7 +25,14 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
 
     // Check proposal hasnt gone past voting date
     require!(
-        current_timestamp < ctx.accounts.proposal.ranking_at.unwrap().checked_add(60 * 60 * 24 * 7).unwrap(),
+        current_timestamp
+            < ctx
+                .accounts
+                .proposal
+                .ranking_at
+                .unwrap()
+                .checked_add(60 * 60 * 24 * 7)
+                .unwrap(),
         AlignError::RankingPeriodLapsed
     );
 

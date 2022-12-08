@@ -2,7 +2,6 @@ use crate::state::Organisation;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 
-
 pub fn create_sub_organisation(_ctx: Context<CreateSubOrganisation>) -> Result<()> {
     Ok(())
 }

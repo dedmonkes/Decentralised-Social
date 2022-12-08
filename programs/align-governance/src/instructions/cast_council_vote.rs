@@ -1,22 +1,17 @@
 use crate::{
-    constants::{MIN_REP_TO_CREATE_PROPOSAL},
+    constants::MIN_REP_TO_CREATE_PROPOSAL,
+    error::AlignError,
     state::{
-        ContributionRecord, CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        RankVoteType, ReputationManager, CouncilVote,
-    }, error::AlignError,
+        ContributionRecord, CouncilManager, CouncilVote, NativeTreasuryAccount, Organisation,
+        Proposal, ProposalState, RankVoteType, ReputationManager,
+    },
 };
 use anchor_lang::{prelude::*, solana_program::vote};
 
-use identifiers::{
-    state::{Identifier, Identity, OwnerRecord},
-};
+use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal & collection metatdata check
-pub fn cast_council_vote(
-    ctx: Context<CastCouncilVote>,
-    vote_type: CouncilVote,
-) -> Result<()> {
-
+pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) -> Result<()> {
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
     let threshold = ctx.accounts.governance.council_threshold;
     let council_seats = ctx.accounts.council_manager.council_count;
@@ -25,16 +20,47 @@ pub fn cast_council_vote(
 
     // Check proposal hasnt gone past voting date
     require!(
-        current_timestamp > ctx.accounts.proposal.ranking_at.unwrap().checked_add(60 * 60 * 24 * 7).unwrap(),
+        current_timestamp
+            > ctx
+                .accounts
+                .proposal
+                .ranking_at
+                .unwrap()
+                .checked_add(60 * 60 * 24 * 7)
+                .unwrap(),
         AlignError::RankingPeriodLapsed
     );
 
-    require!(council_idenitfiers.contains(&ctx.accounts.identity.identifier), AlignError::NotCouncilIdentifier);
-    
+    require!(
+        council_idenitfiers.contains(&ctx.accounts.identity.identifier),
+        AlignError::NotCouncilIdentifier
+    );
+
     match vote_type {
-        CouncilVote::Yes => ctx.accounts.proposal.total_council_yes_votes = ctx.accounts.proposal.total_council_yes_votes.checked_add(1).unwrap(),
-        CouncilVote::No => ctx.accounts.proposal.total_council_no_votes = ctx.accounts.proposal.total_council_no_votes.checked_add(1).unwrap(),
-        CouncilVote::Abstain => ctx.accounts.proposal.total_council_abstain_votes = ctx.accounts.proposal.total_council_abstain_votes.checked_add(1).unwrap(),
+        CouncilVote::Yes => {
+            ctx.accounts.proposal.total_council_yes_votes = ctx
+                .accounts
+                .proposal
+                .total_council_yes_votes
+                .checked_add(1)
+                .unwrap()
+        }
+        CouncilVote::No => {
+            ctx.accounts.proposal.total_council_no_votes = ctx
+                .accounts
+                .proposal
+                .total_council_no_votes
+                .checked_add(1)
+                .unwrap()
+        }
+        CouncilVote::Abstain => {
+            ctx.accounts.proposal.total_council_abstain_votes = ctx
+                .accounts
+                .proposal
+                .total_council_abstain_votes
+                .checked_add(1)
+                .unwrap()
+        }
     }
 
     let minimum_yes_votes = match threshold.checked_mul(council_seats) {
@@ -48,17 +74,23 @@ pub fn cast_council_vote(
     if minimum_yes_votes <= ctx.accounts.proposal.total_council_yes_votes {
         ctx.accounts.proposal.approved_at = Some(current_timestamp);
         ctx.accounts.proposal.state = ProposalState::Servicing;
-        return Ok(())
+        return Ok(());
     }
 
     let yes_votes = ctx.accounts.proposal.total_council_yes_votes;
     let no_votes = ctx.accounts.proposal.total_council_no_votes;
     let abstain_votes = ctx.accounts.proposal.total_council_abstain_votes;
 
-    let total_votes = yes_votes.checked_add(no_votes).unwrap().checked_add(abstain_votes).unwrap();
+    let total_votes = yes_votes
+        .checked_add(no_votes)
+        .unwrap()
+        .checked_add(abstain_votes)
+        .unwrap();
     let remaining_votes = total_votes.checked_sub(council_seats).unwrap();
 
-    if minimum_yes_votes.saturating_sub(ctx.accounts.proposal.total_council_yes_votes) > remaining_votes {
+    if minimum_yes_votes.saturating_sub(ctx.accounts.proposal.total_council_yes_votes)
+        > remaining_votes
+    {
         ctx.accounts.proposal.denied_at = Some(current_timestamp);
         ctx.accounts.proposal.state = ProposalState::Denied;
     }

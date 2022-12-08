@@ -11,7 +11,7 @@ pub enum RankVoteType {
 pub enum CouncilVote {
     Yes,
     No,
-    Abstain
+    Abstain,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
@@ -23,7 +23,7 @@ pub enum ProposalState {
     Reviewing,
     Reviewed,
     Complete,
-    Denied
+    Denied,
 }
 
 #[account]
@@ -36,15 +36,15 @@ pub struct Proposal {
     pub ranking_at: Option<i64>,
     pub voting_at: Option<i64>,
     pub denied_at: Option<i64>,
-    pub approved_at : Option<i64>,
+    pub approved_at: Option<i64>,
     pub draft_at: i64,
     pub servicer: Option<Pubkey>, // idenitfier of person to service the proposal
     pub id: u64,
     pub shadow_drive: Pubkey,
     pub council_review_rating: Option<u8>,
-    pub total_council_yes_votes : u8,
-    pub total_council_no_votes : u8,
-    pub total_council_abstain_votes : u8,
+    pub total_council_yes_votes: u8,
+    pub total_council_no_votes: u8,
+    pub total_council_abstain_votes: u8,
     pub upvotes: u64,
     pub downvotes: u64,
     pub bump: u8,

@@ -1,14 +1,10 @@
 use crate::{
     constants::{DEFAULT_CAPTIAL_REP_WEIGHT, DEFAULT_CONTRIBUTION_REP_WEIGHT},
-    state::{
-        CapitalReputation, ContributionReputation, Organisation, ReputationManager,
-    },
+    state::{CapitalReputation, ContributionReputation, Organisation, ReputationManager},
 };
 use anchor_lang::prelude::*;
 
-use identifiers::{
-    state::{Identity, OwnerRecord},
-};
+use identifiers::state::{Identity, OwnerRecord};
 use multigraph::{ConnectionType, EdgeRelation};
 
 // TODO : Add collection gate, init reputation manager

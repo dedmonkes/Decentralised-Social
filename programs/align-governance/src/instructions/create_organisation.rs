@@ -1,9 +1,10 @@
 use crate::{
+    constants::DEFAULT_COUNCIL_THRESHOLD,
     error::AlignError,
     state::{
         CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
         NativeTreasuryAccount, Organisation,
-    }, constants::DEFAULT_COUNCIL_THRESHOLD,
+    },
 };
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
