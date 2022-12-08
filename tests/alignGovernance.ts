@@ -6,7 +6,10 @@ import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
-import { mineIdentifier, mintNft } from "./helpers";
+import { getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft } from "./helpers";
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
+import { expect } from "chai";
 
 
 describe("Align Governance Inergration Tests", () => {
@@ -23,6 +26,9 @@ describe("Align Governance Inergration Tests", () => {
 
     const councilKeypair = web3.Keypair.generate();
     const servicerKeypair = web3.Keypair.generate();
+
+    const collectionMintKeypair = new anchor.web3.Keypair();
+
 
 
 
@@ -146,8 +152,7 @@ describe("Align Governance Inergration Tests", () => {
 
         console.log("Creating Council identifier")
 
-        const mintKeypair = new anchor.web3.Keypair();
-        await mintNft(mintKeypair, identifierProgram.provider)
+        await mintCollectionNft(collectionMintKeypair, identifierProgram.provider)
         await profilesProgram.provider.connection.requestAirdrop(councilKeypair.publicKey, 2 * web3.LAMPORTS_PER_SOL)
 
         await identifierProgram.methods.initializeIdentifier(null)
@@ -179,7 +184,7 @@ describe("Align Governance Inergration Tests", () => {
                 ownerRecord,
                 recoveryKey: new anchor.web3.Keypair().publicKey,
                 multigraph: multigraphProgram.programId,
-                collectionMint: mintKeypair.publicKey,
+                collectionMint: collectionMintKeypair.publicKey,
                 identifierProgram: identifierProgram.programId,
                 systemProgram: web3.SystemProgram.programId,
                 organisation,
@@ -196,7 +201,7 @@ describe("Align Governance Inergration Tests", () => {
             }])
             .signers([identifier])
             .transaction()
-            // .rpc({ skipPreflight: true })
+        // .rpc({ skipPreflight: true })
 
         await alignProgram.provider.sendAndConfirm(tx, [identifier])
 
@@ -228,7 +233,7 @@ describe("Align Governance Inergration Tests", () => {
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
                 fromNode: councilNodeAddress,
-                ownerRecord : councilOwnerRecord,
+                ownerRecord: councilOwnerRecord,
                 multigraph: multigraphProgram.programId,
                 identifierProgram: identifierProgram.programId,
                 systemProgram: web3.SystemProgram.programId,
@@ -242,7 +247,7 @@ describe("Align Governance Inergration Tests", () => {
             })
             .signers([councilKeypair])
             .rpc({
-                skipPreflight : true
+                skipPreflight: true
             })
 
 
@@ -253,6 +258,121 @@ describe("Align Governance Inergration Tests", () => {
 
         const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
         console.log(JSON.parse(JSON.stringify(repAccount)))
+
+
+    })
+
+    it("Stake Nft", async () => {
+
+        let mint = web3.Keypair.generate()
+
+        await mintNft(collectionMintKeypair, mint, alignProgram.provider, councilKeypair.publicKey)
+
+        const [nftVault] = publicKey.findProgramAddressSync([
+            Buffer.from("nft-vault"),
+            councilIdentifier.publicKey.toBuffer(),
+            mint.publicKey.toBuffer()
+        ],
+            alignProgram.programId
+        )
+
+
+        const stakeIx = await alignProgram.methods.stakeNft()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: councilOwnerRecord,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                reputationManager: reputationManagerAddress,
+                owner: councilKeypair.publicKey,
+                nftVault,
+                nftHolderOwnerRecord: councilOwnerRecord,
+                nftMint: mint.publicKey,
+                nftTokenAccount: await getAssociatedTokenAddress(mint.publicKey, councilKeypair.publicKey),
+                nftMetadata: await getMetadataAddress(mint.publicKey),
+                nftMasterEdition: await getMasterEditionAddress(mint.publicKey),
+                tokenProgram: TOKEN_PROGRAM_ID,
+                rent: web3.SYSVAR_RENT_PUBKEY
+            })
+            .signers([councilKeypair])
+            .instruction()
+
+        let mint2 = web3.Keypair.generate()
+
+        await mintNft(collectionMintKeypair, mint2, alignProgram.provider, councilKeypair.publicKey)
+
+        const [nftVault2] = publicKey.findProgramAddressSync([
+            Buffer.from("nft-vault"),
+            councilIdentifier.publicKey.toBuffer(),
+            mint2.publicKey.toBuffer()
+        ],
+            alignProgram.programId
+        )
+
+
+        const stakeIx2 = await alignProgram.methods.stakeNft()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: councilOwnerRecord,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                reputationManager: reputationManagerAddress,
+                owner: councilKeypair.publicKey,
+                nftVault: nftVault2,
+                nftHolderOwnerRecord: councilOwnerRecord,
+                nftMint: mint2.publicKey,
+                nftTokenAccount: await getAssociatedTokenAddress(mint2.publicKey, councilKeypair.publicKey),
+                nftMetadata: await getMetadataAddress(mint2.publicKey),
+                nftMasterEdition: await getMasterEditionAddress(mint2.publicKey),
+                tokenProgram: TOKEN_PROGRAM_ID,
+                rent: web3.SYSVAR_RENT_PUBKEY
+            })
+            .signers([councilKeypair])
+            .instruction()
+        // .rpc({
+        //     skipPreflight: true
+        // })
+
+        await alignProgram.provider.sendAndConfirm(new web3.Transaction().add(stakeIx, stakeIx2), [councilKeypair], { skipPreflight: true })
+
+        console.log("Fetching proposal Accounts")
+
+        const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
+        console.log(JSON.parse(JSON.stringify(repAccount)))
+
+        const unstakeTransaction = await alignProgram.methods.unstakeNft()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: councilOwnerRecord,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                reputationManager: reputationManagerAddress,
+                owner: councilKeypair.publicKey,
+                nftVault,
+                nftHolderOwnerRecord: councilOwnerRecord,
+                nftMint: mint.publicKey,
+                nftTokenAccount: await getAssociatedTokenAddress(mint.publicKey, councilKeypair.publicKey),
+                tokenProgram: TOKEN_PROGRAM_ID,
+                rent: web3.SYSVAR_RENT_PUBKEY,
+                nftOwnerAccount: councilKeypair.publicKey,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID
+            })
+            .signers([councilKeypair])
+            .transaction()
+        // .rpc({
+        //     skipPreflight: true
+        // })
+
+        await alignProgram.provider.sendAndConfirm(unstakeTransaction, [councilKeypair], { skipPreflight: true })
+
+        const unstakedRepAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
+        console.log(JSON.parse(JSON.stringify(unstakedRepAccount)))
+
+        expect(unstakedRepAccount.capitalReputation.amount).equal(1)
+        expect(repAccount.capitalReputation.amount).equal(2)
 
 
     })
@@ -271,22 +391,22 @@ describe("Align Governance Inergration Tests", () => {
         )
 
         await identifierProgram.methods.initializeIdentifier(null)
-        .accountsStrict({
-            payer: profilesProgram.provider.publicKey,
-            owner: servicerKeypair.publicKey,
-            identifierSigner: servicerIdenitifier.publicKey,
-            identifier: servicerIdenitifier.publicKey,
-            identity: servicerIdentity,
-            node: servicerNodeAddress,
-            ownerRecord: servicerOwnerRecord,
-            recoveryKey: web3.Keypair.generate().publicKey,
-            multigraph: multigraphProgram.programId,
-            systemProgram: web3.SystemProgram.programId
-        })
-        .signers([servicerIdenitifier, servicerKeypair])
-        .rpc({
-            skipPreflight: true
-        })
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                owner: servicerKeypair.publicKey,
+                identifierSigner: servicerIdenitifier.publicKey,
+                identifier: servicerIdenitifier.publicKey,
+                identity: servicerIdentity,
+                node: servicerNodeAddress,
+                ownerRecord: servicerOwnerRecord,
+                recoveryKey: web3.Keypair.generate().publicKey,
+                multigraph: multigraphProgram.programId,
+                systemProgram: web3.SystemProgram.programId
+            })
+            .signers([servicerIdenitifier, servicerKeypair])
+            .rpc({
+                skipPreflight: true
+            })
 
         await alignProgram.methods.createProposal()
             .accountsStrict({
@@ -301,7 +421,7 @@ describe("Align Governance Inergration Tests", () => {
                 proposal: proposalAddress,
                 governance: nativeTreasuryAddress,
                 servicerIdenitifier: servicerIdenitifier.publicKey,
-                owner:councilKeypair.publicKey,
+                owner: councilKeypair.publicKey,
             })
             .signers([councilKeypair])
             .rpc()

@@ -1,5 +1,5 @@
 import { Provider, utils, web3 } from "@project-serum/anchor";
-import {createCreateMasterEditionV3Instruction, createCreateMetadataAccountV3Instruction, CreateMasterEditionArgs, CreateMasterEditionV3InstructionAccounts, CreateMetadataAccountArgsV2, CreateMetadataAccountArgsV3, CreateMetadataAccountV3InstructionAccounts, PROGRAM_ADDRESS} from "@metaplex-foundation/mpl-token-metadata"
+import {createCreateMasterEditionV3Instruction, createCreateMetadataAccountV3Instruction, CreateMasterEditionArgs, CreateMasterEditionV3InstructionAccounts, CreateMetadataAccountArgsV2, CreateMetadataAccountArgsV3, CreateMetadataAccountV3InstructionAccounts, createSetAndVerifySizedCollectionItemInstruction, PROGRAM_ADDRESS, SetAndVerifySizedCollectionItemInstructionAccounts} from "@metaplex-foundation/mpl-token-metadata"
 import {createAssociatedTokenAccountInstruction, createInitializeMintInstruction, createMintToCheckedInstruction, getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MintLayout, TOKEN_PROGRAM_ID} from "@solana/spl-token"
 
 export const mineIdentifier = () => {
@@ -54,9 +54,10 @@ export const getCreateMintIx = async (
     authority: web3.PublicKey,
     amount: number,
     decimals: number,
-    connection: web3.Connection
+    connection: web3.Connection,
+    reciever : web3.PublicKey = authority
   ): Promise<web3.TransactionInstruction[]> => {
-    const ata = await getAssociatedTokenAddress(mint, authority);
+    const ata = await getAssociatedTokenAddress(mint, reciever);
   
     let instructions = [
       web3.SystemProgram.createAccount({
@@ -75,7 +76,7 @@ export const getCreateMintIx = async (
       createAssociatedTokenAccountInstruction(
         authority, // payer
         ata, // ata
-        authority, // owner
+        reciever, // owner
         mint // mint
       ),
       createMintToCheckedInstruction(mint, ata, authority, amount, decimals),
@@ -84,7 +85,7 @@ export const getCreateMintIx = async (
     return instructions;
   };
 
-export const mintNft = async (
+export const mintCollectionNft = async (
     mint : web3.Keypair,
     provider : Provider
 ) =>{
@@ -120,6 +121,90 @@ export const mintNft = async (
       sellerFeeBasisPoints: 10000,
       creators: null,
       collection: null,
+      uses: null,
+    },
+    isMutable: false,
+    collectionDetails: {
+      __kind: "V1",
+      size: 0,
+    },
+  };
+
+  const createMetadataAccountsIx = createCreateMetadataAccountV3Instruction(
+    createMetadataAccounts,
+    {
+      createMetadataAccountArgsV3: createMetadataAccountArgs,
+    }
+  );
+
+  instructions.push(createMetadataAccountsIx);
+
+  const masterEditionAddress = await getMasterEditionAddress(mint.publicKey);
+
+  const createMasterEditionAccounts: CreateMasterEditionV3InstructionAccounts =
+    {
+      edition: masterEditionAddress,
+      mint: mint.publicKey,
+      updateAuthority: provider.publicKey,
+      mintAuthority: provider.publicKey,
+      payer: provider.publicKey,
+      metadata: metadataAddress,
+    };
+
+  const createMasterEditionArgs: CreateMasterEditionArgs = {
+    maxSupply: 0,
+  };
+
+  const createMasterEditionAccountsIx = createCreateMasterEditionV3Instruction(
+    createMasterEditionAccounts,
+    {
+      createMasterEditionArgs: createMasterEditionArgs,
+    }
+  );
+
+  instructions.push(createMasterEditionAccountsIx);
+
+  await provider.sendAndConfirm(new web3.Transaction().add(...instructions), [mint])
+}
+
+export const mintNft = async (collectionKey : web3.Keypair, mint : web3.Keypair, provider : Provider, reciever : web3.PublicKey) => {
+  let instructions: web3.TransactionInstruction[] = [];
+
+  const createMintIx = await getCreateMintIx(
+    mint.publicKey,
+    provider.publicKey,
+    1,
+    0,
+    provider.connection,
+    reciever
+  );
+  const ata = await getAssociatedTokenAddress(
+    mint.publicKey,
+    provider.publicKey
+  );
+  const metadataAddress = await getMetadataAddress(mint.publicKey);
+
+  instructions.push(...createMintIx);
+
+  const createMetadataAccounts: CreateMetadataAccountV3InstructionAccounts = {
+    metadata: metadataAddress,
+    mint: mint.publicKey,
+    mintAuthority: provider.publicKey,
+    payer: provider.publicKey,
+    updateAuthority: provider.publicKey,
+  };
+  const collection = collectionKey.publicKey;
+  const createMetadataAccountArgs: CreateMetadataAccountArgsV3 = {
+    data: {
+      name: "name",
+      symbol: "DS",
+      uri: "https://shdw-drive.genesysgo.net/Avy3TVpFP9M1mjrDFZdswBhdA7kZaJnyiLBPi1XRYqRa/collectionMetadata_49gW2U7ftZ724rMk6bswVayCrTNAu9aGcMiKnSj8XPAG6i5k5pxTtNSUVKZyeWFpn8npz4CVsqzL7CqXfgW33fAM.json",
+      sellerFeeBasisPoints: 10000,
+      creators: null,
+      collection: {
+        key: collection,
+        verified: false,
+      },
       uses: null,
     },
     isMutable: false,
@@ -159,6 +244,21 @@ export const mintNft = async (
   );
 
   instructions.push(createMasterEditionAccountsIx);
+  const accounts: SetAndVerifySizedCollectionItemInstructionAccounts = {
+    metadata: metadataAddress,
+    collectionAuthority: provider.publicKey,
+    payer: provider.publicKey,
+    updateAuthority: provider.publicKey,
+    collectionMint: collection,
+    collection: await getMetadataAddress(collection),
+    collectionMasterEditionAccount: await getMasterEditionAddress(collection),
+  };
+  const setCollectionIx =
+    createSetAndVerifySizedCollectionItemInstruction(accounts);
 
-  await provider.sendAndConfirm(new web3.Transaction().add(...instructions), [mint])
+  instructions.push(setCollectionIx);
+
+  const tx = new web3.Transaction().add(...instructions);
+  const sig = await provider.sendAndConfirm(tx, [mint], {skipPreflight : true});
+  return sig
 }

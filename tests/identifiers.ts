@@ -8,7 +8,7 @@ import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
-import { mineIdentifier, mintNft } from "./helpers";
+import { mineIdentifier, mintCollectionNft } from "./helpers";
 
 describe("identifiers", () => {
   // Configure the client to use the local cluster.
@@ -94,7 +94,7 @@ describe("identifiers", () => {
     console.log("Minting a pfp..")
     
     const mintKeypair = new anchor.web3.Keypair();
-    await mintNft(mintKeypair, identifierProgram.provider)
+    await mintCollectionNft(mintKeypair, identifierProgram.provider)
     console.log("Creating a profile..")
 
     const username = "@professormint"

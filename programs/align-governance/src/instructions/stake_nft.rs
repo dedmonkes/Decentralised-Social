@@ -105,7 +105,7 @@ pub struct StakeNft<'info> {
     pub reputation_manager: Box<Account<'info, ReputationManager>>,
 
     #[account(
-        init,
+        init_if_needed,
         seeds = [b"nft-vault", identity.identifier.key().as_ref(), nft_mint.key().as_ref()],
         bump,
         payer = payer,
@@ -146,17 +146,18 @@ pub struct StakeNft<'info> {
     )]
     nft_token_account: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK inside instruction
     #[account(
         seeds = [b"metadata", mpl_token_metadata::ID.key().as_ref(), nft_mint.key().as_ref()],
         bump,
-        owner = mpl_token_metadata::ID.key(),
+        owner = mpl_token_metadata::ID,
         seeds::program = mpl_token_metadata::id()
     )]
     nft_metadata: AccountInfo<'info>,
 
     /// CHECK inside instruction
     #[account(
-        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), nft_metadata.key().as_ref(), b"edition"],
+        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), nft_mint.key().as_ref(), b"edition"],
         bump,
         owner = mpl_token_metadata::ID,
         seeds::program = mpl_token_metadata::id()

@@ -12,11 +12,11 @@ use anchor_spl::{
 use identifiers::state::{Identity, OwnerRecord};
 
 pub fn unstake_nft(ctx: Context<UnstakeNft>) -> Result<()> {
-    let _organisation = ctx.accounts.organisation.key();
+    let organisation = ctx.accounts.organisation.key();
     let identity = ctx.accounts.identity.key();
     let bump = &[ctx.accounts.reputation_manager.bump];
 
-    let seeds = vec![b"reputation-manager".as_ref(), identity.as_ref(), bump];
+    let seeds = vec![b"reputation-manager".as_ref(), organisation.as_ref(), identity.as_ref(), bump];
 
     let signers = vec![seeds.as_slice()];
 
@@ -83,7 +83,6 @@ pub struct UnstakeNft<'info> {
         mut,
         seeds = [b"nft-vault", identity.identifier.key().as_ref(), nft_mint.key().as_ref()],
         bump,
-        close = nft_owner_account,
         constraint = nft_vault.mint == nft_mint.key(),
         constraint = nft_vault.owner == reputation_manager.key(),
     )]
@@ -122,7 +121,9 @@ pub struct UnstakeNft<'info> {
     )]
     nft_token_account: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK address is checked to corresponed to identifier here
     #[account(
+        mut, 
         address = nft_holder_owner_record.account
     )]
     nft_owner_account: AccountInfo<'info>,
