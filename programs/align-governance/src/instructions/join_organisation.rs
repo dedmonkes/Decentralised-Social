@@ -1,5 +1,5 @@
 use crate::{
-    constants::{DEFAULT_CAPTIAL_REP_WEIGHT, DEFAULT_CONTRIBUTION_REP_WEIGHT},
+    constants::{DEFAULT_CAPTIAL_REP_WEIGHT, DEFAULT_CONTRIBUTION_REP_WEIGHT, POINTS_DECIMAL},
     state::{CapitalReputation, ContributionReputation, Organisation, ReputationManager},
 };
 use anchor_lang::prelude::*;
@@ -29,7 +29,7 @@ pub fn join_organisation(ctx: Context<JoinOrganisation>) -> Result<()> {
 
     ctx.accounts.reputation_manager.reputation = 0;
     ctx.accounts.reputation_manager.snapshot_at = Clock::get().unwrap().unix_timestamp;
-    ctx.accounts.reputation_manager.snapshot_points = 30;
+    ctx.accounts.reputation_manager.snapshot_points = 30_u64.checked_mul(POINTS_DECIMAL.into()).unwrap();
     ctx.accounts.reputation_manager.bump = *ctx.bumps.get("reputation_manager").unwrap();
 
     let cpi_program = ctx.accounts.multigraph.to_account_info();

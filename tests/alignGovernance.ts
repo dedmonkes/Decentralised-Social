@@ -6,7 +6,7 @@ import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
-import { getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft } from "./helpers";
+import { getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft, sleep } from "./helpers";
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
@@ -143,6 +143,17 @@ describe("Align Governance Inergration Tests", () => {
     const [nativeTreasuryAddress] = publicKey.findProgramAddressSync([
         Buffer.from("native-treasury"),
         organisation.toBuffer()
+    ],
+        alignProgram.programId
+    )
+
+    const indexBuff = Buffer.alloc(8)
+    indexBuff.writeBigUint64LE(0n, 0)
+
+    const [proposalAddress] = publicKey.findProgramAddressSync([
+        Buffer.from("proposal"),
+        nativeTreasuryAddress.toBuffer(),
+        indexBuff
     ],
         alignProgram.programId
     )
@@ -379,17 +390,6 @@ describe("Align Governance Inergration Tests", () => {
 
     it("Create Proposal", async () => {
 
-        const indexBuff = Buffer.alloc(8)
-        indexBuff.writeBigUint64LE(0n, 0)
-
-        const [proposalAddress] = publicKey.findProgramAddressSync([
-            Buffer.from("proposal"),
-            nativeTreasuryAddress.toBuffer(),
-            indexBuff
-        ],
-            alignProgram.programId
-        )
-
         await identifierProgram.methods.initializeIdentifier(null)
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
@@ -438,6 +438,143 @@ describe("Align Governance Inergration Tests", () => {
         const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
         console.log(JSON.parse(JSON.stringify(repAccount)))
 
+
+    })
+
+    it("Stage Proposal for ranking", async () => {
+
+
+        await alignProgram.methods.stageProposalForRanking()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: councilOwnerRecord,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                reputationManager: reputationManagerAddress,
+                proposal: proposalAddress,
+                governance: nativeTreasuryAddress,
+                servicerIdenitifier: servicerIdenitifier.publicKey,
+                owner: councilKeypair.publicKey,
+            })
+            .signers([councilKeypair])
+            .rpc()
+
+
+        console.log("Fetching proposal Accounts")
+        
+        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        console.log(JSON.parse(JSON.stringify(propAccount)))
+        
+        //@ts-ignore
+        // expect(propAccount.state).haveOwnProperty("ranking")
+
+        const govAccount = await alignProgram.account.nativeTreasuryAccount.fetch(nativeTreasuryAddress)
+        console.log(JSON.parse(JSON.stringify(govAccount)))
+
+        const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
+        console.log(JSON.parse(JSON.stringify(repAccount)))
+
+
+    })
+
+    it("Cast Rank on proposal", async () => {
+
+        const [contributionRecord] = publicKey.findProgramAddressSync([
+            Buffer.from("contribution-record"),
+            proposalAddress.toBuffer()
+        ],
+            alignProgram.programId
+        )
+
+        const tx = await alignProgram.methods.castRank({upvote : {}}, 1)
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: councilOwnerRecord,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: councilIdentity,
+                reputationManager: reputationManagerAddress,
+                proposal: proposalAddress,
+                governance: nativeTreasuryAddress,
+                owner: councilKeypair.publicKey,
+                contributionRecord
+            })
+            .signers([councilKeypair])
+            .transaction()
+            // .rpc({skipPreflight: true})
+
+        await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], { skipPreflight: true })
+
+        console.log("Fetching proposal Accounts")
+        
+        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        console.log(JSON.parse(JSON.stringify(propAccount)))
+        
+        //@ts-ignore
+        // expect(propAccount.state).haveOwnProperty("ranking")
+
+        const govAccount = await alignProgram.account.nativeTreasuryAccount.fetch(nativeTreasuryAddress)
+        console.log(JSON.parse(JSON.stringify(govAccount)))
+
+        const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
+        console.log(JSON.parse(JSON.stringify(repAccount)))
+
+
+    })
+
+
+    it("Push proposal state to council vote", async () => {
+
+        await sleep(10000)
+
+        const tx = await alignProgram.methods.pushProposalState()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                proposal: proposalAddress,
+            })
+            .transaction()
+
+        await alignProgram.provider.sendAndConfirm(tx, [], { skipPreflight: true })
+
+        console.log("Fetching proposal Accounts")
+        
+        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        console.log(JSON.parse(JSON.stringify(propAccount)))
+
+    })
+
+    it("Cast Council vote", async () => {
+
+        const [councilVoteRecord] = publicKey.findProgramAddressSync([
+            Buffer.from("council-vote-record"),
+            proposalAddress.toBuffer()
+        ],
+            alignProgram.programId
+        )
+
+        const tx = await alignProgram.methods.castCouncilVote({yes:{}})
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                proposal: proposalAddress,
+                owner: councilKeypair.publicKey,
+                organisation: organisation,
+                governance: nativeTreasuryAddress,
+                identity: councilIdentity,
+                ownerRecord: councilOwnerRecord,
+                councilManager: councilManager,
+                councilVoteRecord,
+            })
+            .transaction()
+
+        await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], { skipPreflight: true })
+
+        console.log("Fetching proposal Accounts")
+        
+        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        console.log(JSON.parse(JSON.stringify(propAccount)))
 
     })
 

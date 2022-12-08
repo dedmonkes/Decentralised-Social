@@ -123,12 +123,11 @@ pub struct CastCouncilVote<'info> {
 
     #[account(
         mut,
-        constraint = proposal.state == ProposalState::Ranking,
+        constraint = proposal.state == ProposalState::Voting,
         constraint = proposal.organisation == organisation.key()
     )]
     pub proposal: Box<Account<'info, Proposal>>,
 
-    /// CHECK : Checked in Identifier CPI
     identity: Account<'info, Identity>,
 
     #[account(
@@ -138,11 +137,7 @@ pub struct CastCouncilVote<'info> {
         bump = owner_record.bump,
         seeds::program = identifiers::id(),
     )]
-    /// CHECK : Checked in Identifier CPI
     pub owner_record: Account<'info, OwnerRecord>,
-
-    /// CHECK
-    pub shadow_drive: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }

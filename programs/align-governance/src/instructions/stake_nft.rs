@@ -81,6 +81,10 @@ pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
         .reputation
         .checked_add(capital_rep_total)
         .unwrap();
+        
+    let current_timestamp = Clock::get().unwrap().unix_timestamp;
+    ctx.accounts.reputation_manager.snapshot_at = current_timestamp;
+
 
     Ok(())
 }

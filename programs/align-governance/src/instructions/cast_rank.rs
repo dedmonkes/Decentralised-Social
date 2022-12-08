@@ -1,5 +1,5 @@
 use crate::{
-    constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
+    constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL, DEFAULT_RANKING_PEROID},
     error::AlignError,
     state::{
         ContributionRecord, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
@@ -31,7 +31,7 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
                 .proposal
                 .ranking_at
                 .unwrap()
-                .checked_add(60 * 60 * 24 * 7)
+                .checked_add(DEFAULT_RANKING_PEROID)
                 .unwrap(),
         AlignError::RankingPeriodLapsed
     );
@@ -42,6 +42,9 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
         snapshot_points,
         current_timestamp,
     );
+
+    msg!("Points avaliable to use: {}", points_avaliable);
+    msg!("Points needed for vote: {}", amount.checked_mul(POINTS_DECIMAL).unwrap());
 
     require!(
         points_avaliable > 0_u64.checked_mul(POINTS_DECIMAL.into()).unwrap(),
@@ -57,7 +60,7 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
         .accounts
         .reputation_manager
         .snapshot_points
-        .checked_sub(amount.into())
+        .checked_sub(amount.checked_mul(POINTS_DECIMAL).unwrap().into())
         .unwrap();
 
     match vote_type {
@@ -159,9 +162,6 @@ pub struct CastRank<'info> {
     )]
     /// CHECK : Checked in Identifier CPI
     pub owner_record: Account<'info, OwnerRecord>,
-
-    /// CHECK
-    pub shadow_drive: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }
