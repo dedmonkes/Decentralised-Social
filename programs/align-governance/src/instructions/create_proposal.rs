@@ -1,12 +1,21 @@
+use crate::{
+    constants::MIN_REP_TO_CREATE_PROPOSAL,
+    error::AlignError,
+    state::{
+        CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
+        NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager,
+        TokenAccountGovernance,
+    },
+};
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use identifiers::{cpi::accounts::InitializeIdentifier, state::{is_valid_prefix, OwnerRecord, Identity, Identifier}};
-use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, TokenAccountGovernance, ReputationManager, Proposal, ProposalState, NativeTreasuryAccount}, error::AlignError, constants::MIN_REP_TO_CREATE_PROPOSAL};
-
+use identifiers::{
+    cpi::accounts::InitializeIdentifier,
+    state::{is_valid_prefix, Identifier, Identity, OwnerRecord},
+};
 
 // TODO add link in graph to show proposal
 pub fn create_proposal(ctx: Context<CreateProposal>) -> Result<()> {
-    
     ctx.accounts.proposal.state = ProposalState::Draft;
     ctx.accounts.proposal.organisation = ctx.accounts.organisation.key();
     ctx.accounts.proposal.sub_org_type = None;
@@ -24,31 +33,34 @@ pub fn create_proposal(ctx: Context<CreateProposal>) -> Result<()> {
     ctx.accounts.proposal.downvotes = 0;
     ctx.accounts.proposal.bump = *ctx.bumps.get("proposal").unwrap();
 
-    ctx.accounts.governance.total_proposals = ctx.accounts.governance.total_proposals.checked_add(1).unwrap();
+    ctx.accounts.governance.total_proposals = ctx
+        .accounts
+        .governance
+        .total_proposals
+        .checked_add(1)
+        .unwrap();
 
     Ok(())
-
 }
 
 #[derive(Accounts)]
 pub struct CreateProposal<'info> {
-
     #[account(mut)]
     pub payer: Signer<'info>,
 
     #[account(
         address = owner_record.account
     )]
-    pub owner : Signer<'info>,
+    pub owner: Signer<'info>,
 
     #[account()]
-    pub organisation : Box<Account<'info, Organisation>>,
+    pub organisation: Box<Account<'info, Organisation>>,
 
     #[account(
         mut,
         constraint = governance.organisation == organisation.key()
     )]
-    pub governance : Box<Account<'info, NativeTreasuryAccount>>,
+    pub governance: Box<Account<'info, NativeTreasuryAccount>>,
 
     #[account(
         constraint = reputation_manager.identifier == identity.identifier,
@@ -68,9 +80,9 @@ pub struct CreateProposal<'info> {
         space = Proposal::space(),
         payer = payer
     )]
-    pub proposal : Box<Account<'info, Proposal>>,
+    pub proposal: Box<Account<'info, Proposal>>,
 
-    pub servicer_idenitifier : Box<Account<'info, Identifier>>,
+    pub servicer_idenitifier: Box<Account<'info, Identifier>>,
 
     /// CHECK : Checked in Identifier CPI
     identity: Account<'info, Identity>,
@@ -85,10 +97,8 @@ pub struct CreateProposal<'info> {
     /// CHECK : Checked in Identifier CPI
     pub owner_record: Account<'info, OwnerRecord>,
 
-    /// CHECK 
+    /// CHECK
     pub shadow_drive: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
-
-
 }

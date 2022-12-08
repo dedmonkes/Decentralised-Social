@@ -1,10 +1,15 @@
+use crate::{
+    error::AlignError,
+    state::{
+        CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
+        NativeTreasuryAccount, Organisation,
+    },
+};
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use identifiers::{cpi::accounts::InitializeIdentifier, state::is_valid_prefix};
-use crate::{state::{Organisation, CouncilManager, CouncilManagerState, CouncilGovernanceAccount, ElectionManager, NativeTreasuryAccount}, error::AlignError};
 
 pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
-    
     ctx.accounts.organisation.identifier = ctx.accounts.identifier.key();
     ctx.accounts.organisation.collection_mint = ctx.accounts.collection_mint.key();
     ctx.accounts.organisation.bump = *ctx.bumps.get("organisation").unwrap();
@@ -31,7 +36,7 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
         identifier: ctx.accounts.identifier.to_account_info(),
         identity: ctx.accounts.identity.to_account_info(),
         owner_record: ctx.accounts.owner_record.to_account_info(),
-        recovery_key:  ctx.accounts.organisation.to_account_info(),
+        recovery_key: ctx.accounts.organisation.to_account_info(),
         multigraph: ctx.accounts.multigraph.to_account_info(),
     };
 
@@ -44,24 +49,24 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
     ctx.accounts.council_manager.state = CouncilManagerState::Elected;
     ctx.accounts.council_manager.organisation = ctx.accounts.organisation.key();
     ctx.accounts.council_manager.governance = ctx.accounts.council_governance.key();
-    if ctx.remaining_accounts.len() <= 8{
-        ctx.accounts.council_manager
-        .council_identifiers = ctx
+    if ctx.remaining_accounts.len() <= 8 {
+        ctx.accounts.council_manager.council_identifiers = ctx
             .remaining_accounts
             .into_iter()
-            .filter(|account| account.owner == &identifiers::id() && is_valid_prefix(account.key()).is_ok() )
+            .filter(|account| {
+                account.owner == &identifiers::id() && is_valid_prefix(account.key()).is_ok()
+            })
             .map(|account| account.key())
             .collect();
+    } else {
+        return Err(AlignError::NumericalOverflow.into());
     }
-    else{
-        return Err(AlignError::NumericalOverflow.into())
-    }
-    ctx.accounts.council_manager.council_count = ctx.accounts.council_manager.council_identifiers.len() as u8;
+    ctx.accounts.council_manager.council_count =
+        ctx.accounts.council_manager.council_identifiers.len() as u8;
     ctx.accounts.council_manager.is_in_election = false;
     ctx.accounts.council_manager.election_manager = ctx.accounts.election_manager.key();
     ctx.accounts.council_manager.elected_at = None;
     ctx.accounts.council_manager.bump = *ctx.bumps.get("council_manager").unwrap();
-
 
     // Set election manager for council
 
@@ -75,12 +80,10 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
     ctx.accounts.native_treasury_account.bump = *ctx.bumps.get("native_treasury_account").unwrap();
 
     Ok(())
-
 }
 
 #[derive(Accounts)]
 pub struct CreateOrganisation<'info> {
-
     #[account(mut)]
     pub payer: Signer<'info>,
 
@@ -91,7 +94,7 @@ pub struct CreateOrganisation<'info> {
         space = Organisation::space(),
         payer = payer,
     )]
-    pub organisation : Box<Account<'info, Organisation>>,
+    pub organisation: Box<Account<'info, Organisation>>,
 
     #[account(
         init,
@@ -100,7 +103,7 @@ pub struct CreateOrganisation<'info> {
         space = CouncilManager::space(),
         payer = payer,
     )]
-    pub council_manager : Box<Account<'info, CouncilManager>>,
+    pub council_manager: Box<Account<'info, CouncilManager>>,
 
     #[account(
         init,
@@ -109,7 +112,7 @@ pub struct CreateOrganisation<'info> {
         space = CouncilGovernanceAccount::space(),
         payer = payer,
     )]
-    pub council_governance : Box<Account<'info, CouncilGovernanceAccount>>,
+    pub council_governance: Box<Account<'info, CouncilGovernanceAccount>>,
 
     #[account(
         init,
@@ -118,7 +121,7 @@ pub struct CreateOrganisation<'info> {
         space = NativeTreasuryAccount::space(),
         payer = payer
     )]
-    pub native_treasury_account : Box<Account<'info, NativeTreasuryAccount>>,
+    pub native_treasury_account: Box<Account<'info, NativeTreasuryAccount>>,
 
     #[account(
         init,
@@ -127,7 +130,7 @@ pub struct CreateOrganisation<'info> {
         space = ElectionManager::space(),
         payer = payer,
     )]
-    pub election_manager : Box<Account<'info, ElectionManager>>,
+    pub election_manager: Box<Account<'info, ElectionManager>>,
 
     #[account()]
     pub identifier_signer: Signer<'info>,
@@ -168,6 +171,4 @@ pub struct CreateOrganisation<'info> {
     identifier_program: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
-
-
 }

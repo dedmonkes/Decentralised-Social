@@ -1,12 +1,12 @@
 use anchor_lang::prelude::*;
 
+pub mod constants;
 pub mod error;
 pub mod state;
-pub mod constants;
 
 mod instructions;
 use instructions::{
-    create_organisation::*, join_organisation::*, create_proposal::*, stage_proposal_for_ranking::*
+    create_organisation::*, create_proposal::*, join_organisation::*, stage_proposal_for_ranking::*,
 };
 declare_id!("DBVmushm1XMc3kJS9Pc5eTaFYYbEZVow9HB4NyW5mJuD");
 
@@ -30,5 +30,4 @@ pub mod align_governance {
     pub fn stage_proposal_for_ranking(ctx: Context<StageProposalForRanking>) -> Result<()> {
         instructions::stage_proposal_for_ranking(ctx)
     }
-
 }

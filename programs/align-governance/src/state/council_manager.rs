@@ -8,20 +8,19 @@ pub enum CouncilManagerState {
 
 #[account]
 pub struct CouncilManager {
-    pub state : CouncilManagerState,
-    pub organisation : Pubkey, // Sub org or Organisation
-    pub governance : Pubkey, // Account governance that determines council
-	pub council_identifiers : Vec<Pubkey>,
-    pub council_count : u8,
-    pub is_in_election : bool,
-    pub election_manager : Pubkey,
-    pub elected_at : Option<i64>,
-    pub bump : u8
-
+    pub state: CouncilManagerState,
+    pub organisation: Pubkey, // Sub org or Organisation
+    pub governance: Pubkey,   // Account governance that determines council
+    pub council_identifiers: Vec<Pubkey>,
+    pub council_count: u8,
+    pub is_in_election: bool,
+    pub election_manager: Pubkey,
+    pub elected_at: Option<i64>,
+    pub bump: u8,
 }
 
 impl CouncilManager {
-    pub fn space() -> usize{
+    pub fn space() -> usize {
         8 +
         1 +
         32 +

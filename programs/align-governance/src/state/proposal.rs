@@ -5,7 +5,7 @@ use super::SubOrganisationType;
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum RankVoteType {
     Upvote,
-    Downvote
+    Downvote,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
@@ -15,31 +15,31 @@ pub enum ProposalState {
     Voting,
     Servicing,
     Reviewing,
-    Reviewed
+    Reviewed,
 }
 
 #[account]
 pub struct Proposal {
-    pub state : ProposalState,
-    pub organisation : Pubkey,
-    pub sub_org_type : Option<SubOrganisationType>,
-    pub proposer : Pubkey, // idenitifier of person who created proposal
-    pub governance : Pubkey,
-    pub ranking_at : Option<i64>,
-    pub voting_at : Option<i64>,
-    pub denied_at : Option<i64>,
-    pub draft_at : i64,
-    pub servicer : Option<Pubkey>, // idenitfier of person to service the proposal
-    pub id : u64,
-    pub shadow_drive : Pubkey,
-    pub council_review_rating : Option<u8>,
-    pub upvotes : u64,
-    pub downvotes : u64,
-    pub bump : u8
+    pub state: ProposalState,
+    pub organisation: Pubkey,
+    pub sub_org_type: Option<SubOrganisationType>,
+    pub proposer: Pubkey, // idenitifier of person who created proposal
+    pub governance: Pubkey,
+    pub ranking_at: Option<i64>,
+    pub voting_at: Option<i64>,
+    pub denied_at: Option<i64>,
+    pub draft_at: i64,
+    pub servicer: Option<Pubkey>, // idenitfier of person to service the proposal
+    pub id: u64,
+    pub shadow_drive: Pubkey,
+    pub council_review_rating: Option<u8>,
+    pub upvotes: u64,
+    pub downvotes: u64,
+    pub bump: u8,
 }
 
 impl Proposal {
-    pub fn space() -> usize{
+    pub fn space() -> usize {
         8 +
         1 +
         32 +

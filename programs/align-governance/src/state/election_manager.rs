@@ -8,16 +8,12 @@ pub enum ElectionState {
 
 #[account]
 pub struct ElectionManager {
-    
     // TODO
-
-    pub bump : u8
-
+    pub bump: u8,
 }
 
 impl ElectionManager {
-    pub fn space() -> usize{
-        8 +
-        1
+    pub fn space() -> usize {
+        8 + 1
     }
 }
