@@ -3,7 +3,7 @@ use crate::{
     state::{
         CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
         NativeTreasuryAccount, Organisation,
-    },
+    }, constants::DEFAULT_COUNCIL_THRESHOLD,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
@@ -52,7 +52,7 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
     if ctx.remaining_accounts.len() <= 8 {
         ctx.accounts.council_manager.council_identifiers = ctx
             .remaining_accounts
-            .into_iter()
+            .iter()
             .filter(|account| {
                 account.owner == &identifiers::id() && is_valid_prefix(account.key()).is_ok()
             })
@@ -77,6 +77,7 @@ pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
     ctx.accounts.native_treasury_account.organisation = ctx.accounts.organisation.key();
     ctx.accounts.native_treasury_account.voting_proposal_count = 0;
     ctx.accounts.native_treasury_account.total_proposals = 0;
+    ctx.accounts.native_treasury_account.council_threshold = DEFAULT_COUNCIL_THRESHOLD;
     ctx.accounts.native_treasury_account.bump = *ctx.bumps.get("native_treasury_account").unwrap();
 
     Ok(())

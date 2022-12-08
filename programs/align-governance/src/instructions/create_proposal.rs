@@ -1,17 +1,14 @@
 use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
-    error::AlignError,
     state::{
-        CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
+        CouncilManager,
         NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager,
-        TokenAccountGovernance,
     },
 };
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
+
 use identifiers::{
-    cpi::accounts::InitializeIdentifier,
-    state::{is_valid_prefix, Identifier, Identity, OwnerRecord},
+    state::{Identifier, Identity, OwnerRecord},
 };
 
 // TODO add link in graph to show proposal

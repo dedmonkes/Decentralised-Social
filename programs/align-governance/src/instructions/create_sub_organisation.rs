@@ -1,9 +1,9 @@
 use crate::state::Organisation;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use identifiers::cpi::accounts::InitializeIdentifier;
 
-pub fn create_sub_organisation(ctx: Context<CreateSubOrganisation>) -> Result<()> {
+
+pub fn create_sub_organisation(_ctx: Context<CreateSubOrganisation>) -> Result<()> {
     Ok(())
 }
 

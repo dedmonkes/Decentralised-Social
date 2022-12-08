@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use crate::state::{CouncilGovernanceAccount, CouncilManager, Organisation};
 
 // TODO add link in graph to show proposal
-pub fn create_token_governance(ctx: Context<CreateTokenGovernance>) -> Result<()> {
+pub fn create_token_governance(_ctx: Context<CreateTokenGovernance>) -> Result<()> {
     Ok(())
 }
 

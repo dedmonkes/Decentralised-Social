@@ -21,3 +21,7 @@ pub mod cast_rank;
 
 pub use cast_council_vote::*;
 pub mod cast_council_vote;
+
+pub use push_proposal_state::*;
+pub mod push_proposal_state;
+

@@ -1,4 +1,4 @@
-use std::ops::Mul;
+
 
 use anchor_lang::prelude::*;
 
@@ -103,7 +103,7 @@ impl ReputationManager {
         let contribution_total: u64 = proposal_votes_total
             .saturating_add(serviced_proposals_total)
             .saturating_add(proposals_created_total)
-            .checked_mul(contribution_reputation.aggregated_proposal_outcomes.into())
+            .checked_mul(contribution_reputation.aggregated_proposal_outcomes)
             .unwrap()
             .checked_mul(contribution_reputation.weight.into())
             .unwrap();
@@ -147,7 +147,7 @@ mod test {
         let timestamp = now.duration_since(UNIX_EPOCH).unwrap();
         let one_week_ago = timestamp.as_secs() - (60 * 60 * 24 * 7);
         let total_points = ReputationManager::calculate_points(
-            150800000100,
+            10,
             one_week_ago.try_into().unwrap(),
             0,
             timestamp.as_secs().try_into().unwrap(),

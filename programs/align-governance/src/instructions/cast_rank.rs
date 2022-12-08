@@ -2,25 +2,24 @@ use crate::{
     constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        ContributionRecord, CouncilGovernanceAccount, CouncilManager, CouncilManagerState,
-        ElectionManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        RankVoteType, ReputationManager, TokenAccountGovernance,
+        ContributionRecord, CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
+        RankVoteType, ReputationManager, reputation,
     },
 };
-use anchor_lang::{prelude::*, solana_program::vote};
-use anchor_spl::token::Mint;
+use anchor_lang::{prelude::*};
+
 use identifiers::{
-    cpi::accounts::InitializeIdentifier,
-    state::{is_valid_prefix, Identifier, Identity, OwnerRecord},
+    state::{Identifier, Identity, OwnerRecord},
 };
 
 // TODO add link in graph to show proposal & collection metatdata check
 pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -> Result<()> {
-    let contribution_rep = ctx.accounts.reputation_manager.contribution_reputation;
-    let capital_rep = ctx.accounts.reputation_manager.capital_reputation;
+    // let contribution_rep = ctx.accounts.reputation_manager.contribution_reputation;
+    // let capital_rep = ctx.accounts.reputation_manager.capital_reputation;
 
-    let reputation = ReputationManager::calculate_reputation(&capital_rep, &contribution_rep);
+    // let reputation = ReputationManager::calculate_reputation(&capital_rep, &contribution_rep);
 
+    let reputation = ctx.accounts.reputation_manager.reputation;
     let last_snapshot = ctx.accounts.reputation_manager.snapshot_at;
     let snapshot_points = ctx.accounts.reputation_manager.snapshot_points;
 
@@ -28,7 +27,7 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
 
     // Check proposal hasnt gone past voting date
     require!(
-        current_timestamp < current_timestamp.checked_add(60 * 60 * 24 * 7).unwrap(),
+        current_timestamp < ctx.accounts.proposal.ranking_at.unwrap().checked_add(60 * 60 * 24 * 7).unwrap(),
         AlignError::RankingPeriodLapsed
     );
 
@@ -44,7 +43,7 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
         AlignError::NotEnoughPoints
     );
     require!(
-        points_avaliable >= amount.checked_mul(POINTS_DECIMAL.into()).unwrap().into(),
+        points_avaliable >= amount.checked_mul(POINTS_DECIMAL).unwrap().into(),
         AlignError::NotEnoughPoints
     );
 
@@ -137,18 +136,11 @@ pub struct CastRank<'info> {
     pub contribution_record: Box<Account<'info, ContributionRecord>>,
 
     #[account(
-        constraint = council_manager.organisation == organisation.key(),
-    )]
-    pub council_manager: Box<Account<'info, CouncilManager>>,
-
-    #[account(
         mut,
         constraint = proposal.state == ProposalState::Ranking,
         constraint = proposal.organisation == organisation.key()
     )]
     pub proposal: Box<Account<'info, Proposal>>,
-
-    pub servicer_idenitifier: Box<Account<'info, Identifier>>,
 
     /// CHECK : Checked in Identifier CPI
     identity: Account<'info, Identity>,

@@ -1,16 +1,13 @@
 use crate::{
     constants::{DEFAULT_CAPTIAL_REP_WEIGHT, DEFAULT_CONTRIBUTION_REP_WEIGHT},
-    error::AlignError,
     state::{
-        CapitalReputation, ContributionReputation, CouncilGovernanceAccount, CouncilManager,
-        CouncilManagerState, ElectionManager, Organisation, ReputationManager,
+        CapitalReputation, ContributionReputation, Organisation, ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
+
 use identifiers::{
-    cpi::accounts::InitializeIdentifier,
-    state::{is_valid_prefix, Identity, OwnerRecord},
+    state::{Identity, OwnerRecord},
 };
 use multigraph::{ConnectionType, EdgeRelation};
 
@@ -36,7 +33,7 @@ pub fn join_organisation(ctx: Context<JoinOrganisation>) -> Result<()> {
 
     ctx.accounts.reputation_manager.reputation = 0;
     ctx.accounts.reputation_manager.snapshot_at = Clock::get().unwrap().unix_timestamp;
-    ctx.accounts.reputation_manager.snapshot_points = 0;
+    ctx.accounts.reputation_manager.snapshot_points = 30;
     ctx.accounts.reputation_manager.bump = *ctx.bumps.get("reputation_manager").unwrap();
 
     let cpi_program = ctx.accounts.multigraph.to_account_info();

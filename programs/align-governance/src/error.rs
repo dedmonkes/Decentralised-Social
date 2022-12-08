@@ -10,4 +10,7 @@ pub enum AlignError {
 
     #[msg("Ranking period has finished for proposal!")]
     RankingPeriodLapsed,
+
+    #[msg("Idenitfier is not apart of the council")]
+    NotCouncilIdentifier,
 }
