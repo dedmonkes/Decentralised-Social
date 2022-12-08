@@ -9,6 +9,7 @@ pub fn stage_proposal_for_ranking(ctx: Context<StageProposalForRanking>) -> Resu
     
     ctx.accounts.proposal.state = ProposalState::Ranking;
     ctx.accounts.proposal.governance = ctx.accounts.governance.key();
+    ctx.accounts.proposal.ranking_at = Some(Clock::get().unwrap().unix_timestamp);
 
     ctx.accounts.governance.total_proposals = ctx.accounts.governance.total_proposals.checked_add(1).unwrap();
    

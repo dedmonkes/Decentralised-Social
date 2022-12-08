@@ -1,5 +1,3 @@
-
-
 use anchor_lang::prelude::*;
 
 declare_id!("BStZRTvLZYK6rbGipkpwWSF82wPnFbTfH2fx1vbdpev1");

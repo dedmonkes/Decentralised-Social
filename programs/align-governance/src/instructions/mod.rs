@@ -15,3 +15,6 @@ pub mod create_token_governance;
 
 pub use stage_proposal_for_ranking::*;
 pub mod stage_proposal_for_ranking;
+
+pub use cast_rank::*;
+pub mod cast_rank;

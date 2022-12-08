@@ -1,9 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{identifier::*, OwnerRecord};
-use multigraph::{
-    cpi::accounts::{CreateNode}, NodeType,
-};
+use multigraph::{cpi::accounts::CreateNode, NodeType};
 
 pub fn initialise_identifier(
     ctx: Context<InitializeIdentifier>,
