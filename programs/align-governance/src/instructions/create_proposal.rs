@@ -1,5 +1,6 @@
 use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
+    error::AlignError,
     state::{
         CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
         ReputationManager,
@@ -59,7 +60,7 @@ pub struct CreateProposal<'info> {
 
     #[account(
         constraint = reputation_manager.identifier == identity.identifier,
-        constraint = reputation_manager.reputation >= MIN_REP_TO_CREATE_PROPOSAL
+        constraint = reputation_manager.reputation >= MIN_REP_TO_CREATE_PROPOSAL @AlignError::NotEnoughReputationForInstruction
     )]
     pub reputation_manager: Box<Account<'info, ReputationManager>>,
 

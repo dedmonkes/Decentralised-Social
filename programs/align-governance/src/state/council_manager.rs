@@ -39,8 +39,8 @@ impl CouncilManager {
 #[account]
 pub struct CouncilVoteRecord {
     pub organisation: Pubkey, // Sub org or Organisation
-    pub proposal : Pubkey,
-    pub vote : CouncilVote,
+    pub proposal: Pubkey,
+    pub vote: CouncilVote,
     pub bump: u8,
 }
 

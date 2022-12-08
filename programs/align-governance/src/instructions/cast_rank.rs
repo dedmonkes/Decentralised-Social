@@ -2,8 +2,8 @@ use crate::{
     constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
-        ContributionRecord, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, RankVoteType, ReputationManager,
+        ContributionRecord, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
+        RankVoteType, ReputationManager,
     },
 };
 use anchor_lang::prelude::*;

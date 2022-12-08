@@ -68,9 +68,9 @@ pub struct CreateEdge<'info> {
     #[account(
         init,
         seeds = [b"edge", 
-                from_node.key().as_ref(), 
-                to_node.key().as_ref(), 
-                &[connection_type as u8], 
+                from_node.key().as_ref(),
+                to_node.key().as_ref(),
+                &[connection_type as u8],
                 &[edge_direction as u8]],
         bump,
         space = Edge::space(),

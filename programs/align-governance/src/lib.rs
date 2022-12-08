@@ -4,11 +4,11 @@ pub mod constants;
 pub mod error;
 pub mod state;
 
-
 mod instructions;
 use instructions::{
-    create_organisation::*, create_proposal::*, join_organisation::*, stage_proposal_for_ranking::*,
-    cast_rank::*, cast_council_vote::*, push_proposal_state::*
+    cast_council_vote::*, cast_rank::*, create_organisation::*, create_proposal::*,
+    join_organisation::*, push_proposal_state::*, stage_proposal_for_ranking::*,
+    stake_nft::*, unstake_nft::*
 };
 
 use state::*;
@@ -34,14 +34,22 @@ pub mod align_governance {
     pub fn stage_proposal_for_ranking(ctx: Context<StageProposalForRanking>) -> Result<()> {
         instructions::stage_proposal_for_ranking(ctx)
     }
-    pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32 ) -> Result<()> {
+    pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -> Result<()> {
         instructions::cast_rank(ctx, vote_type, amount)
     }
     pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) -> Result<()> {
         instructions::cast_council_vote(ctx, vote_type)
     }
+
     pub fn push_proposal_state(ctx: Context<PushProposalState>) -> Result<()> {
         instructions::push_proposal_state(ctx)
     }
 
+    pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
+        instructions::stake_nft(ctx)
+    }
+
+    pub fn unstake_nft(ctx: Context<UnstakeNft>) -> Result<()> {
+        instructions::unstake_nft(ctx)
+    }
 }

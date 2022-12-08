@@ -38,7 +38,7 @@ pub struct RejectOwnerTransfer<'info> {
     #[account(
         constraint = recovery_manager.state == IdRecoveryManagerState::Waiting,
         constraint = recovery_manager.id == identifier.key(),
-        constraint = recovery_manager.from_key == owner.key() 
+        constraint = recovery_manager.from_key == owner.key()
     )]
     pub recovery_manager: Account<'info, IdRecoveryManager>,
 

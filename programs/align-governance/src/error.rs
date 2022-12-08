@@ -13,4 +13,13 @@ pub enum AlignError {
 
     #[msg("Idenitfier is not apart of the council")]
     NotCouncilIdentifier,
+
+    #[msg("Not enough reputation for instruction")]
+    NotEnoughReputationForInstruction,
+
+    #[msg("Unverified NFT for collection")]
+    UnverifiedNFT,
+
+    #[msg("Incorrect NFT for collection that governs organisation")]
+    CollectionMintMismatch,
 }

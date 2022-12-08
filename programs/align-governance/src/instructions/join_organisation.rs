@@ -10,7 +10,7 @@ use multigraph::{ConnectionType, EdgeRelation};
 // TODO : Add collection gate, init reputation manager
 pub fn join_organisation(ctx: Context<JoinOrganisation>) -> Result<()> {
     // Initialise reputation manager
-
+    msg!("Joining organisation and creating a social edge..");
     ctx.accounts.reputation_manager.identifier = ctx.accounts.identity.identifier.key();
     ctx.accounts.reputation_manager.organisation = ctx.accounts.organisation.key();
 
@@ -73,7 +73,7 @@ pub struct JoinOrganisation<'info> {
 
     #[account(
         init,
-        seeds=[b"reputation-manager", organisation.key().as_ref()],
+        seeds=[b"reputation-manager", organisation.key().as_ref(), identity.key().as_ref()],
         bump,
         payer = payer,
         space = ReputationManager::space()

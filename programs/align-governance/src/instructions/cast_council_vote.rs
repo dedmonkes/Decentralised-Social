@@ -1,17 +1,15 @@
 use crate::{
-    constants::MIN_REP_TO_CREATE_PROPOSAL,
     error::AlignError,
     state::{
-        CouncilManager, CouncilVote, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, ReputationManager, CouncilVoteRecord,
+        CouncilManager, CouncilVote, CouncilVoteRecord, NativeTreasuryAccount, Organisation,
+        Proposal, ProposalState,
     },
 };
-use anchor_lang::{prelude::*};
+use anchor_lang::prelude::*;
 
 use identifiers::state::{Identity, OwnerRecord};
 
 pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) -> Result<()> {
-
     // initialize council vote record
     ctx.accounts.council_vote_record.organisation = ctx.accounts.proposal.organisation;
     ctx.accounts.council_vote_record.proposal = ctx.accounts.proposal.key();
