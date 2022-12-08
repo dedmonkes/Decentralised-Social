@@ -24,3 +24,10 @@ pub mod cast_council_vote;
 
 pub use push_proposal_state::*;
 pub mod push_proposal_state;
+
+pub use stake_nft::*;
+pub mod stake_nft;
+
+pub use unstake_nft::*;
+pub mod unstake_nft;
+

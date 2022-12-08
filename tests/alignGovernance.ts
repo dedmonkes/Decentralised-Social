@@ -19,8 +19,10 @@ describe("Align Governance Inergration Tests", () => {
 
     const identifier = mineIdentifier()
     const councilIdentifier = mineIdentifier()
+    const servicerIdenitifier = mineIdentifier()
 
     const councilKeypair = web3.Keypair.generate();
+    const servicerKeypair = web3.Keypair.generate();
 
 
 
@@ -34,6 +36,13 @@ describe("Align Governance Inergration Tests", () => {
     const [councilIdentity] = publicKey.findProgramAddressSync([
         Buffer.from("identity"),
         councilIdentifier.publicKey.toBuffer()
+    ],
+        identifierProgram.programId
+    )
+
+    const [servicerIdentity] = publicKey.findProgramAddressSync([
+        Buffer.from("identity"),
+        servicerIdenitifier.publicKey.toBuffer()
     ],
         identifierProgram.programId
     )
@@ -80,6 +89,13 @@ describe("Align Governance Inergration Tests", () => {
         identifierProgram.programId
     )
 
+    const [servicerOwnerRecord] = publicKey.findProgramAddressSync([
+        Buffer.from("owner-record"),
+        servicerKeypair.publicKey.toBuffer()
+    ],
+        identifierProgram.programId
+    )
+
     const [orgNodeAddress] = publicKey.findProgramAddressSync([
         Buffer.from("node"),
         identity.toBuffer()
@@ -90,6 +106,13 @@ describe("Align Governance Inergration Tests", () => {
     const [councilNodeAddress] = publicKey.findProgramAddressSync([
         Buffer.from("node"),
         councilIdentity.toBuffer()
+    ],
+        multigraphProgram.programId
+    )
+
+    const [servicerNodeAddress] = publicKey.findProgramAddressSync([
+        Buffer.from("node"),
+        servicerIdentity.toBuffer()
     ],
         multigraphProgram.programId
     )
@@ -106,7 +129,8 @@ describe("Align Governance Inergration Tests", () => {
 
     const [reputationManagerAddress] = publicKey.findProgramAddressSync([
         Buffer.from("reputation-manager"),
-        organisation.toBuffer()
+        organisation.toBuffer(),
+        councilIdentity.toBuffer()
     ],
         alignProgram.programId
     )
@@ -118,12 +142,9 @@ describe("Align Governance Inergration Tests", () => {
     )
 
 
-
-
     it("Create organisation!", async () => {
 
         console.log("Creating Council identifier")
-        console.log(`${councilManager.toBase58()}, ${councilGovernance.toBase58()}, ${electionManager.toBase58()}`)
 
         const mintKeypair = new anchor.web3.Keypair();
         await mintNft(mintKeypair, identifierProgram.provider)
@@ -202,7 +223,8 @@ describe("Align Governance Inergration Tests", () => {
 
     it("Join organisation", async () => {
 
-        const tx = await alignProgram.methods.joinOrganisation()
+        await profilesProgram.provider.connection.requestAirdrop(councilKeypair.publicKey, 2);
+        await alignProgram.methods.joinOrganisation()
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
                 fromNode: councilNodeAddress,
@@ -219,7 +241,9 @@ describe("Align Governance Inergration Tests", () => {
                 toNode: orgNodeAddress
             })
             .signers([councilKeypair])
-            .rpc()
+            .rpc({
+                skipPreflight : true
+            })
 
 
         console.log("Fetching Organisation Accounts")
@@ -235,12 +259,34 @@ describe("Align Governance Inergration Tests", () => {
 
     it("Create Proposal", async () => {
 
-        const [nativeTreasuryAddress] = publicKey.findProgramAddressSync([
+        const indexBuff = Buffer.alloc(8)
+        indexBuff.writeBigUint64LE(0n, 0)
+
+        const [proposalAddress] = publicKey.findProgramAddressSync([
             Buffer.from("proposal"),
-            organisation.toBuffer()
+            nativeTreasuryAddress.toBuffer(),
+            indexBuff
         ],
             alignProgram.programId
         )
+
+        await identifierProgram.methods.initializeIdentifier(null)
+        .accountsStrict({
+            payer: profilesProgram.provider.publicKey,
+            owner: servicerKeypair.publicKey,
+            identifierSigner: servicerIdenitifier.publicKey,
+            identifier: servicerIdenitifier.publicKey,
+            identity: servicerIdentity,
+            node: servicerNodeAddress,
+            ownerRecord: servicerOwnerRecord,
+            recoveryKey: web3.Keypair.generate().publicKey,
+            multigraph: multigraphProgram.programId,
+            systemProgram: web3.SystemProgram.programId
+        })
+        .signers([servicerIdenitifier, servicerKeypair])
+        .rpc({
+            skipPreflight: true
+        })
 
         await alignProgram.methods.createProposal()
             .accountsStrict({
@@ -252,18 +298,22 @@ describe("Align Governance Inergration Tests", () => {
                 reputationManager: reputationManagerAddress,
                 shadowDrive: web3.Keypair.generate().publicKey,
                 councilManager,
-                proposal: "",
-                governance: "",
-                servicerIdenitifier: ""
+                proposal: proposalAddress,
+                governance: nativeTreasuryAddress,
+                servicerIdenitifier: servicerIdenitifier.publicKey,
+                owner:councilKeypair.publicKey,
             })
             .signers([councilKeypair])
             .rpc()
 
 
-        console.log("Fetching Organisation Accounts")
+        console.log("Fetching proposal Accounts")
 
-        const edgeAccount = await multigraphProgram.account.edge.fetch(edgeAddress)
-        console.log(JSON.parse(JSON.stringify(edgeAccount)))
+        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        console.log(JSON.parse(JSON.stringify(propAccount)))
+
+        const govAccount = await alignProgram.account.nativeTreasuryAccount.fetch(nativeTreasuryAddress)
+        console.log(JSON.parse(JSON.stringify(govAccount)))
 
         const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
         console.log(JSON.parse(JSON.stringify(repAccount)))

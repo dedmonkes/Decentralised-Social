@@ -3,7 +3,7 @@ use crate::{
     state::{
         CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
         ReputationManager,
-    },
+    }, error::AlignError,
 };
 use anchor_lang::prelude::*;
 
@@ -59,7 +59,7 @@ pub struct CreateProposal<'info> {
 
     #[account(
         constraint = reputation_manager.identifier == identity.identifier,
-        constraint = reputation_manager.reputation >= MIN_REP_TO_CREATE_PROPOSAL
+        constraint = reputation_manager.reputation >= MIN_REP_TO_CREATE_PROPOSAL @AlignError::NotEnoughReputationForInstruction
     )]
     pub reputation_manager: Box<Account<'info, ReputationManager>>,
 
