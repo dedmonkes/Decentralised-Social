@@ -1,6 +1,6 @@
 use crate::{
     error::AlignError,
-    state::{Proposal, ProposalState},
+    state::{Proposal, ProposalState}, constants::DEFAULT_RANKING_PEROID,
 };
 use anchor_lang::prelude::*;
 
@@ -15,7 +15,7 @@ pub fn push_proposal_state(ctx: Context<PushProposalState>) -> Result<()> {
                 .proposal
                 .ranking_at
                 .unwrap()
-                .checked_add(60 * 60 * 24 * 7)
+                .checked_add(DEFAULT_RANKING_PEROID)
                 .unwrap(),
         AlignError::RankingPeriodLapsed
     );

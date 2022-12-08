@@ -262,3 +262,5 @@ export const mintNft = async (collectionKey : web3.Keypair, mint : web3.Keypair,
   const sig = await provider.sendAndConfirm(tx, [mint], {skipPreflight : true});
   return sig
 }
+
+export const sleep = ms => new Promise(r => setTimeout(r, ms));
