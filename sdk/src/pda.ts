@@ -1,186 +1,179 @@
-import { BN, utils, web3 } from "@project-serum/anchor"
-import { PublicKey } from "@solana/web3.js"
-import { ALIGN_PROGRAM_ID, IDENTIFIERS_PROGRAM_ID, MULTIGRAPH_PROGRAM_ID, PROFILES_PROGRAM_ID } from "./constants"
-import { ConnectionType, EdgeRelation } from "./types"
+import { BN, utils, web3 } from "@project-serum/anchor";
+import { PublicKey } from "@solana/web3.js";
+import {
+    ALIGN_PROGRAM_ID,
+    IDENTIFIERS_PROGRAM_ID,
+    MULTIGRAPH_PROGRAM_ID,
+    PROFILES_PROGRAM_ID,
+} from "./constants";
+import { ConnectionType, EdgeRelation } from "./types";
 
 export namespace Derivation {
-
-    export const deriveIdentityAddress = (identifierAddress : PublicKey) => {
-        const [identity] = PublicKey.findProgramAddressSync([
-            Buffer.from("identity"),
-            identifierAddress.toBuffer()
-        ],
+    export const deriveIdentityAddress = (identifierAddress: PublicKey) => {
+        const [identity] = PublicKey.findProgramAddressSync(
+            [Buffer.from("identity"), identifierAddress.toBuffer()],
             IDENTIFIERS_PROGRAM_ID
-        )
-        return identity
-    }
+        );
+        return identity;
+    };
 
-    export const deriveOrganisationAddress = (identifierAddress : PublicKey) => {
-        const [orgAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("organisation"),
-            identifierAddress.toBuffer()
-        ],
+    export const deriveOrganisationAddress = (identifierAddress: PublicKey) => {
+        const [orgAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("organisation"), identifierAddress.toBuffer()],
             ALIGN_PROGRAM_ID
-        )
-        return orgAddress
+        );
+        return orgAddress;
+    };
 
-    }
-
-    export const deriveCouncilManagerAddress = (organisationAddress : PublicKey) => {
-        const [managerAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("council-manager"),
-            organisationAddress.toBuffer()
-        ],
+    export const deriveCouncilManagerAddress = (
+        organisationAddress: PublicKey
+    ) => {
+        const [managerAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("council-manager"), organisationAddress.toBuffer()],
             ALIGN_PROGRAM_ID
-        )
-        return managerAddress
+        );
+        return managerAddress;
+    };
 
-    }
-
-    export const deriveCouncilGovernanceAddress = (organisationAddress : PublicKey) => {
-        const [councilGovernanceAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("council-governance"),
-            organisationAddress.toBuffer()
-        ],
+    export const deriveCouncilGovernanceAddress = (
+        organisationAddress: PublicKey
+    ) => {
+        const [councilGovernanceAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("council-governance"), organisationAddress.toBuffer()],
             ALIGN_PROGRAM_ID
-        )
-        return councilGovernanceAddress
+        );
+        return councilGovernanceAddress;
+    };
 
-    }
-
-    export const deriveElectionManagerAddress = (organisationAddress : PublicKey) => {
-        const [electionManagerAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("election-manager"),
-            organisationAddress.toBuffer()
-        ],
+    export const deriveElectionManagerAddress = (
+        organisationAddress: PublicKey
+    ) => {
+        const [electionManagerAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("election-manager"), organisationAddress.toBuffer()],
             ALIGN_PROGRAM_ID
-        )
-        return electionManagerAddress
-    }
+        );
+        return electionManagerAddress;
+    };
 
-    export const deriveOwnerRecordAddress =  (ownerAddress : PublicKey) => {
-        const [ownerRecordAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("owner-record"),
-            ownerAddress.toBuffer()
-        ],
+    export const deriveOwnerRecordAddress = (ownerAddress: PublicKey) => {
+        const [ownerRecordAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("owner-record"), ownerAddress.toBuffer()],
             IDENTIFIERS_PROGRAM_ID
-        )
-        return ownerRecordAddress
-    }
+        );
+        return ownerRecordAddress;
+    };
 
-    export const deriveNodeAddress =  (accountAddress : PublicKey) => {
-        const [ownerRecordAddress] =  PublicKey.findProgramAddressSync([
-            Buffer.from("node"),
-            accountAddress.toBuffer()
-        ],
+    export const deriveNodeAddress = (accountAddress: PublicKey) => {
+        const [ownerRecordAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("node"), accountAddress.toBuffer()],
             MULTIGRAPH_PROGRAM_ID
-        )
-        return ownerRecordAddress
-    }
+        );
+        return ownerRecordAddress;
+    };
 
     export const deriveEdgeAddress = (
-        fromNodeAddress : PublicKey, 
-        toNodeAddress : PublicKey,
-        connectionType : ConnectionType,
-        edgeRelation : EdgeRelation 
-        ) => {
-        const [edgeAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("edge"),
-            fromNodeAddress.toBuffer(),
-            toNodeAddress.toBuffer(),
-            Uint8Array.from([connectionType]),
-            Uint8Array.from([edgeRelation])
-        ],
+        fromNodeAddress: PublicKey,
+        toNodeAddress: PublicKey,
+        connectionType: ConnectionType,
+        edgeRelation: EdgeRelation
+    ) => {
+        const [edgeAddress] = PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("edge"),
+                fromNodeAddress.toBuffer(),
+                toNodeAddress.toBuffer(),
+                Uint8Array.from([connectionType]),
+                Uint8Array.from([edgeRelation]),
+            ],
             MULTIGRAPH_PROGRAM_ID
-        )
-        return edgeAddress
-    }
+        );
+        return edgeAddress;
+    };
 
-    export const deriveReputationManagerAddress =  (organisationAddresss : PublicKey, userIdentityAddress : PublicKey) => {
-        const [reputationManagerAddress] =  PublicKey.findProgramAddressSync([
-            Buffer.from("reputation-manager"),
-            organisationAddresss.toBuffer(),
-            userIdentityAddress.toBuffer(),
-
-        ],
+    export const deriveReputationManagerAddress = (
+        organisationAddresss: PublicKey,
+        userIdentityAddress: PublicKey
+    ) => {
+        const [reputationManagerAddress] = PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("reputation-manager"),
+                organisationAddresss.toBuffer(),
+                userIdentityAddress.toBuffer(),
+            ],
             ALIGN_PROGRAM_ID
-        )
-        return reputationManagerAddress
-    }
+        );
+        return reputationManagerAddress;
+    };
 
-    export const deriveNativeTreasuryAddress = (organisation : PublicKey) => {
-        const [nativeTreasuryAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("native-treasury"),
-            organisation.toBuffer()
-        ],
+    export const deriveNativeTreasuryAddress = (organisation: PublicKey) => {
+        const [nativeTreasuryAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("native-treasury"), organisation.toBuffer()],
             ALIGN_PROGRAM_ID
-        )
-        return nativeTreasuryAddress
-    }
+        );
+        return nativeTreasuryAddress;
+    };
 
-    export const deriveProposalAddress = (governanceAdddress : PublicKey, index : bigint) => {
+    export const deriveProposalAddress = (
+        governanceAdddress: PublicKey,
+        index: bigint
+    ) => {
         const buff = Buffer.alloc(8);
-        buff.writeBigUint64LE(index)
-        
-        const [proposalAddress] = PublicKey.findProgramAddressSync([
-            Buffer.from("proposal"),
-            governanceAdddress.toBuffer(),
-            buff
-        ],
+        buff.writeBigUint64LE(index);
+
+        const [proposalAddress] = PublicKey.findProgramAddressSync(
+            [Buffer.from("proposal"), governanceAdddress.toBuffer(), buff],
             ALIGN_PROGRAM_ID
-        )
-        return proposalAddress
+        );
+        return proposalAddress;
+    };
 
-    }
-
-    export const deriveNftVault = (userIdentifier : PublicKey, mintAddress : PublicKey) => {
-        
-        const [nftVault] = PublicKey.findProgramAddressSync([
-            Buffer.from("nft-vault"),
-            userIdentifier.toBuffer(),
-            mintAddress.toBuffer()
-        ],
+    export const deriveNftVault = (
+        userIdentifier: PublicKey,
+        mintAddress: PublicKey
+    ) => {
+        const [nftVault] = PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("nft-vault"),
+                userIdentifier.toBuffer(),
+                mintAddress.toBuffer(),
+            ],
             ALIGN_PROGRAM_ID
-        )
+        );
 
-        return nftVault
+        return nftVault;
+    };
 
-    }
-
-    export const deriveContributionRecord = (userIdentifier : PublicKey, proposalAddress : PublicKey) => {
-        const [contributionRecord] = PublicKey.findProgramAddressSync([
-            Buffer.from("contribution-record"),
-            proposalAddress.toBuffer(),
-            userIdentifier.toBuffer()
-        ],
+    export const deriveContributionRecord = (
+        userIdentifier: PublicKey,
+        proposalAddress: PublicKey
+    ) => {
+        const [contributionRecord] = PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("contribution-record"),
+                proposalAddress.toBuffer(),
+                userIdentifier.toBuffer(),
+            ],
             ALIGN_PROGRAM_ID
-        )
+        );
 
-        return contributionRecord
-    }
+        return contributionRecord;
+    };
 
-    export const deriveUserProfileAddress = (userIdentifier : PublicKey) => {
-        const [userProfile] = PublicKey.findProgramAddressSync([
-            Buffer.from("user"),
-            userIdentifier.toBuffer()
-        ],
+    export const deriveUserProfileAddress = (userIdentifier: PublicKey) => {
+        const [userProfile] = PublicKey.findProgramAddressSync(
+            [Buffer.from("user"), userIdentifier.toBuffer()],
             PROFILES_PROGRAM_ID
-        )
+        );
 
-        return userProfile
-    }
+        return userProfile;
+    };
 
-    export const deriveUsernameRecordAddress = (username : string) => {
-        const [usernameRecord] = PublicKey.findProgramAddressSync([
-            Buffer.from("username"),
-            utils.bytes.utf8.encode(username)
-        ],
+    export const deriveUsernameRecordAddress = (username: string) => {
+        const [usernameRecord] = PublicKey.findProgramAddressSync(
+            [Buffer.from("username"), utils.bytes.utf8.encode(username)],
             PROFILES_PROGRAM_ID
-        )
+        );
 
-        return usernameRecord
-    }
-
+        return usernameRecord;
+    };
 }
-
-

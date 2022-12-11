@@ -13,8 +13,3 @@ export const filterFactory = (
     };
   };
   
-//   export const getOwnerRecord = (
-//     state: PhaseStateEnum
-//   ): web3.MemcmpFilter => {
-//     return filterFactory(PHASE_STATE_OFFSET, Uint8Array.of(state));
-//   };

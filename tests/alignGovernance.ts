@@ -10,6 +10,7 @@ import { getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollec
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
+import { Api, createAlignPrograms } from "align-sdk";
 
 
 describe("Align Governance Inergration Tests", () => {
@@ -577,6 +578,27 @@ describe("Align Governance Inergration Tests", () => {
         const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
         console.log(JSON.parse(JSON.stringify(propAccount)))
 
+        const wallet : anchor.Wallet = {
+            payer: identifier,
+            signTransaction: function (tx: anchor.web3.Transaction): Promise<anchor.web3.Transaction> {
+              throw new Error("Function not implemented.");
+            },
+            signAllTransactions: function (txs: anchor.web3.Transaction[]): Promise<anchor.web3.Transaction[]> {
+              throw new Error("Function not implemented.");
+            },
+            publicKey: identifier.publicKey
+          }
+        
+          const programs = createAlignPrograms(leafProgram.provider.connection, wallet)
+
+        const org = await Api.fetchOrgranisation(organisation, programs)
+        console.log(org)
+
+        const orgs = await Api.fetchOrganisationAddressesByCollections([collectionMintKeypair.publicKey], programs)
+        console.log(orgs)
+
+        const props = await Api.fetchOrganisationProposals(org.address, programs)
+        console.log(props)
     })
 
 
