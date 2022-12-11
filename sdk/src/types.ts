@@ -80,6 +80,30 @@ export interface Identity {
     bump: number;
 }
 
+export interface ContributionReputation {
+    proposalVotes: number,
+    servicedProposals: number,
+    aggregatedProposalOutcomes: BN,
+    proposalsCreated: number,
+    weight: number,
+}
+
+export interface CapitalReputation {
+    amount: number,
+    weight: number,
+}
+
+export interface ReputationManager {
+    identifier: PublicKey,
+    organisation: PublicKey,
+    capitalReputation: CapitalReputation,
+    contributionReputation: ContributionReputation,
+    reputation: BN,
+    snapshotAt: BN,
+    snapshotPoints: BN,
+    bump: number,
+}
+
 export interface Account<T> {
     address: PublicKey;
     account: T;
