@@ -6,4 +6,3 @@ export const PROFILES_PROGRAM_ID = new PublicKey("8vkLd15JfYsCC8NRwJuvnjunKy4bnb
 export const LEAF_PROGRAM_ID = new PublicKey("DxjuPtmoxHYvnnyAwUKmgdr475Hx1ZPsjdEf1HS7MEK")
 export const ALIGN_PROGRAM_ID = new PublicKey("DBVmushm1XMc3kJS9Pc5eTaFYYbEZVow9HB4NyW5mJuD")
 
-
