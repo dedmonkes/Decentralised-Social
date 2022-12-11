@@ -3,12 +3,14 @@ import { Program } from "@project-serum/anchor";
 import { publicKey } from "@project-serum/anchor/dist/cjs/utils";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { util } from "chai";
+import { createAlignPrograms } from "../sdk/src";
 import { AlignGovernance } from "../target/types/align_governance";
 import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
 import { mineIdentifier, mintCollectionNft } from "./helpers";
+import {Api} from "align-sdk"
 
 describe("identifiers", () => {
   // Configure the client to use the local cluster.
@@ -19,8 +21,22 @@ describe("identifiers", () => {
   const profilesProgram = anchor.workspace.Profiles as Program<Profiles>
   const leafProgram = anchor.workspace.Leaf as Program<Leaf>
   const alignProgram = anchor.workspace.AlignGovernance as Program<AlignGovernance>
+  
 
   const identifier = mineIdentifier()
+
+  const wallet : anchor.Wallet = {
+    payer: identifier,
+    signTransaction: function (tx: anchor.web3.Transaction): Promise<anchor.web3.Transaction> {
+      throw new Error("Function not implemented.");
+    },
+    signAllTransactions: function (txs: anchor.web3.Transaction[]): Promise<anchor.web3.Transaction[]> {
+      throw new Error("Function not implemented.");
+    },
+    publicKey: identifier.publicKey
+  }
+
+  const programs = createAlignPrograms(leafProgram.provider.connection, wallet)
 
   const [identity] = publicKey.findProgramAddressSync([
     Buffer.from("identity"),
@@ -133,7 +149,7 @@ describe("identifiers", () => {
       )
 
 
-    const profileAccount = await profilesProgram.account.user.fetch(userProfile)
+    const profileAccount = await Api.fetchUserProfileByIdentifier(identifier.publicKey, programs)
     console.log(JSON.parse(JSON.stringify(profileAccount)))
 
     const usernameRecordAccount = await profilesProgram.account.username.fetch(usernameRecord)
