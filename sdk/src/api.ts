@@ -11,6 +11,7 @@ import {
     Organisation,
     OwnerRecord,
     Profile,
+    ReputationManager,
     User,
 } from "./types";
 
@@ -232,4 +233,30 @@ export namespace Api {
             );
         return balance;
     };
+
+    export const fetchIdentifiersReputationManager = async (
+        identifier: PublicKey,
+        organisation: PublicKey,
+        programs: AlignPrograms
+    ): Promise<Account<ReputationManager>> => {
+        const identityAddress = Derivation.deriveIdentityAddress(identifier);
+
+        const reputationManagerAddress =
+            Derivation.deriveReputationManagerAddress(
+                organisation,
+                identityAddress
+            );
+        const reputationManager =
+            await programs.alignGovernanceProgram.account.reputationManager.fetch(
+                reputationManagerAddress
+            );
+        return {
+            address: reputationManagerAddress,
+            account: reputationManager,
+        };
+    };
+
+    // TODO calculate reputation to display
+    // TODO calculate points to display
+    
 }
