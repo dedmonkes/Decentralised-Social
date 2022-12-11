@@ -6,6 +6,7 @@ import {
     IDENTIFIERS_PROGRAM_ID,
     LEAF_PROGRAM_ID,
     MULTIGRAPH_PROGRAM_ID,
+    POINTS_DECIMAL,
     POINTS_PER_SECOND,
     PROFILES_PROGRAM_ID,
 } from "./constants";
@@ -77,7 +78,7 @@ export const getUsersPointsAvailable = async (userIdentifier : PublicKey, organi
 
     const pointsForPeroidLapsed = timeLapsedSinceSnapshot * POINTS_PER_SECOND
 
-    return reputationManager.account.snapshotPoints.toNumber() + pointsForPeroidLapsed
+    return (reputationManager.account.snapshotPoints.toNumber() + pointsForPeroidLapsed) / POINTS_DECIMAL
 
 }
 
