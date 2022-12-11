@@ -246,7 +246,7 @@ export namespace Api {
                 organisation,
                 identityAddress
             );
-        const reputationManager =
+        const reputationManager : ReputationManager =
             await programs.alignGovernanceProgram.account.reputationManager.fetch(
                 reputationManagerAddress
             );
