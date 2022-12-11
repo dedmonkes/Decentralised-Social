@@ -1,10 +1,12 @@
 import { Program, AnchorProvider, Wallet } from "@project-serum/anchor";
-import { Connection } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { Api } from "./api";
 import {
     ALIGN_PROGRAM_ID,
     IDENTIFIERS_PROGRAM_ID,
     LEAF_PROGRAM_ID,
     MULTIGRAPH_PROGRAM_ID,
+    POINTS_PER_SECOND,
     PROFILES_PROGRAM_ID,
 } from "./constants";
 import { IDL as AlignIDL } from "./idls/align_governance";
@@ -12,7 +14,7 @@ import { IDL as IdentifiersIDL } from "./idls/identifiers";
 import { IDL as LeafIDL } from "./idls/leaf";
 import { IDL as MultigraphIDL } from "./idls/multigraph";
 import { IDL as ProfilesIDL } from "./idls/profiles";
-import { AlignPrograms } from "./types";
+import { AlignPrograms, Organisation } from "./types";
 
 export { Derivation } from "./pda";
 export * from "./types";
@@ -65,3 +67,17 @@ export const createAlignPrograms = (
         provider,
     };
 };
+
+export const getUsersPointsAvailable = async (userIdentifier : PublicKey, organisation : PublicKey, progams : AlignPrograms, timestamp : number = Date.now()) => {
+
+    const reputationManager = await Api.fetchIdentifiersReputationManager(userIdentifier, organisation, progams)
+    const timestampSeconds = timestamp / 1000
+
+    const timeLapsedSinceSnapshot = timestampSeconds - reputationManager.account.snapshotAt.toNumber()
+
+    const pointsForPeroidLapsed = timeLapsedSinceSnapshot * POINTS_PER_SECOND
+
+    return reputationManager.account.snapshotPoints.toNumber() + pointsForPeroidLapsed
+
+}
+
