@@ -1,0 +1,161 @@
+import { BN, web3 } from "@project-serum/anchor"
+import { PublicKey } from "@solana/web3.js"
+import { ALIGN_PROGRAM_ID, IDENTIFIERS_PROGRAM_ID, MULTIGRAPH_PROGRAM_ID } from "./constants"
+import { ConnectionType, EdgeRelation } from "./types"
+
+export const deriveIdentityAddress = (identifierAddress : PublicKey) => {
+    const [identity] = PublicKey.findProgramAddressSync([
+        Buffer.from("identity"),
+        identifierAddress.toBuffer()
+    ],
+        IDENTIFIERS_PROGRAM_ID
+    )
+    return identity
+}
+
+export const deriveOrganisationAddress = (identifierAddress : PublicKey) => {
+    const [orgAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("organisation"),
+        identifierAddress.toBuffer()
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return orgAddress
+
+}
+
+export const deriveCouncilManagerAddress = (organisationAddress : PublicKey) => {
+    const [managerAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("council-manager"),
+        organisationAddress.toBuffer()
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return managerAddress
+
+}
+
+export const deriveCouncilGovernanceAddress = (organisationAddress : PublicKey) => {
+    const [councilGovernanceAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("council-governance"),
+        organisationAddress.toBuffer()
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return councilGovernanceAddress
+
+}
+
+export const deriveElectionManagerAddress = (organisationAddress : PublicKey) => {
+    const [electionManagerAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("election-manager"),
+        organisationAddress.toBuffer()
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return electionManagerAddress
+}
+
+export const deriveOwnerRecordAddress =  (ownerAddress : PublicKey) => {
+    const [ownerRecordAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("owner-record"),
+        ownerAddress.toBuffer()
+    ],
+        IDENTIFIERS_PROGRAM_ID
+    )
+    return ownerRecordAddress
+}
+
+export const deriveNodeAddress =  (accountAddress : PublicKey) => {
+    const [ownerRecordAddress] =  PublicKey.findProgramAddressSync([
+        Buffer.from("node"),
+        accountAddress.toBuffer()
+    ],
+        MULTIGRAPH_PROGRAM_ID
+    )
+    return ownerRecordAddress
+}
+
+export const deriveEdgeAddress = (
+    fromNodeAddress : PublicKey, 
+    toNodeAddress : PublicKey,
+    connectionType : ConnectionType,
+    edgeRelation : EdgeRelation 
+    ) => {
+    const [edgeAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("edge"),
+        fromNodeAddress.toBuffer(),
+        toNodeAddress.toBuffer(),
+        Uint8Array.from([connectionType]),
+        Uint8Array.from([edgeRelation])
+    ],
+        MULTIGRAPH_PROGRAM_ID
+    )
+    return edgeAddress
+}
+
+export const deriveReputationManagerAddress =  (organisationAddresss : PublicKey, userIdentityAddress : PublicKey) => {
+    const [reputationManagerAddress] =  PublicKey.findProgramAddressSync([
+        Buffer.from("reputation-manager"),
+        organisationAddresss.toBuffer(),
+        userIdentityAddress.toBuffer(),
+
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return reputationManagerAddress
+}
+
+export const deriveNativeTreasuryAddress = (organisation : PublicKey) => {
+    const [nativeTreasuryAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("native-treasury"),
+        organisation.toBuffer()
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return nativeTreasuryAddress
+}
+
+export const deriveProposalAddress = (governanceAdddress : PublicKey, index : bigint) => {
+    const buff = Buffer.alloc(8);
+    buff.writeBigUint64LE(index)
+    
+    const [proposalAddress] = PublicKey.findProgramAddressSync([
+        Buffer.from("proposal"),
+        governanceAdddress.toBuffer(),
+        buff
+    ],
+        ALIGN_PROGRAM_ID
+    )
+    return proposalAddress
+
+}
+
+export const deriveNftVault = (userIdentifier : PublicKey, mintAddress : PublicKey) => {
+    
+    const [nftVault] = PublicKey.findProgramAddressSync([
+        Buffer.from("nft-vault"),
+        userIdentifier.toBuffer(),
+        mintAddress.toBuffer()
+    ],
+        ALIGN_PROGRAM_ID
+    )
+
+    return nftVault
+
+}
+
+export const deriveContributionRecord = (userIdentifier : PublicKey, proposalAddress : PublicKey) => {
+    const [contributionRecord] = PublicKey.findProgramAddressSync([
+        Buffer.from("contribution-record"),
+        proposalAddress.toBuffer(),
+        userIdentifier.toBuffer()
+    ],
+         ALIGN_PROGRAM_ID
+    )
+
+    return contributionRecord
+}
+
+
+

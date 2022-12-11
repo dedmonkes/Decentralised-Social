@@ -136,7 +136,7 @@ pub struct CastRank<'info> {
 
     #[account(
         init,
-        seeds = [b"contribution-record", proposal.key().as_ref()],
+        seeds = [b"contribution-record", proposal.key().as_ref(), identity.identifier.as_ref()],
         bump,
         space = ContributionRecord::space(),
         payer = payer

@@ -482,7 +482,8 @@ describe("Align Governance Inergration Tests", () => {
 
         const [contributionRecord] = publicKey.findProgramAddressSync([
             Buffer.from("contribution-record"),
-            proposalAddress.toBuffer()
+            proposalAddress.toBuffer(),
+            councilIdentifier.publicKey.toBuffer()
         ],
             alignProgram.programId
         )
