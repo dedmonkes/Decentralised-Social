@@ -267,5 +267,12 @@ export namespace Api {
         }
 
     }
+
+    export const fetchStakedNfts = async (ownerAddress : PublicKey, organisationAddress : PublicKey, programs : AlignPrograms) => {
+        const identity = fetchUserProfileByOwnerPubkey()
+        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, )
+        programs.alignGovernanceProgram.provider.connection.getTokenAccountsByOwner()
+
+    }
     
 }
