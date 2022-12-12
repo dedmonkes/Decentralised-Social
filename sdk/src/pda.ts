@@ -205,4 +205,15 @@ export namespace Derivation {
         return address;
       };
 
+      export const deriveCouncilVoteRecord = (councilIdentifier : web3.PublicKey, proposalAddress: web3.PublicKey) => {
+        const [councilVoteRecord] = PublicKey.findProgramAddressSync([
+            Buffer.from("council-vote-record"),
+            proposalAddress.toBuffer(),
+            councilIdentifier.toBuffer()
+        ],
+            ALIGN_PROGRAM_ID
+        )
+      
+        return councilVoteRecord;
+      };
 }

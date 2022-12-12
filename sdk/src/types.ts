@@ -109,7 +109,11 @@ export enum CouncilVote {
     No,
     Abstain,
 }
-
+export interface AnchorCouncilVote {
+    yes? : {},
+    no? : {},
+    abstain? : {},
+}
 export enum SubOrganisationType {
     ProposalModeration,
     Product,
@@ -198,6 +202,30 @@ export interface AnchorRankVoteType {
 export interface Account<T> {
     address: PublicKey;
     account: T;
+}
+
+export interface AnchorCouncilManagerState {
+    electing? : {},
+    elected? : {},
+}
+
+export interface CouncilManager {
+    state: AnchorCouncilManagerState,
+    organisation: PublicKey, // Sub org or Organisation
+    governance: PublicKey,   // Account governance that determines council
+    councilIdentifiers: PublicKey[],
+    councilCount: number,
+    isInElection: boolean,
+    electionManager: PublicKey,
+    electedAt: BN | null,
+    bump: number,
+}
+
+export interface CouncilVoteRecord {
+    organisation: PublicKey, // Sub org or Organisation
+    proposal: PublicKey,
+    vote: AnchorCouncilVote,
+    bump: number,
 }
 
 export interface ProposalData {
