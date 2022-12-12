@@ -22,7 +22,7 @@ export interface AlignPrograms {
     multigraphProgram: Program<Multigraph>;
     profilesProgram: Program<Profiles>;
     leafProgram: Program<Leaf>;
-    provider: AnchorProvider;
+    provider?: AnchorProvider;
 }
 
 export interface Organisation {
@@ -102,6 +102,97 @@ export interface ReputationManager {
     snapshotAt: BN,
     snapshotPoints: BN,
     bump: number,
+}
+
+export enum CouncilVote {
+    Yes,
+    No,
+    Abstain,
+}
+
+export enum SubOrganisationType {
+    ProposalModeration,
+    Product,
+    Engineering,
+    Operations,
+    CustomerSupport,
+    Marketing,
+    Growth,
+    Finance,
+    Security,
+    Recruiting,
+    Tokenomics,
+    Other,
+}
+export interface AnchorSubOrganisationType {
+    proposalModeration ?: {},
+    product ?: {},
+    engineering ?: {},
+    operations ?: {},
+    customerSupport ?: {},
+    marketing ?: {},
+    growth ?: {},
+    finance ?: {},
+    security ?: {},
+    recruiting ?: {},
+    tokenomics ?: {},
+    other ?: {},
+}
+
+export enum ProposalState {
+    Draft,
+    Ranking,
+    Voting,
+    Servicing,
+    Reviewing,
+    Reviewed,
+    Complete,
+    Denied,
+}
+
+export interface AnchorProposalState {
+    draft ?: {},
+    ranking ?: {},
+    voting?: {},
+    servicing?: {},
+    reviewing?: {},
+    reviewed?: {},
+    complete?: {},
+    denied?: {},
+}
+
+
+export interface Proposal {
+    state: AnchorProposalState,
+    organisation: PublicKey,
+    subOrgType: AnchorSubOrganisationType | null,
+    proposer: PublicKey, // idenitifier of person who created proposal
+    governance: PublicKey,
+    rankingAt: BN | null,
+    votingAt: BN | null,
+    deniedAt: BN | null,
+    approvedAt: BN | null,
+    draftAt: BN,
+    servicer: PublicKey | null, // idenitfier of person to service the proposal
+    id: BN,
+    shadowDrive: PublicKey,
+    councilReviewRating: number | null
+    totalCouncilYesVotes: number,
+    totalCouncilNoVotes: number,
+    totalCouncilAbstainVotes: number,
+    upvotes: BN,
+    downvotes: BN,
+    bump: number,
+}
+
+export enum RankVoteType {
+    Upvote,
+    Downvote
+}
+
+export interface AnchorRankVoteType {
+   upvote? : {}
+   downvote? : {}
 }
 
 export interface Account<T> {

@@ -1,5 +1,5 @@
-import { Program, AnchorProvider, Wallet } from "@project-serum/anchor";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Program, AnchorProvider, Wallet, web3 } from "@project-serum/anchor";
+import { Connection, PublicKey, SystemProgram } from "@solana/web3.js";
 import { Api } from "./api";
 import {
     ALIGN_PROGRAM_ID,
@@ -15,7 +15,13 @@ import { IDL as IdentifiersIDL } from "./idls/identifiers";
 import { IDL as LeafIDL } from "./idls/leaf";
 import { IDL as MultigraphIDL } from "./idls/multigraph";
 import { IDL as ProfilesIDL } from "./idls/profiles";
-import { AlignPrograms, Organisation } from "./types";
+import { Derivation } from "./pda";
+import {
+    AlignPrograms,
+    AnchorRankVoteType,
+    Organisation,
+    RankVoteType,
+} from "./types";
 
 export { Derivation } from "./pda";
 export * from "./types";
@@ -69,16 +75,68 @@ export const createAlignPrograms = (
     };
 };
 
-export const getUsersPointsAvailable = async (userIdentifier : PublicKey, organisation : PublicKey, progams : AlignPrograms, timestamp : number = Date.now()) => {
+export const getUsersPointsAvailable = async (
+    userIdentifier: PublicKey,
+    organisation: PublicKey,
+    progams: AlignPrograms,
+    timestamp: number = Date.now()
+) => {
+    const reputationManager = await Api.fetchIdentifiersReputationManager(
+        userIdentifier,
+        organisation,
+        progams
+    );
+    const timestampSeconds = timestamp / 1000;
 
-    const reputationManager = await Api.fetchIdentifiersReputationManager(userIdentifier, organisation, progams)
-    const timestampSeconds = timestamp / 1000
+    const timeLapsedSinceSnapshot =
+        timestampSeconds - reputationManager.account.snapshotAt.toNumber();
 
-    const timeLapsedSinceSnapshot = timestampSeconds - reputationManager.account.snapshotAt.toNumber()
+    const pointsForPeroidLapsed = timeLapsedSinceSnapshot * POINTS_PER_SECOND;
 
-    const pointsForPeroidLapsed = timeLapsedSinceSnapshot * POINTS_PER_SECOND
+    return (
+        (reputationManager.account.snapshotPoints.toNumber() +
+            pointsForPeroidLapsed) /
+        POINTS_DECIMAL
+    );
+};
 
-    return (reputationManager.account.snapshotPoints.toNumber() + pointsForPeroidLapsed) / POINTS_DECIMAL
+export const castRankVote = async (
+    userIdentifier: PublicKey,
+    proposalAddress: PublicKey,
+    voteType: RankVoteType,
+    amountOfPoints: number,
+    programs: AlignPrograms
+) => {
 
-}
+    const contributionRecord = Derivation.deriveContributionRecord(
+        userIdentifier,
+        proposalAddress
+    );
+    const proposal = await Api.fetchProposal(proposalAddress, programs)
+    const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(programs.alignGovernanceProgram.provider.publicKey)
+    const identityAddress = Derivation.deriveIdentityAddress(userIdentifier)
+    const reputationManagerAddress = Derivation.deriveReputationManagerAddress(proposal.account.organisation, identityAddress)
 
+    const anchorRankVoteType: AnchorRankVoteType =
+        voteType === RankVoteType.Upvote ? { upvote: {} } : { downvote: {} };
+    const roundedPoints = Math.floor(amountOfPoints);
+    if (roundedPoints <= 0) throw "Points must be above zero";
+    
+    const sig = await programs.alignGovernanceProgram.methods
+        .castRank(anchorRankVoteType, amountOfPoints)
+        .accountsStrict({
+            payer: programs.alignGovernanceProgram.provider.publicKey,
+            organisation: proposal.account.organisation,
+            identity: identityAddress,
+            ownerRecord: ownerRecordAddress,
+            systemProgram: SystemProgram.programId,
+            owner: programs.alignGovernanceProgram.provider.publicKey,
+            reputationManager: reputationManagerAddress,
+            governance: proposal.account.governance,
+            proposal: proposal.address,
+            contributionRecord: contributionRecord
+        })
+        .rpc();
+
+    return sig
+};
