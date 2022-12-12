@@ -9,6 +9,9 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useEffect, useState } from "react";
+import { AlignPrograms, createAlignPrograms } from "align-sdk";
+import { useConnection } from "@solana/wallet-adapter-react";
 
 export const getTokenAccountsByAddress = async (
     addr: string,
@@ -23,7 +26,18 @@ export const METADATA_PROGRAM_ID = new PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 export function Profile() {
-    const { user, proposals, wallet } = useDecentralizedSocial();
+    const { user, proposals, wallet, reputation } = useDecentralizedSocial();
+    const {connection} = useConnection()
+    
+    const [programs, setPrograms] = useState<AlignPrograms | null>(null);
+
+    useEffect(() => {
+        const getPrograms = async () =>{
+            const programs = await createAlignPrograms(connection, wallet as any)
+            setPrograms(programs)
+        }
+        getPrograms()
+    }, []);
 
     if (!wallet?.publicKey) {
         return <div />;
@@ -64,7 +78,7 @@ export function Profile() {
                             </p>
                             <p className="flex grow"></p>
                             <p className="mr-4 text-xl mt-6 text-right align-right items-end justify-end">
-                                <span className="block"></span>
+                                <span className="block">{reputation} REP</span>
                                 <span className="block font-thin text-xs opacity-50">
                                     {proposals?.length || 0} Proposal(s)
                                 </span>
