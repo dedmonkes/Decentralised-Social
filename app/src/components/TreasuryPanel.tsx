@@ -33,18 +33,18 @@ const TreasuryPanel = () => {
 
     return (
         <div className="box-container mb-4 py-4 px-6">
-        <div className="flex items-center justify-between text-lg">
-          <h4>Treasury:</h4>
-          <div className="flex items-center justify-end gap-2">
-            <span className="rounded-full border border-white border-opacity-30 px-5 py-1">
-              {balance} SOL
-            </span>
-            <span className="rounded-full border border-white border-opacity-30 px-5 py-1">
-              2,520 USDC
-            </span>
-          </div>
+            <div className="flex items-center justify-between text-lg">
+                <h4>Treasury:</h4>
+                <div className="flex items-center justify-end gap-2">
+                    <span className="rounded-full border border-white border-opacity-30 px-5 py-1">
+                        {balance} SOL
+                    </span>
+                    <span className="rounded-full border border-white border-opacity-30 px-5 py-1">
+                        2,520 USDC
+                    </span>
+                </div>
+            </div>
         </div>
-      </div>
     );
 };
 

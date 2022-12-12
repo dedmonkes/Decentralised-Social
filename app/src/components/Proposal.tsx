@@ -1,11 +1,26 @@
 import { PublicKey } from "@solana/web3.js";
-import { Account, Api, castRankVote, Organisation, Proposal as ProposalAccount, ProposalData, RankVoteType } from "@dedmonkes/align-sdk";
+import {
+    Account,
+    Api,
+    castRankVote,
+    Organisation,
+    Proposal as ProposalAccount,
+    ProposalData,
+    RankVoteType,
+} from "@dedmonkes/align-sdk";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, MinusSquare, PlusSquare, User } from "react-feather";
+import {
+    ArrowDown,
+    ArrowUp,
+    ChevronDown,
+    ChevronUp,
+    MinusSquare,
+    PlusSquare,
+    User,
+} from "react-feather";
 import LoadingSpinner from "./LoadingSpinner";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
-
 
 export function Proposal(props: { proposal: Account<ProposalAccount> }) {
     const [proposalMetadata, setProposalMetadata] =
@@ -29,41 +44,61 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
         getProposalMetadata();
     }, [props.proposal]);
 
-    if (!proposalMetadata) return <></>
+    if (!proposalMetadata) return <></>;
 
     return (
         <div className="my-4 flex w-full justify-between gap-4">
             <div className="box-container p-2 text-center">
-                <button onClick={async () => {
-                    if (!user || !alignPrograms || !props.proposal.address) {
-                        return;
-                    }
-                    try {
-                        const response = await castRankVote(user.account.identifier, props.proposal.address, RankVoteType.Upvote, 1, alignPrograms);
-                    } catch (err) {
-                        alert(err);
-                        return;
-                    }
-
-                }} className="flex h-5 w-5 items-center justify-center rounded-md border border-white text-white opacity-20 hover:opacity-100">
+                <button
+                    onClick={async () => {
+                        if (
+                            !user ||
+                            !alignPrograms ||
+                            !props.proposal.address
+                        ) {
+                            return;
+                        }
+                        try {
+                            const response = await castRankVote(
+                                user.account.identifier,
+                                props.proposal.address,
+                                RankVoteType.Upvote,
+                                1,
+                                alignPrograms
+                            );
+                        } catch (err) {
+                            alert(err);
+                            return;
+                        }
+                    }}
+                    className="flex h-5 w-5 items-center justify-center rounded-md border border-white text-white opacity-20 hover:opacity-100"
+                >
                     <ChevronUp size={"16px"} />
                 </button>
                 <span className="my-2 block font-mono">
                     {Number((props.proposal.account as any).upvotes) -
                         Number((props.proposal.account as any).downvotes)}
                 </span>
-                <button onClick={async () => {
-                    if (!user || !alignPrograms) {
-                        return;
-                    }
-                    try {
-                        const response = await castRankVote(user.account.identifier, props.proposal.address, RankVoteType.Downvote, 1, alignPrograms);
-                    } catch (err) {
-                        alert(err);
-                        return;
-                    }
-
-                }} className="flex h-5 w-5 items-center justify-center rounded-md border border-white text-white opacity-20 hover:opacity-100">
+                <button
+                    onClick={async () => {
+                        if (!user || !alignPrograms) {
+                            return;
+                        }
+                        try {
+                            const response = await castRankVote(
+                                user.account.identifier,
+                                props.proposal.address,
+                                RankVoteType.Downvote,
+                                1,
+                                alignPrograms
+                            );
+                        } catch (err) {
+                            alert(err);
+                            return;
+                        }
+                    }}
+                    className="flex h-5 w-5 items-center justify-center rounded-md border border-white text-white opacity-20 hover:opacity-100"
+                >
                     <ChevronDown size={"16px"} />
                 </button>
             </div>
@@ -71,7 +106,8 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
                 <div className="h-full items-stretch gap-6 md:flex">
                     <div className="flex-1">
                         <h2 className="text-lg">
-                            {proposalMetadata?.name || "Storyboard for a Graphic Novel"}
+                            {proposalMetadata?.name ||
+                                "Storyboard for a Graphic Novel"}
                         </h2>
                         <p className="text-sm font-light opacity-75">
                             {proposalMetadata?.description ||

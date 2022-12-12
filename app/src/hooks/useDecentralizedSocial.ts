@@ -73,15 +73,17 @@ export function useDecentralizedSocial() {
         null
     );
 
-    const [proposals, setProposals] = useState<Account<ProposalAccount>[] | null>(
-        null
-    );
+    const [proposals, setProposals] = useState<
+        Account<ProposalAccount>[] | null
+    >(null);
 
     const [pointsBalance, setPointsBalance] = useState(0);
 
     const [reputation, setReputation] = useState(0);
-    
-    const [alignPrograms, setAlignPrograms] = useState<AlignPrograms | null>(null);
+
+    const [alignPrograms, setAlignPrograms] = useState<AlignPrograms | null>(
+        null
+    );
 
     useEffect(() => {
         const getReputation = async () => {

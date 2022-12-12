@@ -3,36 +3,60 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: "Syne";
-  src: local("Syne"),
-    url("./fonts/Syne/syne-bold-webfont.woff2") format("woff2");
-  font-weight: normal;
+    font-family: "Syne";
+    src: local("Syne"),
+        url("./fonts/Syne/syne-bold-webfont.woff2") format("woff2");
+    font-weight: normal;
 }
 
 body {
-  background: rgb(0, 0, 0);
-  background: linear-gradient(
-    235deg,
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 50%,
-    rgba(99, 26, 255, 1) 100%
-  );
-  background-attachment: fixed;
-  height: 100vh;
-  font-family: "Poppins", sans-serif;
+    background: rgb(0, 0, 0);
+    background: linear-gradient(
+        235deg,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 50%,
+        rgba(99, 26, 255, 1) 100%
+    );
+    background-attachment: fixed;
+    height: 100vh;
+    font-family: "Poppins", sans-serif;
 }
 
 .box-container {
-  @apply rounded-lg border border-white border-opacity-30 bg-black bg-opacity-30;
+    @apply rounded-lg border border-white border-opacity-30 bg-black bg-opacity-30;
 }
 
 .box-container.no-fill {
-  @apply bg-transparent;
+    @apply bg-transparent;
 }
 
 .ant-carousel {
-  padding-bottom: 20px;
+    padding-bottom: 20px;
 }
 .ant-carousel .slick-dots {
-  bottom: -20px;
+    bottom: -20px;
+}
+
+.Aligner {
+    display: flex;
+    align-items: center;
+    min-height: 24em;
+    justify-content: center;
+}
+
+.Aligner-item {
+    flex: 1;
+}
+
+.Aligner-item--top {
+    align-self: flex-start;
+}
+
+.Aligner-item--bottom {
+    align-self: flex-end;
+}
+
+.Aligner-item--fixed {
+    flex: none;
+    max-width: 50%;
 }
