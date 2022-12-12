@@ -1,4 +1,5 @@
 import { Program, AnchorProvider, BN } from "@project-serum/anchor";
+import { ShdwDrive } from "@shadow-drive/sdk";
 import { PublicKey } from "@solana/web3.js";
 import { AlignGovernance } from "./idls/align_governance";
 import { Identifiers } from "./idls/identifiers";
@@ -23,6 +24,14 @@ export interface AlignPrograms {
     profilesProgram: Program<Profiles>;
     leafProgram: Program<Leaf>;
     provider?: AnchorProvider;
+    shadowDriveInstance : ShdwDrive
+}
+export interface NativeTreasuryAccount {
+    organisation: PublicKey,
+    votingProposalCount: number,
+    totalProposals: BN,
+    councilThreshold: number,
+    bump: number,
 }
 
 export interface Organisation {

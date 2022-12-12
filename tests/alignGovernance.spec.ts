@@ -6,11 +6,11 @@ import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
-import { createShadowAccount, getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft, sleep, uploadProposalMetadata } from "./helpers";
+import {getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft, sleep } from "./helpers";
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
-import { AlignPrograms, Api, castCouncilVote, CouncilVote, createAlignPrograms, Proposal, ProposalData, stakeNfts } from "align-sdk";
+import { AlignPrograms, Api, castCouncilVote, CouncilVote, createAlignPrograms, createShadowAccount, createProposal, Proposal, ProposalData, stakeNfts, uploadProposalMetadata } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from 'fs' 
 import os from "os"
@@ -25,7 +25,7 @@ const key = fs.readFileSync(keyPath, {encoding: "binary"});
 const wallet = new anchor.Wallet(anchor.web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(key))))
 
 
-describe("identifiers", () => {
+describe("identifiers", async () => {
     // Configure the client to use the local cluster.
     anchor.setProvider(anchor.AnchorProvider.env());
     
@@ -47,7 +47,7 @@ describe("identifiers", () => {
 
     const identifier = anchor.web3.Keypair.fromSecretKey(identifierSeed)
   
-    const programs = createAlignPrograms(leafProgram.provider.connection, wallet)
+    const programs = await createAlignPrograms(leafProgram.provider.connection, wallet)
     const [identity] = publicKey.findProgramAddressSync([
       Buffer.from("identity"),
       identifier.publicKey.toBuffer()
@@ -248,7 +248,7 @@ describe("identifiers", () => {
     })
   })
 
-describe("Align Governance Inergration Tests", () => {
+describe("Align Governance Inergration Tests", async () => {
     anchor.setProvider(anchor.AnchorProvider.env());
 
     const identifierProgram = anchor.workspace.Identifiers as Program<Identifiers>;
@@ -312,14 +312,7 @@ describe("Align Governance Inergration Tests", () => {
 
     const collectionMintKeypair = new anchor.web3.Keypair();
 
-    // const programs : AlignPrograms = {
-    //     alignGovernanceProgram: alignProgram,
-    //     identifiersProgram: identifierProgram,
-    //     multigraphProgram: multigraphProgram,
-    //     profilesProgram: profilesProgram,
-    //     leafProgram: leafProgram,
-    // } 
-    const programs = createAlignPrograms(leafProgram.provider.connection, wallet)
+    const programs = await createAlignPrograms(leafProgram.provider.connection, wallet)
 
 
     const [identity] = publicKey.findProgramAddressSync([
@@ -595,14 +588,7 @@ describe("Align Governance Inergration Tests", () => {
 
     it("Create Proposal", async () => {
         
-        const drive = await new ShdwDrive(new web3.Connection(web3.clusterApiUrl("mainnet-beta"), {commitment : "max"}),  wallet).init()
-        const proposalData : ProposalData= {
-            name: "Create a onchain social network based DAO",
-            description: "Qui harum facere et nesciunt internos ut veritatis optio! Et enim quisquam aut quasi repellendus sed possimus optio et quis dolorem ut laudantium velit non error iure At fugit consectetur. Qui quasi fugit id architecto totam est blanditiis autem. Ut consequuntur quae quo impedit molestiae est maxime perferendis eos nisi necessitatibus aut autem sapiente ut esse quos aut velit unde?",
-        }
-        const accountRes = await createShadowAccount("ALIGN_PROPOSAL", proposalData, drive)
-        await uploadProposalMetadata(proposalAddress.toBase58(), proposalData,new web3.PublicKey(accountRes.shdw_bucket), drive)
-        
+
         const tx = await identifierProgram.methods.initializeIdentifier(null)
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
@@ -621,24 +607,12 @@ describe("Align Governance Inergration Tests", () => {
 
         await alignProgram.provider.sendAndConfirm(tx, [servicerIdenitifier, servicerKeypair], { skipPreflight: true })
         
+        const proposalData : ProposalData= {
+          name: "Create a onchain social network based DAO",
+          description: "Qui harum facere et nesciunt internos ut veritatis optio! Et enim quisquam aut quasi repellendus sed possimus optio et quis dolorem ut laudantium velit non error iure At fugit consectetur. Qui quasi fugit id architecto totam est blanditiis autem. Ut consequuntur quae quo impedit molestiae est maxime perferendis eos nisi necessitatibus aut autem sapiente ut esse quos aut velit unde?",
+      }
+      await createProposal(councilIdentifier.publicKey, organisation, servicerIdenitifier.publicKey, proposalData, programs)
 
-        await alignProgram.methods.createProposal()
-            .accountsStrict({
-                payer: profilesProgram.provider.publicKey,
-                ownerRecord: councilOwnerRecord,
-                systemProgram: web3.SystemProgram.programId,
-                organisation,
-                identity: councilIdentity,
-                reputationManager: reputationManagerAddress,
-                shadowDrive: accountRes.shdw_bucket,
-                councilManager,
-                proposal: proposalAddress,
-                governance: nativeTreasuryAddress,
-                servicerIdenitifier: servicerIdenitifier.publicKey,
-                owner: councilKeypair.publicKey,
-            })
-            .signers([councilKeypair])
-            .rpc()
 
 
         console.log("Fetching proposal Accounts")
