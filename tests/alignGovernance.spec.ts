@@ -11,7 +11,7 @@ import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
 import { AlignPrograms, Api, createAlignPrograms, ProposalData } from "align-sdk";
-import { castRankVote, RankVoteType } from "align-sdk/src";
+import { castRankVote, RankVoteType } from "align-sdk";
 import fs from 'fs' 
 import os from "os"
 import path from "path"
