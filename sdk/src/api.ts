@@ -294,7 +294,7 @@ export namespace Api {
             }
           );
         //@ts-ignore
-        return tokenAccounts.map(acc => acc.account.data.parsed.mint)
+        return tokenAccounts.map((acc) => new PublicKey(acc.account.data.parsed.info.mint))
         
     }
     

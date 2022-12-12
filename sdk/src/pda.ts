@@ -7,6 +7,7 @@ import {
     PROFILES_PROGRAM_ID,
 } from "./constants";
 import { ConnectionType, EdgeRelation } from "./types";
+import {PROGRAM_ADDRESS} from "@metaplex-foundation/mpl-token-metadata"
 
 export namespace Derivation {
     export const deriveIdentityAddress = (identifierAddress: PublicKey) => {
@@ -176,4 +177,32 @@ export namespace Derivation {
 
         return usernameRecord;
     };
+
+    export const getMetadataAddress = async (mint: web3.PublicKey) => {
+        const [address, bump] = await web3.PublicKey.findProgramAddress(
+          [
+            utils.bytes.utf8.encode("metadata"),
+            new web3.PublicKey(PROGRAM_ADDRESS).toBuffer(),
+            mint.toBuffer(),
+          ],
+          new web3.PublicKey(PROGRAM_ADDRESS)
+        );
+      
+        return address;
+      };
+
+      export const getMasterEditionAddress = async (mint: web3.PublicKey) => {
+        const [address, bump] = await web3.PublicKey.findProgramAddress(
+          [
+            utils.bytes.utf8.encode("metadata"),
+            new web3.PublicKey(PROGRAM_ADDRESS).toBuffer(),
+            mint.toBuffer(),
+            utils.bytes.utf8.encode("edition"),
+          ],
+          new web3.PublicKey(PROGRAM_ADDRESS)
+        );
+      
+        return address;
+      };
+
 }

@@ -1,5 +1,5 @@
 import { Program, AnchorProvider, Wallet, web3 } from "@project-serum/anchor";
-import { Connection, PublicKey, SystemProgram } from "@solana/web3.js";
+import { Connection, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { Api } from "./api";
 import {
     ALIGN_PROGRAM_ID,
@@ -22,6 +22,9 @@ import {
     Organisation,
     RankVoteType,
 } from "./types";
+
+import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+
 
 export { Derivation } from "./pda";
 export * from "./types";
@@ -137,6 +140,93 @@ export const castRankVote = async (
             contributionRecord: contributionRecord
         })
         .rpc();
+
+    return sig
+};
+export const stakeNfts = async (
+    userIdentifier: PublicKey,
+    mintAddresses: PublicKey[],
+    organisationAddress : PublicKey,
+    programs: AlignPrograms
+) => {
+
+    const ixPromises = mintAddresses.map(async mint => {
+        const nftVault = Derivation.deriveNftVault(
+            userIdentifier,
+            mint
+        );
+        const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(programs.alignGovernanceProgram.provider.publicKey)
+        const identityAddress = Derivation.deriveIdentityAddress(userIdentifier)
+        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, identityAddress)
+        
+        return await programs.alignGovernanceProgram.methods
+            .stakeNft()
+            .accountsStrict({
+                payer: programs.alignGovernanceProgram.provider.publicKey,
+                owner: programs.alignGovernanceProgram.provider.publicKey,
+                organisation: organisationAddress,
+                reputationManager: reputationManagerAddress,
+                identity: identityAddress,
+                ownerRecord: ownerRecordAddress,
+                systemProgram: SystemProgram.programId,
+                nftVault: nftVault,
+                nftHolderOwnerRecord: ownerRecordAddress,
+                nftMint: mint,
+                nftTokenAccount: await getAssociatedTokenAddress(mint, programs.alignGovernanceProgram.provider.publicKey),
+                nftMetadata: await Derivation.getMetadataAddress(mint),
+                nftMasterEdition: await Derivation.getMasterEditionAddress(mint),
+                tokenProgram: TOKEN_PROGRAM_ID,
+                rent: SYSVAR_RENT_PUBKEY
+            }).instruction()
+    })
+
+    const instructions = await Promise.all(ixPromises)
+    
+    const sig = await programs.alignGovernanceProgram.provider.sendAndConfirm(new web3.Transaction().add(...instructions), [])
+
+    return sig
+};
+
+export const unstakeNfts = async (
+    userIdentifier: PublicKey,
+    mintAddresses: PublicKey[],
+    organisationAddress : PublicKey,
+    programs: AlignPrograms
+) => {
+
+    const ixPromises = mintAddresses.map(async mint => {
+        const nftVault = Derivation.deriveNftVault(
+            userIdentifier,
+            mint
+        );
+        const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(programs.alignGovernanceProgram.provider.publicKey)
+        const identityAddress = Derivation.deriveIdentityAddress(userIdentifier)
+        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, identityAddress)
+        
+        return await programs.alignGovernanceProgram.methods
+            .unstakeNft()
+            .accountsStrict({
+                payer: programs.alignGovernanceProgram.provider.publicKey,
+                owner: programs.alignGovernanceProgram.provider.publicKey,
+                organisation: organisationAddress,
+                reputationManager: reputationManagerAddress,
+                identity: identityAddress,
+                ownerRecord: ownerRecordAddress,
+                systemProgram: SystemProgram.programId,
+                nftVault: nftVault,
+                nftHolderOwnerRecord: ownerRecordAddress,
+                nftMint: mint,
+                nftTokenAccount: await getAssociatedTokenAddress(mint, programs.alignGovernanceProgram.provider.publicKey),
+                tokenProgram: TOKEN_PROGRAM_ID,
+                rent: SYSVAR_RENT_PUBKEY,
+                nftOwnerAccount: programs.alignGovernanceProgram.provider.publicKey,
+                associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+            }).instruction()
+    })
+
+    const instructions = await Promise.all(ixPromises)
+    
+    const sig = await programs.alignGovernanceProgram.provider.sendAndConfirm(new web3.Transaction().add(...instructions), [])
 
     return sig
 };
