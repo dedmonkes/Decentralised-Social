@@ -6,6 +6,10 @@ module.exports = {
             colors: {
                 primary: "#8350F0",
             },
+            fontFamily: {
+                poppins: ['"Poppins"', "sans-serif"],
+                syne: ['"Syne"', "sans-serif"],
+            },
         },
     },
     plugins: [],
