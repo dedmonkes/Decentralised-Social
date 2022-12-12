@@ -10,13 +10,14 @@ import { createShadowAccount, getMasterEditionAddress, getMetadataAddress, mineI
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
-import { AlignPrograms, Api, createAlignPrograms, ProposalData } from "align-sdk";
+import { AlignPrograms, Api, createAlignPrograms, ProposalData, stakeNfts } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from 'fs' 
 import os from "os"
 import path from "path"
 
 import {ShdwDrive} from "@shadow-drive/sdk";
+import { unstakeNfts } from "../sdk/src";
 
 
 const keyPath = path.join(os.homedir(), ".config", "solana", "id.json")
@@ -566,114 +567,28 @@ describe("Align Governance Inergration Tests", () => {
     it("Stake Nft", async () => {
 
         let mint = web3.Keypair.generate()
-
-        await mintNft(collectionMintKeypair, mint, alignProgram.provider, councilKeypair.publicKey)
-
-        const [nftVault] = publicKey.findProgramAddressSync([
-            Buffer.from("nft-vault"),
-            councilIdentifier.publicKey.toBuffer(),
-            mint.publicKey.toBuffer()
-        ],
-            alignProgram.programId
-        )
-
-
-        const stakeIx = await alignProgram.methods.stakeNft()
-            .accountsStrict({
-                payer: profilesProgram.provider.publicKey,
-                ownerRecord: councilOwnerRecord,
-                systemProgram: web3.SystemProgram.programId,
-                organisation,
-                identity: councilIdentity,
-                reputationManager: reputationManagerAddress,
-                owner: councilKeypair.publicKey,
-                nftVault,
-                nftHolderOwnerRecord: councilOwnerRecord,
-                nftMint: mint.publicKey,
-                nftTokenAccount: await getAssociatedTokenAddress(mint.publicKey, councilKeypair.publicKey),
-                nftMetadata: await getMetadataAddress(mint.publicKey),
-                nftMasterEdition: await getMasterEditionAddress(mint.publicKey),
-                tokenProgram: TOKEN_PROGRAM_ID,
-                rent: web3.SYSVAR_RENT_PUBKEY
-            })
-            .signers([councilKeypair])
-            .instruction()
-
         let mint2 = web3.Keypair.generate()
 
+        await mintNft(collectionMintKeypair, mint, alignProgram.provider, councilKeypair.publicKey)
         await mintNft(collectionMintKeypair, mint2, alignProgram.provider, councilKeypair.publicKey)
 
-        const [nftVault2] = publicKey.findProgramAddressSync([
-            Buffer.from("nft-vault"),
-            councilIdentifier.publicKey.toBuffer(),
-            mint2.publicKey.toBuffer()
-        ],
-            alignProgram.programId
-        )
-
-
-        const stakeIx2 = await alignProgram.methods.stakeNft()
-            .accountsStrict({
-                payer: profilesProgram.provider.publicKey,
-                ownerRecord: councilOwnerRecord,
-                systemProgram: web3.SystemProgram.programId,
-                organisation,
-                identity: councilIdentity,
-                reputationManager: reputationManagerAddress,
-                owner: councilKeypair.publicKey,
-                nftVault: nftVault2,
-                nftHolderOwnerRecord: councilOwnerRecord,
-                nftMint: mint2.publicKey,
-                nftTokenAccount: await getAssociatedTokenAddress(mint2.publicKey, councilKeypair.publicKey),
-                nftMetadata: await getMetadataAddress(mint2.publicKey),
-                nftMasterEdition: await getMasterEditionAddress(mint2.publicKey),
-                tokenProgram: TOKEN_PROGRAM_ID,
-                rent: web3.SYSVAR_RENT_PUBKEY
-            })
-            .signers([councilKeypair])
-            .instruction()
-        // .rpc({
-        //     skipPreflight: true
-        // })
-
-        await alignProgram.provider.sendAndConfirm(new web3.Transaction().add(stakeIx, stakeIx2), [councilKeypair], { skipPreflight: true })
+        await stakeNfts(councilIdentifier.publicKey, [mint.publicKey, mint2.publicKey], organisation, programs)
 
         console.log("Fetching proposal Accounts")
 
         const repAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
         console.log(JSON.parse(JSON.stringify(repAccount)))
 
-        const unstakeTransaction = await alignProgram.methods.unstakeNft()
-            .accountsStrict({
-                payer: profilesProgram.provider.publicKey,
-                ownerRecord: councilOwnerRecord,
-                systemProgram: web3.SystemProgram.programId,
-                organisation,
-                identity: councilIdentity,
-                reputationManager: reputationManagerAddress,
-                owner: councilKeypair.publicKey,
-                nftVault,
-                nftHolderOwnerRecord: councilOwnerRecord,
-                nftMint: mint.publicKey,
-                nftTokenAccount: await getAssociatedTokenAddress(mint.publicKey, councilKeypair.publicKey),
-                tokenProgram: TOKEN_PROGRAM_ID,
-                rent: web3.SYSVAR_RENT_PUBKEY,
-                nftOwnerAccount: councilKeypair.publicKey,
-                associatedTokenProgram: ASSOCIATED_PROGRAM_ID
-            })
-            .signers([councilKeypair])
-            .transaction()
-        // .rpc({
-        //     skipPreflight: true
-        // })
-
-        await alignProgram.provider.sendAndConfirm(unstakeTransaction, [councilKeypair], { skipPreflight: true })
-
+        const mints = await Api.fetchStakedNfts(councilIdentifier.publicKey, organisation, programs )
+        await unstakeNfts(councilIdentifier.publicKey, mints.slice(1), organisation, programs)
+       
         const unstakedRepAccount = await alignProgram.account.reputationManager.fetch(reputationManagerAddress)
         console.log(JSON.parse(JSON.stringify(unstakedRepAccount)))
 
         expect(unstakedRepAccount.capitalReputation.amount).equal(1)
+        expect(unstakedRepAccount.reputation.toNumber()).equal(1)
         expect(repAccount.capitalReputation.amount).equal(2)
+        expect(repAccount.reputation.toNumber()).equal(2)
 
 
     })
@@ -779,35 +694,7 @@ describe("Align Governance Inergration Tests", () => {
 
     it("Cast Rank on proposal", async () => {
 
-        // const [contributionRecord] = publicKey.findProgramAddressSync([
-        //     Buffer.from("contribution-record"),
-        //     proposalAddress.toBuffer(),
-        //     councilIdentifier.publicKey.toBuffer()
-        // ],
-        //     alignProgram.programId
-        // )
-
-        // const tx = await alignProgram.methods.castRank({upvote : {}}, 1)
-        //     .accountsStrict({
-        //         payer: profilesProgram.provider.publicKey,
-        //         ownerRecord: councilOwnerRecord,
-        //         systemProgram: web3.SystemProgram.programId,
-        //         organisation,
-        //         identity: councilIdentity,
-        //         reputationManager: reputationManagerAddress,
-        //         proposal: proposalAddress,
-        //         governance: nativeTreasuryAddress,
-        //         owner: councilKeypair.publicKey,
-        //         contributionRecord
-        //     })
-        //     .signers([councilKeypair])
-        //     .transaction()
-        //     // .rpc({skipPreflight: true})
-
-        // await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], { skipPreflight: true })
-
         await castRankVote(councilIdentifier.publicKey, proposalAddress, RankVoteType.Upvote, 1, programs) 
-
         console.log("Fetching proposal Accounts")
         
         const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)

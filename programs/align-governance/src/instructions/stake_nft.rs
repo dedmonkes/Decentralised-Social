@@ -59,27 +59,18 @@ pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
         .unwrap();
 
     msg!("Recalculating reputation..");
-    let capital_rep_total: u64 = ctx
+    let weight: u64 = ctx
         .accounts
         .reputation_manager
         .capital_reputation
         .weight
-        .checked_mul(
-            ctx.accounts
-                .reputation_manager
-                .capital_reputation
-                .amount
-                .try_into()
-                .unwrap(),
-        )
-        .unwrap()
         .into();
 
     ctx.accounts.reputation_manager.reputation = ctx
         .accounts
         .reputation_manager
         .reputation
-        .checked_add(capital_rep_total)
+        .checked_add(weight)
         .unwrap();
         
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
