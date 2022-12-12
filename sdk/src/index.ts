@@ -1,5 +1,10 @@
 import { Program, AnchorProvider, Wallet, web3 } from "@project-serum/anchor";
-import { Connection, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
+import {
+    Connection,
+    PublicKey,
+    SystemProgram,
+    SYSVAR_RENT_PUBKEY,
+} from "@solana/web3.js";
 import { Api } from "./api";
 import {
     ALIGN_PROGRAM_ID,
@@ -18,13 +23,18 @@ import { IDL as ProfilesIDL } from "./idls/profiles";
 import { Derivation } from "./pda";
 import {
     AlignPrograms,
+    AnchorCouncilVote,
     AnchorRankVoteType,
+    CouncilVote,
     Organisation,
     RankVoteType,
 } from "./types";
 
-import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-
+import {
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+    getAssociatedTokenAddress,
+    TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 
 export { Derivation } from "./pda";
 export * from "./types";
@@ -110,21 +120,25 @@ export const castRankVote = async (
     amountOfPoints: number,
     programs: AlignPrograms
 ) => {
-
     const contributionRecord = Derivation.deriveContributionRecord(
         userIdentifier,
         proposalAddress
     );
-    const proposal = await Api.fetchProposal(proposalAddress, programs)
-    const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(programs.alignGovernanceProgram.provider.publicKey)
-    const identityAddress = Derivation.deriveIdentityAddress(userIdentifier)
-    const reputationManagerAddress = Derivation.deriveReputationManagerAddress(proposal.account.organisation, identityAddress)
+    const proposal = await Api.fetchProposal(proposalAddress, programs);
+    const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(
+        programs.alignGovernanceProgram.provider.publicKey
+    );
+    const identityAddress = Derivation.deriveIdentityAddress(userIdentifier);
+    const reputationManagerAddress = Derivation.deriveReputationManagerAddress(
+        proposal.account.organisation,
+        identityAddress
+    );
 
     const anchorRankVoteType: AnchorRankVoteType =
         voteType === RankVoteType.Upvote ? { upvote: {} } : { downvote: {} };
     const roundedPoints = Math.floor(amountOfPoints);
     if (roundedPoints <= 0) throw "Points must be above zero";
-    
+
     const sig = await programs.alignGovernanceProgram.methods
         .castRank(anchorRankVoteType, amountOfPoints)
         .accountsStrict({
@@ -137,28 +151,31 @@ export const castRankVote = async (
             reputationManager: reputationManagerAddress,
             governance: proposal.account.governance,
             proposal: proposal.address,
-            contributionRecord: contributionRecord
+            contributionRecord: contributionRecord,
         })
         .rpc();
 
-    return sig
+    return sig;
 };
 export const stakeNfts = async (
     userIdentifier: PublicKey,
     mintAddresses: PublicKey[],
-    organisationAddress : PublicKey,
+    organisationAddress: PublicKey,
     programs: AlignPrograms
 ) => {
-
-    const ixPromises = mintAddresses.map(async mint => {
-        const nftVault = Derivation.deriveNftVault(
-            userIdentifier,
-            mint
+    const ixPromises = mintAddresses.map(async (mint) => {
+        const nftVault = Derivation.deriveNftVault(userIdentifier, mint);
+        const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(
+            programs.alignGovernanceProgram.provider.publicKey
         );
-        const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(programs.alignGovernanceProgram.provider.publicKey)
-        const identityAddress = Derivation.deriveIdentityAddress(userIdentifier)
-        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, identityAddress)
-        
+        const identityAddress =
+            Derivation.deriveIdentityAddress(userIdentifier);
+        const reputationManagerAddress =
+            Derivation.deriveReputationManagerAddress(
+                organisationAddress,
+                identityAddress
+            );
+
         return await programs.alignGovernanceProgram.methods
             .stakeNft()
             .accountsStrict({
@@ -172,37 +189,49 @@ export const stakeNfts = async (
                 nftVault: nftVault,
                 nftHolderOwnerRecord: ownerRecordAddress,
                 nftMint: mint,
-                nftTokenAccount: await getAssociatedTokenAddress(mint, programs.alignGovernanceProgram.provider.publicKey),
+                nftTokenAccount: await getAssociatedTokenAddress(
+                    mint,
+                    programs.alignGovernanceProgram.provider.publicKey
+                ),
                 nftMetadata: await Derivation.getMetadataAddress(mint),
-                nftMasterEdition: await Derivation.getMasterEditionAddress(mint),
+                nftMasterEdition: await Derivation.getMasterEditionAddress(
+                    mint
+                ),
                 tokenProgram: TOKEN_PROGRAM_ID,
-                rent: SYSVAR_RENT_PUBKEY
-            }).instruction()
-    })
+                rent: SYSVAR_RENT_PUBKEY,
+            })
+            .instruction();
+    });
 
-    const instructions = await Promise.all(ixPromises)
-    
-    const sig = await programs.alignGovernanceProgram.provider.sendAndConfirm(new web3.Transaction().add(...instructions), [])
+    const instructions = await Promise.all(ixPromises);
 
-    return sig
+    const sig = await programs.alignGovernanceProgram.provider.sendAndConfirm(
+        new web3.Transaction().add(...instructions),
+        []
+    );
+
+    return sig;
 };
 
 export const unstakeNfts = async (
     userIdentifier: PublicKey,
     mintAddresses: PublicKey[],
-    organisationAddress : PublicKey,
+    organisationAddress: PublicKey,
     programs: AlignPrograms
 ) => {
-
-    const ixPromises = mintAddresses.map(async mint => {
-        const nftVault = Derivation.deriveNftVault(
-            userIdentifier,
-            mint
+    const ixPromises = mintAddresses.map(async (mint) => {
+        const nftVault = Derivation.deriveNftVault(userIdentifier, mint);
+        const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(
+            programs.alignGovernanceProgram.provider.publicKey
         );
-        const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(programs.alignGovernanceProgram.provider.publicKey)
-        const identityAddress = Derivation.deriveIdentityAddress(userIdentifier)
-        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, identityAddress)
-        
+        const identityAddress =
+            Derivation.deriveIdentityAddress(userIdentifier);
+        const reputationManagerAddress =
+            Derivation.deriveReputationManagerAddress(
+                organisationAddress,
+                identityAddress
+            );
+
         return await programs.alignGovernanceProgram.methods
             .unstakeNft()
             .accountsStrict({
@@ -216,17 +245,69 @@ export const unstakeNfts = async (
                 nftVault: nftVault,
                 nftHolderOwnerRecord: ownerRecordAddress,
                 nftMint: mint,
-                nftTokenAccount: await getAssociatedTokenAddress(mint, programs.alignGovernanceProgram.provider.publicKey),
+                nftTokenAccount: await getAssociatedTokenAddress(
+                    mint,
+                    programs.alignGovernanceProgram.provider.publicKey
+                ),
                 tokenProgram: TOKEN_PROGRAM_ID,
                 rent: SYSVAR_RENT_PUBKEY,
-                nftOwnerAccount: programs.alignGovernanceProgram.provider.publicKey,
-                associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-            }).instruction()
-    })
+                nftOwnerAccount:
+                    programs.alignGovernanceProgram.provider.publicKey,
+                associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            })
+            .instruction();
+    });
 
-    const instructions = await Promise.all(ixPromises)
-    
-    const sig = await programs.alignGovernanceProgram.provider.sendAndConfirm(new web3.Transaction().add(...instructions), [])
+    const instructions = await Promise.all(ixPromises);
 
-    return sig
+    const sig = await programs.alignGovernanceProgram.provider.sendAndConfirm(
+        new web3.Transaction().add(...instructions),
+        []
+    );
+
+    return sig;
+};
+
+export const castCouncilVote = async (
+    userIdentifier: PublicKey,
+    proposalAddress: PublicKey,
+    councilVoteType: CouncilVote,
+    programs: AlignPrograms
+) => {
+    let voteType: AnchorCouncilVote = { yes: {} };
+
+    if (councilVoteType === CouncilVote.Abstain) {
+        voteType = { abstain: {} };
+    } else if (councilVoteType === CouncilVote.No) {
+        voteType = { no: {} };
+    }
+    const proposal = await Api.fetchProposal(proposalAddress, programs);
+    const ownerRecordAddress = Derivation.deriveOwnerRecordAddress(
+        programs.alignGovernanceProgram.provider.publicKey
+    );
+    const identityAddress = Derivation.deriveIdentityAddress(userIdentifier);
+    const councilManagerAddress = Derivation.deriveCouncilManagerAddress(
+        proposal.account.organisation
+    );
+    const councilVoteRecordAddress = Derivation.deriveCouncilVoteRecord(
+        userIdentifier,
+        proposalAddress
+    );
+
+    const sig = await programs.alignGovernanceProgram.methods
+        .castCouncilVote(voteType)
+        .accountsStrict({
+            payer: programs.alignGovernanceProgram.provider.publicKey,
+            owner: programs.alignGovernanceProgram.provider.publicKey,
+            organisation: proposal.account.organisation,
+            identity: identityAddress,
+            ownerRecord: ownerRecordAddress,
+            systemProgram: SystemProgram.programId,
+            governance: proposal.account.governance,
+            councilManager: councilManagerAddress,
+            councilVoteRecord: councilVoteRecordAddress,
+            proposal: proposalAddress,
+        })
+        .rpc({skipPreflight: true});
+    return sig;
 };

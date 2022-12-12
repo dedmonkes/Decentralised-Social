@@ -18,7 +18,7 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
 
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
     let threshold = ctx.accounts.governance.council_threshold;
-    let council_seats = ctx.accounts.council_manager.council_count;
+    let council_seats: u32 = ctx.accounts.council_manager.council_count.into();
 
     let council_idenitfiers = &ctx.accounts.council_manager.council_identifiers;
 
@@ -54,32 +54,33 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
         }
     }
 
-    let minimum_yes_votes = match threshold.checked_mul(council_seats) {
+    let minimum_yes_votes = match threshold.checked_mul(council_seats.into()) {
         Some(seats) => match seats.checked_div(100) {
             Some(minimum_seats) => minimum_seats,
             None => return Err(AlignError::NumericalOverflow.into()),
         },
         None => return Err(AlignError::NumericalOverflow.into()),
     };
+    let yes_votes : u32 = ctx.accounts.proposal.total_council_yes_votes.into();
+    let no_votes : u32 = ctx.accounts.proposal.total_council_no_votes.into();
+    let abstain_votes : u32 = ctx.accounts.proposal.total_council_abstain_votes.into();
 
-    if minimum_yes_votes <= ctx.accounts.proposal.total_council_yes_votes {
+
+    if minimum_yes_votes <= yes_votes.checked_mul(100).unwrap().into() {
         ctx.accounts.proposal.approved_at = Some(current_timestamp);
         ctx.accounts.proposal.state = ProposalState::Servicing;
         return Ok(());
     }
-
-    let yes_votes = ctx.accounts.proposal.total_council_yes_votes;
-    let no_votes = ctx.accounts.proposal.total_council_no_votes;
-    let abstain_votes = ctx.accounts.proposal.total_council_abstain_votes;
 
     let total_votes = yes_votes
         .checked_add(no_votes)
         .unwrap()
         .checked_add(abstain_votes)
         .unwrap();
-    let remaining_votes = total_votes.checked_sub(council_seats).unwrap();
 
-    if minimum_yes_votes.saturating_sub(ctx.accounts.proposal.total_council_yes_votes)
+    let remaining_votes : u32 = council_seats.checked_mul(100).unwrap().checked_sub(total_votes.checked_mul(100).unwrap()).unwrap().into();
+
+    if minimum_yes_votes.saturating_sub(yes_votes.checked_mul(100).unwrap())
         > remaining_votes
     {
         ctx.accounts.proposal.denied_at = Some(current_timestamp);

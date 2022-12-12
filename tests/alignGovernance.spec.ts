@@ -10,7 +10,7 @@ import { createShadowAccount, getMasterEditionAddress, getMetadataAddress, mineI
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
-import { AlignPrograms, Api, createAlignPrograms, ProposalData, stakeNfts } from "align-sdk";
+import { AlignPrograms, Api, castCouncilVote, CouncilVote, createAlignPrograms, Proposal, ProposalData, stakeNfts } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from 'fs' 
 import os from "os"
@@ -736,57 +736,17 @@ describe("Align Governance Inergration Tests", () => {
 
     it("Cast Council vote", async () => {
 
-        const [councilVoteRecord] = publicKey.findProgramAddressSync([
-            Buffer.from("council-vote-record"),
-            proposalAddress.toBuffer(),
-            councilIdentifier.publicKey.toBuffer()
-        ],
-            alignProgram.programId
-        )
-
-        const tx = await alignProgram.methods.castCouncilVote({yes:{}})
-            .accountsStrict({
-                payer: profilesProgram.provider.publicKey,
-                systemProgram: web3.SystemProgram.programId,
-                proposal: proposalAddress,
-                owner: councilKeypair.publicKey,
-                organisation: organisation,
-                governance: nativeTreasuryAddress,
-                identity: councilIdentity,
-                ownerRecord: councilOwnerRecord,
-                councilManager: councilManager,
-                councilVoteRecord,
-            })
-            .transaction()
-
-        await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], { skipPreflight: true })
-
+        await castCouncilVote(councilIdentifier.publicKey, proposalAddress, CouncilVote.Yes, programs)
         console.log("Fetching proposal Accounts")
         
-        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        const propAccount : Proposal = await alignProgram.account.proposal.fetch(proposalAddress)
         console.log(JSON.parse(JSON.stringify(propAccount)))
 
-        const wallet : anchor.Wallet = {
-            payer: identifier,
-            signTransaction: function (tx: anchor.web3.Transaction): Promise<anchor.web3.Transaction> {
-              throw new Error("Function not implemented.");
-            },
-            signAllTransactions: function (txs: anchor.web3.Transaction[]): Promise<anchor.web3.Transaction[]> {
-              throw new Error("Function not implemented.");
-            },
-            publicKey: identifier.publicKey
-          }
-        
-          const programs = createAlignPrograms(leafProgram.provider.connection, wallet)
+        const votes = await Api.fetchCouncilVotesForProposal(organisation, proposalAddress, programs)
+        expect(votes).lengthOf(1)
+        expect(votes[0].account.vote).to.deep.include({yes: {}})
+        expect(propAccount.state).to.deep.include({servicing : {}})
 
-        const org = await Api.fetchOrgranisation(organisation, programs)
-        console.log(org)
-
-        const orgs = await Api.fetchOrganisationAddressesByCollections([collectionMintKeypair.publicKey], programs)
-        console.log(orgs)
-
-        const props = await Api.fetchOrganisationProposals(org.address, programs)
-        console.log(props)
     })
 
 

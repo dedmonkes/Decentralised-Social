@@ -205,7 +205,7 @@ export namespace Derivation {
         return address;
       };
 
-      export const deriveCouncilVoteRecord = async (councilIdentifier : web3.PublicKey, proposalAddress: web3.PublicKey) => {
+      export const deriveCouncilVoteRecord = (councilIdentifier : web3.PublicKey, proposalAddress: web3.PublicKey) => {
         const [councilVoteRecord] = PublicKey.findProgramAddressSync([
             Buffer.from("council-vote-record"),
             proposalAddress.toBuffer(),
