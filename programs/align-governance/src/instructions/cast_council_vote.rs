@@ -114,7 +114,7 @@ pub struct CastCouncilVote<'info> {
 
     #[account(
         init,
-        seeds = [b"council-vote-record", proposal.key().as_ref()],
+        seeds = [b"council-vote-record", proposal.key().as_ref(), identity.identifier.as_ref()],
         bump,
         payer = payer,
         space = CouncilVoteRecord::space()

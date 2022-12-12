@@ -7,6 +7,8 @@ import {
     Account,
     AlignPrograms,
     ContributionRecord,
+    CouncilManager,
+    CouncilVoteRecord,
     Identity,
     Organisation,
     OwnerRecord,
@@ -19,7 +21,6 @@ import { Spl } from "@project-serum/anchor";
 import { TOKEN_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 
 export namespace Api {
-
     export const fetchUserProfileByIdentifier = async (
         identifierAddress: PublicKey,
         programs: AlignPrograms
@@ -71,18 +72,21 @@ export namespace Api {
         programs: AlignPrograms
     ) => {
         const orgPromises = collectionMints.map((mint) =>
-            programs.alignGovernanceProgram.provider.connection.getProgramAccounts(ALIGN_PROGRAM_ID, {
-                dataSlice: { offset: 0, length: 0 },
-                filters: [
-                    filterFactory(
-                        0,
-                        Buffer.from(
-                            sha256.digest("account:Organisation")
-                        ).subarray(0, 8)
-                    ),
-                    filterFactory(40, mint.toBuffer()),
-                ],
-            })
+            programs.alignGovernanceProgram.provider.connection.getProgramAccounts(
+                ALIGN_PROGRAM_ID,
+                {
+                    dataSlice: { offset: 0, length: 0 },
+                    filters: [
+                        filterFactory(
+                            0,
+                            Buffer.from(
+                                sha256.digest("account:Organisation")
+                            ).subarray(0, 8)
+                        ),
+                        filterFactory(40, mint.toBuffer()),
+                    ],
+                }
+            )
         );
 
         const orgAccounts = await Promise.all(orgPromises);
@@ -250,7 +254,7 @@ export namespace Api {
                 organisation,
                 identityAddress
             );
-        const reputationManager : ReputationManager =
+        const reputationManager: ReputationManager =
             await programs.alignGovernanceProgram.account.reputationManager.fetch(
                 reputationManagerAddress
             );
@@ -260,42 +264,108 @@ export namespace Api {
         };
     };
 
-    export const fetchProposal = async (proposalAddress : PublicKey, progams : AlignPrograms) : Promise<Account<Proposal>> => {
-
-        const proposal : Proposal = await progams.alignGovernanceProgram.account.proposal.fetch(proposalAddress);
+    export const fetchProposal = async (
+        proposalAddress: PublicKey,
+        progams: AlignPrograms
+    ): Promise<Account<Proposal>> => {
+        const proposal: Proposal =
+            await progams.alignGovernanceProgram.account.proposal.fetch(
+                proposalAddress
+            );
         return {
-            address : proposalAddress,
-            account : proposal
-        }
+            address: proposalAddress,
+            account: proposal,
+        };
+    };
 
-    }
-
-    export const fetchStakedNfts = async (identifierAddress : PublicKey, organisationAddress : PublicKey, programs : AlignPrograms) : Promise<PublicKey[]> => {
-        
-        const identityAddress = Derivation.deriveIdentityAddress(identifierAddress);
-        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, identityAddress )
-        const tokenAccounts :{
+    export const fetchStakedNfts = async (
+        identifierAddress: PublicKey,
+        organisationAddress: PublicKey,
+        programs: AlignPrograms
+    ): Promise<PublicKey[]> => {
+        const identityAddress =
+            Derivation.deriveIdentityAddress(identifierAddress);
+        const reputationManagerAddress =
+            Derivation.deriveReputationManagerAddress(
+                organisationAddress,
+                identityAddress
+            );
+        const tokenAccounts: {
             pubkey: PublicKey;
-            account: AccountInfo<Buffer |ParsedAccountData>;
-        }[]= await programs.alignGovernanceProgram.provider.connection.getParsedProgramAccounts(
-            TOKEN_PROGRAM_ID,
-            {
-              filters: [
+            account: AccountInfo<Buffer | ParsedAccountData>;
+        }[] =
+            await programs.alignGovernanceProgram.provider.connection.getParsedProgramAccounts(
+                TOKEN_PROGRAM_ID,
                 {
-                  dataSize: 165,
-                },
-                {
-                  memcmp: {
-                    offset: 32, 
-                    bytes: reputationManagerAddress.toBase58(),
-                  },
-                },
-              ],
-            }
-          );
-        //@ts-ignore
-        return tokenAccounts.map((acc) => new PublicKey(acc.account.data.parsed.info.mint))
+                    filters: [
+                        {
+                            dataSize: 165,
+                        },
+                        {
+                            memcmp: {
+                                offset: 32,
+                                bytes: reputationManagerAddress.toBase58(),
+                            },
+                        },
+                    ],
+                }
+            );
         
-    }
-    
+        return tokenAccounts.map(
+            //@ts-ignore
+            (acc) => new PublicKey(acc.account.data.parsed.info.mint)
+        );
+    };
+
+    /**
+     * Fetch council manager - lists current elected council memebers, election date etc
+     * @param organisation
+     * @param programs
+     */
+    export const fetchCouncilManager = async (
+        organisation: PublicKey,
+        programs: AlignPrograms
+    ): Promise<Account<CouncilManager>> => {
+        const councilManagerAddress =
+            Derivation.deriveCouncilManagerAddress(organisation);
+        const councilManager: CouncilManager =
+            await programs.alignGovernanceProgram.account.councilManager.fetch(
+                councilManagerAddress
+            );
+
+        return {
+            address: councilManagerAddress,
+            account: councilManager,
+        };
+    };
+
+    export const fetchCouncilVotesForProposal = async (
+        organisationAddress: PublicKey,
+        proposalAddress: PublicKey,
+        programs: AlignPrograms
+    ): Promise<Account<CouncilVoteRecord>[]> => {
+        const manager = await fetchCouncilManager(
+            organisationAddress,
+            programs
+        );
+        const votesPromise = manager.account.councilIdentifiers.map(
+            async (id) => {
+                const recordAddress = await Derivation.deriveCouncilVoteRecord(
+                    id,
+                    proposalAddress
+                );
+                const record: CouncilVoteRecord =
+                    await programs.alignGovernanceProgram.account.councilVoteRecord.fetch(
+                        recordAddress
+                    );
+                return {
+                    address: recordAddress,
+                    account: record,
+                };
+            }
+        );
+
+        const votes = await Promise.all(votesPromise);
+        return votes;
+    };
 }

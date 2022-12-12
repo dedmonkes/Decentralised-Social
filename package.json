@@ -6,6 +6,7 @@
     "dependencies": {
         "@project-serum/anchor": "^0.25.0"
     },
+    "license": "GPL",
     "devDependencies": {
         "@metaplex-foundation/js": "^0.17.8",
         "@metaplex-foundation/mpl-token-metadata": "^2.5.2",
