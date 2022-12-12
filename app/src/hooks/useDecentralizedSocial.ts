@@ -194,6 +194,7 @@ export function useDecentralizedSocial() {
 
         getProposals();
     }, [nfts]);
+    
 
     return {
         user,
