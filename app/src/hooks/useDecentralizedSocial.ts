@@ -19,7 +19,7 @@ import {
     getUsersPointsAvailable,
     Organisation,
     User,
-} from "align-sdk";
+} from "@dedmonkes/align-sdk";
 import { useReadOnlyWallet } from "./useReadOnlyWallet";
 import {
     AccountInfo,
@@ -77,22 +77,27 @@ export function useDecentralizedSocial() {
 
     const [pointsBalance, setPointsBalance] = useState(0);
 
-    const [reputation, setReputation] = useState(0)
+    const [reputation, setReputation] = useState(0);
 
     useEffect(() => {
         const getReputation = async () => {
-            if(!user || !organizations) return
+            if (!user || !organizations) return;
 
             const alignPrograms = await createAlignPrograms(
                 connection,
                 wallet as any
             );
 
-            const reputationManager = await Api.fetchIdentifiersReputationManager(user.account.identifier, organizations[0], alignPrograms)
-            setReputation(reputationManager.account.reputation.toNumber())
-        }
-        getReputation()
-    }, [user, organizations])
+            const reputationManager =
+                await Api.fetchIdentifiersReputationManager(
+                    user.account.identifier,
+                    organizations[0],
+                    alignPrograms
+                );
+            setReputation(reputationManager.account.reputation.toNumber());
+        };
+        getReputation();
+    }, [user, organizations]);
 
     useEffect(() => {
         const getProfile = async () => {
@@ -211,7 +216,6 @@ export function useDecentralizedSocial() {
 
         getProposals();
     }, [nfts]);
-    
 
     return {
         user,

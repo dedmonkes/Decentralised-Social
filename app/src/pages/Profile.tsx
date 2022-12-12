@@ -10,7 +10,7 @@ import { TOKEN_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useEffect, useState } from "react";
-import { AlignPrograms, createAlignPrograms } from "align-sdk";
+import { AlignPrograms, createAlignPrograms } from "@dedmonkes/align-sdk";
 import { useConnection } from "@solana/wallet-adapter-react";
 
 export const getTokenAccountsByAddress = async (
@@ -27,28 +27,31 @@ export const METADATA_PROGRAM_ID = new PublicKey(
 );
 export function Profile() {
     const { user, proposals, wallet, reputation } = useDecentralizedSocial();
-    const {connection} = useConnection()
-    
+    const { connection } = useConnection();
+
     const [programs, setPrograms] = useState<AlignPrograms | null>(null);
 
     useEffect(() => {
-        const getPrograms = async () =>{
-            const programs = await createAlignPrograms(connection, wallet as any)
-            setPrograms(programs)
-        }
-        getPrograms()
+        const getPrograms = async () => {
+            const programs = await createAlignPrograms(
+                connection,
+                wallet as any
+            );
+            setPrograms(programs);
+        };
+        getPrograms();
     }, []);
 
     if (!wallet?.publicKey) {
         return <div />;
     }
 
-    if(!user){
+    if (!user) {
         return (
             <div className="max-w-6xl mx-auto flex items-center justify-center">
-                <LoadingSpinner/>
+                <LoadingSpinner />
             </div>
-        )
+        );
     }
 
     return (

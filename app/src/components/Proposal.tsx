@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { Account, Organisation } from "align-sdk";
+import { Account, Organisation } from "@dedmonkes/align-sdk";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, MinusSquare, PlusSquare } from "react-feather";
@@ -29,7 +29,6 @@ export function Proposal(props: { proposal: Account<Organisation> }) {
 
         getProposalMetadata();
     }, [props.proposal]);
-
 
     return (
         <div className="mt-4">
