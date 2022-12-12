@@ -6,15 +6,18 @@ import { Identifiers } from "../target/types/identifiers";
 import { Leaf } from "../target/types/leaf";
 import { Multigraph } from "../target/types/multigraph";
 import { Profiles } from "../target/types/profiles";
-import { getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft, sleep } from "./helpers";
+import { createShadowAccount, getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollectionNft, mintNft, sleep, uploadProposalMetadata } from "./helpers";
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
-import { AlignPrograms, Api, createAlignPrograms } from "align-sdk";
+import { AlignPrograms, Api, createAlignPrograms, ProposalData } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk/src";
 import fs from 'fs' 
 import os from "os"
 import path from "path"
+
+import {ShdwDrive} from "@shadow-drive/sdk";
+
 
 const keyPath = path.join(os.homedir(), ".config", "solana", "id.json")
 const key = fs.readFileSync(keyPath, {encoding: "binary"});
@@ -42,17 +45,6 @@ describe("identifiers", () => {
     
 
     const identifier = anchor.web3.Keypair.fromSecretKey(identifierSeed)
-
-    // const wallet : anchor.Wallet = {
-    //   payer: identifier,
-    //   signTransaction: function (tx: anchor.web3.Transaction): Promise<anchor.web3.Transaction> {
-    //     throw new Error("Function not implemented.");
-    //   },
-    //   signAllTransactions: function (txs: anchor.web3.Transaction[]): Promise<anchor.web3.Transaction[]> {
-    //     throw new Error("Function not implemented.");
-    //   },
-    //   publicKey: identifier.publicKey
-    // }
   
     const programs = createAlignPrograms(leafProgram.provider.connection, wallet)
     const [identity] = publicKey.findProgramAddressSync([
@@ -687,7 +679,15 @@ describe("Align Governance Inergration Tests", () => {
     })
 
     it("Create Proposal", async () => {
-
+        
+        const drive = await new ShdwDrive(new web3.Connection(web3.clusterApiUrl("mainnet-beta"), {commitment : "max"}),  wallet).init()
+        const proposalData : ProposalData= {
+            name: "Create a onchain social network based DAO",
+            description: "Qui harum facere et nesciunt internos ut veritatis optio! Et enim quisquam aut quasi repellendus sed possimus optio et quis dolorem ut laudantium velit non error iure At fugit consectetur. Qui quasi fugit id architecto totam est blanditiis autem. Ut consequuntur quae quo impedit molestiae est maxime perferendis eos nisi necessitatibus aut autem sapiente ut esse quos aut velit unde?",
+        }
+        const accountRes = await createShadowAccount("ALIGN_PROPOSAL", proposalData, drive)
+        await uploadProposalMetadata(proposalAddress.toBase58(), proposalData,new web3.PublicKey(accountRes.shdw_bucket), drive)
+        
         const tx = await identifierProgram.methods.initializeIdentifier(null)
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
@@ -705,7 +705,7 @@ describe("Align Governance Inergration Tests", () => {
             .transaction()
 
         await alignProgram.provider.sendAndConfirm(tx, [servicerIdenitifier, servicerKeypair], { skipPreflight: true })
-
+        
 
         await alignProgram.methods.createProposal()
             .accountsStrict({
@@ -715,7 +715,7 @@ describe("Align Governance Inergration Tests", () => {
                 organisation,
                 identity: councilIdentity,
                 reputationManager: reputationManagerAddress,
-                shadowDrive: web3.Keypair.generate().publicKey,
+                shadowDrive: accountRes.shdw_bucket,
                 councilManager,
                 proposal: proposalAddress,
                 governance: nativeTreasuryAddress,
