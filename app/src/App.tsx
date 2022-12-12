@@ -38,10 +38,12 @@ export const App: FC = () => {
     return (
         <ConnectionProvider endpoint={endpoint}>
             <WalletProvider wallets={wallets} autoConnect>
-                <WalletModalProvider>
-                    <Navbar />
-                </WalletModalProvider>
-                <Router />
+                <div className="h-screen font-poppins">
+                    <WalletModalProvider>
+                        <Navbar />
+                    </WalletModalProvider>
+                    <Router />
+                </div>
             </WalletProvider>
         </ConnectionProvider>
     );

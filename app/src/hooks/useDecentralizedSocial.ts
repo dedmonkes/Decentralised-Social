@@ -77,6 +77,23 @@ export function useDecentralizedSocial() {
 
     const [pointsBalance, setPointsBalance] = useState(0);
 
+    const [reputation, setReputation] = useState(0)
+
+    useEffect(() => {
+        const getReputation = async () => {
+            if(!user || !organizations) return
+
+            const alignPrograms = await createAlignPrograms(
+                connection,
+                wallet as any
+            );
+
+            const reputationManager = await Api.fetchIdentifiersReputationManager(user.account.identifier, organizations[0], alignPrograms)
+            setReputation(reputationManager.account.reputation.toNumber())
+        }
+        getReputation()
+    }, [user, organizations])
+
     useEffect(() => {
         const getProfile = async () => {
             if (!wallet) {
@@ -143,7 +160,7 @@ export function useDecentralizedSocial() {
     }, [identifier, wallet]);
 
     useInterval(() => {
-        const getReputation = async () => {
+        const getPoints = async () => {
             if (!organizations || !user) {
                 return;
             }
@@ -160,7 +177,7 @@ export function useDecentralizedSocial() {
             console.log(points);
         };
 
-        getReputation();
+        getPoints();
     }, 10000);
 
     useEffect(() => {
@@ -203,6 +220,7 @@ export function useDecentralizedSocial() {
         proposals,
         pointsBalance,
         wallet,
+        reputation,
         error: wallet?.publicKey === undefined,
     };
 }

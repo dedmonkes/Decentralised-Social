@@ -33,7 +33,7 @@ export function Proposal(props: { proposal: Account<Organisation> }) {
 
     return (
         <div className="mt-4">
-            <div className="flex border border-gray-800 rounded pb-4">
+            <div className="flex border border-white rounded-md border-opacity-30 pb-4">
                 <div className="flex">
                     <div className="mt-4 ml-4 ">
                         <button className="block text-gray-400">
