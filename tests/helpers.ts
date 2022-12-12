@@ -15,7 +15,7 @@ export const mineIdentifier = () => {
     const keypair = web3.Keypair.generate()
 
     if (keypair.publicKey.toBase58().startsWith("id")) {
-      console.log("Found key ", keypair.publicKey.toBase58(), keypair.publicKey.toBytes())
+      console.log("Found key ", keypair.publicKey.toBase58(), keypair.secretKey)
 
       return keypair
     }

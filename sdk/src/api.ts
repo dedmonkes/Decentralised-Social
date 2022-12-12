@@ -11,11 +11,13 @@ import {
     Organisation,
     OwnerRecord,
     Profile,
+    Proposal,
     ReputationManager,
     User,
 } from "./types";
 
 export namespace Api {
+
     export const fetchUserProfileByIdentifier = async (
         identifierAddress: PublicKey,
         programs: AlignPrograms
@@ -67,7 +69,7 @@ export namespace Api {
         programs: AlignPrograms
     ) => {
         const orgPromises = collectionMints.map((mint) =>
-            programs.provider.connection.getProgramAccounts(ALIGN_PROGRAM_ID, {
+            programs.alignGovernanceProgram.provider.connection.getProgramAccounts(ALIGN_PROGRAM_ID, {
                 dataSlice: { offset: 0, length: 0 },
                 filters: [
                     filterFactory(
@@ -126,7 +128,7 @@ export namespace Api {
         programs: AlignPrograms
     ): Promise<Account<Organisation>[]> => {
         const proposalAccounts =
-            await programs.provider.connection.getProgramAccounts(
+            await programs.alignGovernanceProgram.provider.connection.getProgramAccounts(
                 ALIGN_PROGRAM_ID,
                 {
                     filters: [
@@ -256,7 +258,14 @@ export namespace Api {
         };
     };
 
-    // TODO calculate reputation to display
-    // TODO calculate points to display
+    export const fetchProposal = async (proposalAddress : PublicKey, progams : AlignPrograms) : Promise<Account<Proposal>> => {
+
+        const proposal : Proposal = await progams.alignGovernanceProgram.account.proposal.fetch(proposalAddress);
+        return {
+            address : proposalAddress,
+            account : proposal
+        }
+
+    }
     
 }
