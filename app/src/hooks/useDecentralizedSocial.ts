@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import {
     Account,
+    AlignPrograms,
     Api,
     createAlignPrograms,
     getUsersPointsAvailable,
@@ -79,6 +80,8 @@ export function useDecentralizedSocial() {
     const [pointsBalance, setPointsBalance] = useState(0);
 
     const [reputation, setReputation] = useState(0);
+    
+    const [alignPrograms, setAlignPrograms] = useState<AlignPrograms | null>(null);
 
     useEffect(() => {
         const getReputation = async () => {
@@ -88,6 +91,8 @@ export function useDecentralizedSocial() {
                 connection,
                 wallet as any
             );
+
+            setAlignPrograms(alignPrograms);
 
             const reputationManager =
                 await Api.fetchIdentifiersReputationManager(
@@ -226,6 +231,7 @@ export function useDecentralizedSocial() {
         pointsBalance,
         wallet,
         reputation,
+        alignPrograms,
         error: wallet?.publicKey === undefined,
     };
 }
