@@ -18,6 +18,7 @@ import {
     createAlignPrograms,
     getUsersPointsAvailable,
     Organisation,
+    Proposal as ProposalAccount,
     User,
 } from "@dedmonkes/align-sdk";
 import { useReadOnlyWallet } from "./useReadOnlyWallet";
@@ -71,7 +72,7 @@ export function useDecentralizedSocial() {
         null
     );
 
-    const [proposals, setProposals] = useState<Account<Organisation>[] | null>(
+    const [proposals, setProposals] = useState<Account<ProposalAccount>[] | null>(
         null
     );
 
@@ -200,7 +201,7 @@ export function useDecentralizedSocial() {
                     nfts.map((n) => n.onChainMetadata[0].mint),
                     alignPrograms
                 );
-            const proposals: Account<Organisation>[] = [];
+            const proposals: Account<ProposalAccount>[] = [];
 
             for (const org of organizations) {
                 const something = await Api.fetchOrganisationProposals(

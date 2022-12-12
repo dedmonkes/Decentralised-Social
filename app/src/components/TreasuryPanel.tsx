@@ -32,17 +32,19 @@ const TreasuryPanel = () => {
     }, [wallet, organizations, user]);
 
     return (
-        <div className="bg-black bg-opacity-30 w-full font-light h-24 border border-white rounded-md border-opacity-30 px-5 py-8 flex flex-row items-center justify-between">
-            <div>Treasury</div>
-            <div className="flex gap-3 text-sm">
-                <div className="border border-white border-solid border-opacity-30 px-3 py-1 rounded-full text-opacity-50">
-                    {balance.toFixed(2)} SOL
-                </div>
-                <div className="border border-white border-solid border-opacity-30 px-3 py-1 rounded-full">
-                    1000 USDC
-                </div>
-            </div>
+        <div className="box-container mb-4 py-4 px-6">
+        <div className="flex items-center justify-between text-lg">
+          <h4>Treasury:</h4>
+          <div className="flex items-center justify-end gap-2">
+            <span className="rounded-full border border-white border-opacity-30 px-5 py-1">
+              {balance} SOL
+            </span>
+            <span className="rounded-full border border-white border-opacity-30 px-5 py-1">
+              2,520 USDC
+            </span>
+          </div>
         </div>
+      </div>
     );
 };
 

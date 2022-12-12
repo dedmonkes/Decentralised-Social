@@ -1,5 +1,6 @@
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useLocation } from "react-router-dom";
+import CouncilVotingPanel from "../components/CouncilVotingPanel";
 import PastProposalsPanel from "../components/PastProposalsPanel";
 import { Proposal } from "../components/Proposal";
 import TreasuryPanel from "../components/TreasuryPanel";
@@ -22,32 +23,28 @@ export function Home() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto text-white h-full">
-            <div className="grid grid-cols-3 w-full grid-flow-col grid-rows-6 gap-4 h-4/5">
-                <div className="row-span-1 col-span-1">
-                    <TreasuryPanel />
-                </div>
-                <div className="row-span-3 col-span-1">
-                    <PastProposalsPanel />
-                </div>
-                <div className="row-span-2 col-span-1">
-                    <PastProposalsPanel />
-                </div>
-                <div className="col-span-2 row-span-6">
-                    <div className="h-full border border-white rounded-md border-opacity-30 bg-black bg-opacity-30 w-full px-4 pt-5">
-                        <h1 className="text-3xl text-center w-full pt-2 pb-2">
-                            Active Proposals
-                        </h1>
-                        <hr className="mt-6 opacity-30" />
-                        {proposals?.map((prop) => (
-                            <Proposal
-                                proposal={prop}
-                                key={prop.address.toBase58()}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div className="mx-auto max-w-screen-2xl px-4 py-8 text-white">
+      <div className="flex-wrap justify-between gap-6 lg:grid lg:grid-cols-3">
+        <main className="box-container w-full p-6 lg:col-span-2">
+          <h1 className="text-center font-syne text-4xl">
+            Community Proposals
+          </h1>
+          <hr className="mt-6 opacity-30" />
+          <div className="mt-4 flex justify-between text-lg">
+            <p className="ml-14">Proposals</p>
+            <p className="w-[180px]">Service Provider</p>
+          </div>
+          {proposals?.map((prop) => (
+            <Proposal proposal={prop} key={prop.address.toBase58()} />
+          ))}
+        </main>
+        <aside className="w-full lg:col-span-1">
+            <TreasuryPanel/>
+            <CouncilVotingPanel/>
+            <PastProposalsPanel/>
+          
+        </aside>
+      </div>
+    </div>
     );
 }

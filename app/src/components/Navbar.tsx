@@ -12,53 +12,46 @@ export function Navbar() {
 
     return (
         <div>
-            <nav>
-                <div className="max-w-full mx-auto px-10 py-2">
-                    <div className="flex justify-between">
-                        <div
-                            className="flex cursor-pointer"
-                            onClick={() => {
-                                navigate("/");
-                            }}
-                        >
-                            <img
-                                alt="align by phase labs"
-                                src={alignByPhaseLabs}
-                            ></img>
-                        </div>
-                        <div className="flex space-x-4">
-                            <div className="pt-5 pb-5">
-                                <div className="flex">
-                                    <button className="text-white font-mono mt-1 mr-3">
-                                        {pointsBalance.toFixed(8)} VP
-                                    </button>
-
-                                    {wallet?.publicKey && (
-                                        <button
-                                            onClick={() => {
-                                                navigate(
-                                                    "/u/" +
-                                                        wallet.publicKey.toBase58()
-                                                );
-                                            }}
-                                            className="text-white mr-5 px-5"
-                                        >
-                                            <User className="inline-block h-4" />{" "}
-                                            My Profile
-                                        </button>
-                                    )}
-                                    <WalletMultiButton
-                                        className="bg-transparent"
-                                        style={{
-                                            border: "1px solid #631AFF ",
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <nav>
+          <div className="mx-auto max-w-screen-2xl px-4 py-8">
+            <div className="flex justify-between">
+              <div
+                className="flex cursor-pointer"
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
+                <img alt="align by phase labs" src={alignByPhaseLabs}></img>
+              </div>
+              <div className="flex space-x-4">
+                <div className="mt-5 mb-5">
+                  <div className="flex">
+                    <button className="mt-1 mr-3 font-mono text-white">
+                      {pointsBalance.toFixed(8)} VP
+                    </button>
+  
+                    {wallet?.publicKey && (
+                      <button
+                        onClick={() => {
+                          navigate("/u/" + wallet.publicKey.toBase58());
+                        }}
+                        className="mr-5 flex items-center gap-1 px-5 text-white"
+                      >
+                        <User className="inline-block h-5" /> My Profile
+                      </button>
+                    )}
+                    <WalletMultiButton
+                      className="bg-transparent"
+                      style={{
+                        border: "1px solid #631AFF ",
+                      }}
+                    />
+                  </div>
                 </div>
-            </nav>
-        </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
     );
 }

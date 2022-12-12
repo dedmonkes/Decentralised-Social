@@ -5,7 +5,7 @@
     "dependencies": {
         "@babel/core": "^7.16.0",
         "@metaplex-foundation/mpl-token-metadata": "^2.5.2",
-        "@dedmonkes/align-sdk": "0.3.1",
+        "@dedmonkes/align-sdk": "0.3.2",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
         "@project-serum/anchor": "^0.25.0",
         "@solana-mobile/wallet-adapter-mobile": "^0.9.4",

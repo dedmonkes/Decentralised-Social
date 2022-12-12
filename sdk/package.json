@@ -1,6 +1,6 @@
 {
   "name": "@dedmonkes/align-sdk",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Align Governance SDK",
   "main": "./dist/index.js",
   "browser": "./dist/index.js",

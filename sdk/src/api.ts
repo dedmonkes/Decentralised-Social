@@ -133,7 +133,7 @@ export namespace Api {
     export const fetchOrganisationProposals = async (
         organisation: PublicKey,
         programs: AlignPrograms
-    ): Promise<Account<Organisation>[]> => {
+    ): Promise<Account<Proposal>[]> => {
         const proposalAccounts =
             await programs.alignGovernanceProgram.provider.connection.getProgramAccounts(
                 ALIGN_PROGRAM_ID,
@@ -151,11 +151,11 @@ export namespace Api {
             );
 
         const parsedAccountData = proposalAccounts.map((acc) => {
-            const parsedAccountData: Organisation =
+            const parsedAccountData: Proposal =
                 programs.alignGovernanceProgram.coder.accounts.decode(
                     "proposal",
                     acc.account.data as Buffer
-                ) as Organisation;
+                ) as Proposal;
 
             return {
                 address: acc.pubkey,
