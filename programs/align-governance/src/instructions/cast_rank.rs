@@ -135,7 +135,7 @@ pub struct CastRank<'info> {
     pub reputation_manager: Box<Account<'info, ReputationManager>>,
 
     #[account(
-        init,
+        init_if_needed,
         seeds = [b"contribution-record", proposal.key().as_ref(), identity.identifier.as_ref()],
         bump,
         space = ContributionRecord::space(),
