@@ -116,13 +116,11 @@ export namespace Derivation {
 
     export const deriveProposalAddress = (
         governanceAdddress: PublicKey,
-        index: bigint
+        index: BN 
     ) => {
-        const buff = Buffer.alloc(8);
-        buff.writeBigUint64LE(index);
 
         const [proposalAddress] = PublicKey.findProgramAddressSync(
-            [Buffer.from("proposal"), governanceAdddress.toBuffer(), buff],
+            [Buffer.from("proposal"), governanceAdddress.toBuffer(), index.toBuffer("le", 8)],
             ALIGN_PROGRAM_ID
         );
         return proposalAddress;

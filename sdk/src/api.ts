@@ -10,6 +10,7 @@ import {
     CouncilManager,
     CouncilVoteRecord,
     Identity,
+    NativeTreasuryAccount,
     Organisation,
     OwnerRecord,
     Profile,
@@ -240,6 +241,22 @@ export namespace Api {
                 nativeTreasuryAddress
             );
         return balance;
+    };
+
+    export const fetchNativeTreasuryInfo = async (
+        organisation: PublicKey,
+        programs: AlignPrograms
+    ): Promise<Account<NativeTreasuryAccount>> => {
+        const nativeTreasuryAddress =
+            Derivation.deriveNativeTreasuryAddress(organisation);
+        const treasury : NativeTreasuryAccount =
+            await programs.alignGovernanceProgram.account.nativeTreasuryAccount.fetch(
+                nativeTreasuryAddress
+            );
+        return {
+            address: nativeTreasuryAddress,
+            account : treasury
+        };
     };
 
     export const fetchIdentifiersReputationManager = async (
