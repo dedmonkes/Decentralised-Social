@@ -805,9 +805,9 @@ describe("Align Governance Inergration Tests", () => {
         //     // .rpc({skipPreflight: true})
 
         // await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], { skipPreflight: true })
+        await Api.fetchStakedNfts(councilIdentifier.publicKey, organisation, programs )
 
         await castRankVote(councilIdentifier.publicKey, proposalAddress, RankVoteType.Upvote, 1, programs) 
-
         console.log("Fetching proposal Accounts")
         
         const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)

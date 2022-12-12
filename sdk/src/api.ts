@@ -1,5 +1,5 @@
 import { sha256 } from "js-sha256";
-import { AccountInfo, PublicKey } from "@solana/web3.js";
+import { AccountInfo, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { ALIGN_PROGRAM_ID } from "./constants";
 import { filterFactory } from "./filters";
 import { Derivation } from "./pda";
@@ -15,6 +15,8 @@ import {
     ReputationManager,
     User,
 } from "./types";
+import { Spl } from "@project-serum/anchor";
+import { TOKEN_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 
 export namespace Api {
 
@@ -268,11 +270,32 @@ export namespace Api {
 
     }
 
-    // export const fetchStakedNfts = async (ownerAddress : PublicKey, organisationAddress : PublicKey, programs : AlignPrograms) => {
-    //     const identity = fetchUserProfileByOwnerPubkey()
-    //     const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, )
-    //     programs.alignGovernanceProgram.provider.connection.getTokenAccountsByOwner()
-
-    // }
+    export const fetchStakedNfts = async (identifierAddress : PublicKey, organisationAddress : PublicKey, programs : AlignPrograms) : Promise<PublicKey[]> => {
+        
+        const identityAddress = Derivation.deriveIdentityAddress(identifierAddress);
+        const reputationManagerAddress = Derivation.deriveReputationManagerAddress(organisationAddress, identityAddress )
+        const tokenAccounts :{
+            pubkey: PublicKey;
+            account: AccountInfo<Buffer |ParsedAccountData>;
+        }[]= await programs.alignGovernanceProgram.provider.connection.getParsedProgramAccounts(
+            TOKEN_PROGRAM_ID,
+            {
+              filters: [
+                {
+                  dataSize: 165,
+                },
+                {
+                  memcmp: {
+                    offset: 32, 
+                    bytes: reputationManagerAddress.toBase58(),
+                  },
+                },
+              ],
+            }
+          );
+        //@ts-ignore
+        return tokenAccounts.map(acc => acc.account.data.parsed.mint)
+        
+    }
     
 }
