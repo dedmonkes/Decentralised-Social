@@ -203,5 +203,5 @@ export interface Account<T> {
 export interface ProposalData {
     name: string;
     description: string;
-    image: string;
+    // image: string;
 }

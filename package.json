@@ -9,6 +9,7 @@
     "devDependencies": {
         "@metaplex-foundation/js": "^0.17.8",
         "@metaplex-foundation/mpl-token-metadata": "^2.5.2",
+        "@shadow-drive/sdk": "^3.0.10",
         "@solana/spl-token": "^0.3.6",
         "@types/bn.js": "^5.1.0",
         "@types/chai": "^4.3.0",
