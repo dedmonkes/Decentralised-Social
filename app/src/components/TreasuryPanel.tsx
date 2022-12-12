@@ -1,11 +1,12 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Api, createAlignPrograms } from "align-sdk";
 import { useEffect, useState } from "react";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 
 const TreasuryPanel = () => {
 
-    const {organizations} = useDecentralizedSocial()
+    const {organizations, user} = useDecentralizedSocial()
     const {connection} = useConnection()
     const wallet = useWallet()
 
@@ -18,9 +19,12 @@ const TreasuryPanel = () => {
             }
             const programs = await createAlignPrograms(connection, wallet as any)
             const balance = await Api.fetchNativeTreasuryBalance(organizations[0], programs)
-            setBalance(balance)
+            console.log(balance )
+
+            setBalance(balance / LAMPORTS_PER_SOL)
         }
-    }, [wallet, organizations]);
+        getTreasuryBalance()
+    }, [wallet, organizations, user]);
 
     return (
          <div className="bg-black bg-opacity-30 w-full font-light h-24 border border-white rounded-md border-opacity-30 px-5 py-8 flex flex-row items-center justify-between">
@@ -29,7 +33,7 @@ const TreasuryPanel = () => {
             </div>
             <div className="flex gap-3 text-sm">
                 <div className="border border-white border-solid border-opacity-30 px-3 py-1 rounded-full text-opacity-50">
-                        {balance} SOL
+                        {balance.toFixed(2)} SOL
                 </div>
                 <div className="border border-white border-solid border-opacity-30 px-3 py-1 rounded-full">
                         1000 USDC
