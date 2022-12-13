@@ -73,7 +73,7 @@ export function Profile() {
                 <main className="box-container w-full p-6 lg:col-span-2">
                     <h1 className="font-syne text-4xl">My Proposals</h1>
                     <hr className="mt-6 opacity-30" />
-                    {proposals?.map((prop) => (
+                    {proposals?.filter(proposal => proposal.account.proposer.toBase58() === user.account.identifier.toBase58()).map((prop) => (
                         <Proposal
                             key={prop.address.toBase58()}
                             proposal={prop}
@@ -106,7 +106,7 @@ export function Profile() {
                             <p className="align-right mr-4 mt-6 items-end justify-end text-right text-xl">
                                 <span className="block">{reputation} REP</span>
                                 <span className="block text-xs font-thin opacity-50">
-                                    {proposals?.length || 0} Proposal(s)
+                                    {proposals?.filter(proposal => proposal.account.proposer.toBase58() === user.account.identifier.toBase58()).length || 0} Proposal(s)
                                 </span>
                             </p>
                         </div>
