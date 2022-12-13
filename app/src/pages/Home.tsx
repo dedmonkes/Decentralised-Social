@@ -45,14 +45,16 @@ export function Home() {
             id="defaultModal"
             tabIndex={-1}
             aria-hidden="true"
-            className={`fixed top-0 left-0 right-0 z-50 ${
+            className={`fixed top-0 left-0 right-0 z-50 w-screen h-screen flex justify-center items-center bg-black bg-opacity-70 p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full ${
               modalOpen ? "" : "hidden"
-            } w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full`}
+            }`}
           >
             <div className="relative w-full h-full max-w-2xl md:h-auto text-white">
-              <div className="relative bg-black rounded-lg shadow text-white">
-                <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-                  <h3 className="text-xl font-semibold">Create Proposal</h3>
+              <div className="relative bg-black border border-white border-opacity-30 rounded-lg shadow text-white p-10">
+                <div className="flex items-start justify-between">
+                  <h3 className="text-xl font-semibold mb-6">
+                    Create Proposal
+                  </h3>
                   <button
                     onClick={() => setModalOpen(false)}
                     type="button"
@@ -75,7 +77,7 @@ export function Home() {
                     <span className="sr-only">Close modal</span>
                   </button>
                 </div>
-                <div className="p-6 space-y-6">
+                <div className="space-y-6">
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -118,29 +120,29 @@ export function Home() {
                       }
                     }}
                   >
-                    <label className="block">Name</label>
+                    <label className="block opacity-75">Name</label>
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="block bg-transparent rounded border mt-1 "
+                      className="block bg-transparent rounded border mt-1 p-3 w-full"
                     />
-                    <label className="block mt-3">Description</label>
+                    <label className="block mt-6 opacity-75">Description</label>
                     <textarea
                       value={description}
+                      rows={4}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="block bg-transparent rounded border mt-1"
+                      className="block bg-transparent rounded border mt-1 p-3 w-full"
                     />
 
                     <button
                       data-modal-toggle="defaultModal"
                       type="submit"
-                      className="mt-5 text-white bg-primary hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      className="mt-6 text-white w-full bg-primary hover:bg-opacity-90 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                     >
                       Create
                     </button>
                   </form>
                 </div>
-                <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600"></div>
               </div>
             </div>
           </div>
