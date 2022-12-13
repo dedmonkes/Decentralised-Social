@@ -78,7 +78,7 @@ const CouncilVotingPanel = () => {
             </h4>
             <Carousel>
 
-                {councilProposals && councilManager ? councilProposals.map(proposal => <CouncilVotingProposal proposal={proposal} councilManager={councilManager}/> ) : <div className="h-52"></div>}
+                {councilProposals && councilManager ? councilProposals.map(proposal => <CouncilVotingProposal key={proposal.address.toBase58()} proposal={proposal} councilManager={councilManager}/> ) : <div className="h-52"></div>}
 
             </Carousel>
         </div>

@@ -1,12 +1,13 @@
 import { createProposal } from "@dedmonkes/align-sdk";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Plus } from "react-feather";
 import CouncilVotingPanel from "../components/CouncilVotingPanel";
 import PastProposalsPanel from "../components/PastProposalsPanel";
 import { Proposal } from "../components/Proposal";
 import { ProposalSkeleton } from "../components/ProposalSkeleton";
 import TreasuryPanel from "../components/TreasuryPanel";
+import { royaltyResponse } from "../constants";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 
 export function Home() {
@@ -17,6 +18,34 @@ export function Home() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+
+  const [royaltyGrade, setRoyaltyGrade] = useState<number | null>(null);
+
+  useEffect(() => {
+    const getRoyaltyActivities = async () => {
+      // in the future, this will be pulled from collection, however we are not on mainnet we are on localhost so this is hardcoded for now
+      // const res = await fetch(`https://api.coralcube.cc/0dec5037-f67d-4da8-9eb6-97e2a09ffe9a/inspector/getMintActivities?update_authority=yootn8Kf22CQczC732psp7qEqxwPGSDQCFZHkzoXp25&collection_symbol=y00ts&limit=10`)
+
+      // this api seems to be experiencing some failure so this is using a hardcoded example response:
+
+      const nftSales = royaltyResponse;
+
+      let paid = 0;
+      let total = 0;
+
+      for (const nftSale of nftSales) {
+        if (nftSale.royalty_fee > 0) {
+          paid += 1;
+        }
+        total += 1;
+      }
+
+      setRoyaltyGrade(paid/total*100)
+
+    }
+
+    getRoyaltyActivities();
+  }, [wallet])
 
   if (!wallet?.publicKey) {
     return (
@@ -35,7 +64,11 @@ export function Home() {
           <h1 className="text-center font-syne text-4xl">
             Community Proposals
           </h1>
-
+          <div className="text-center text-md mt-3">
+            <p className="inline-block">% of Community Paying Royalties:</p>
+            <p className="inline-block ml-2 ">{royaltyGrade?.toFixed(3)}%</p>
+            <p className="text-xs">data from CoralCube</p>
+          </div>
           <hr className="mt-6 opacity-30" />
           <div className="mt-4 flex justify-between text-lg">
             <p className="ml-14">Proposals</p>
@@ -45,9 +78,8 @@ export function Home() {
             id="defaultModal"
             tabIndex={-1}
             aria-hidden="true"
-            className={`fixed top-0 left-0 right-0 z-50 w-screen h-screen flex justify-center items-center bg-black bg-opacity-70 p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full ${
-              modalOpen ? "" : "hidden"
-            }`}
+            className={`fixed top-0 left-0 right-0 z-50 w-screen h-screen flex justify-center items-center bg-black bg-opacity-70 p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full ${modalOpen ? "" : "hidden"
+              }`}
           >
             <div className="relative w-full h-full max-w-2xl md:h-auto text-white">
               <div className="relative bg-black border border-white border-opacity-30 rounded-lg shadow text-white p-10">

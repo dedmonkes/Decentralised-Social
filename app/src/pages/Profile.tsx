@@ -42,6 +42,8 @@ export function Profile() {
     const { user, proposals, wallet, reputation } = useDecentralizedSocial();
     const { connection } = useConnection();
 
+    const [royaltyGrade, setRoyaltyGrade] = useState<any | null>(null);
+
     const [programs, setPrograms] = useState<AlignPrograms | null>(null);
 
     useEffect(() => {
