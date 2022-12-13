@@ -1065,8 +1065,10 @@ algosdk@^1.13.1:
     tweetnacl "^1.0.3"
     vlq "^2.0.4"
 
-"align-sdk@file:sdk":
-  version "0.3.10"
+align-sdk@0.3.11:
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/align-sdk/-/align-sdk-0.3.11.tgz#80fcf27e447d1587207b20fdde326f50e8b661fa"
+  integrity sha512-IB/hgxDFJ1F6zfTAisyrkr7wTPYjk1GtK2mUKZ/WPVMWTwV29I8ULrJtMPSHoRXbjn/HsFcvpX+avMDUw1lu1g==
   dependencies:
     "@project-serum/anchor" "^0.25.0"
     "@shadow-drive/sdk" "^3.0.10"

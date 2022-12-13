@@ -1,15 +1,12 @@
 {
-  "name": "@dedmonkes/align-sdk",
-  "version": "0.3.10",
+  "name": "align-sdk",
+  "version": "0.3.11",
   "description": "Align Governance SDK",
   "main": "./dist/index.js",
   "browser": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "publishConfig": {
-    "@dedmonkes:registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",

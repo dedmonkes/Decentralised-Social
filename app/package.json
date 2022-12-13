@@ -4,7 +4,7 @@
     "private": true,
     "dependencies": {
         "@babel/core": "^7.16.0",
-        "@dedmonkes/align-sdk": "0.3.10",
+        "align-sdk": "0.3.10",
         "@metaplex-foundation/mpl-token-metadata": "^2.5.2",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
         "@project-serum/anchor": "^0.25.0",
