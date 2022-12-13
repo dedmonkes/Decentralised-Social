@@ -1,4 +1,4 @@
-import { createProposal } from "@dedmonkes/align-sdk";
+import { Api, createProposal, Derivation } from "@dedmonkes/align-sdk";
 import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import { BN } from "bn.js";
 import { Suspense, useEffect, useState } from "react";
@@ -10,11 +10,13 @@ import { ProposalSkeleton } from "../components/ProposalSkeleton";
 import TreasuryPanel from "../components/TreasuryPanel";
 import { royaltyResponse } from "../constants";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
+import toast from "react-hot-toast";
+
 
 export function Home() {
   const wallet = useWallet();
   const [modalOpen, setModalOpen] = useState(false);
-  const { proposals, user, organizations, alignPrograms } =
+  const { proposals, user, organizations, alignPrograms, setProposals } =
     useDecentralizedSocial();
 
   const [name, setName] = useState("");
@@ -134,10 +136,14 @@ export function Home() {
                         alert("No alignprograms");
                         return;
                       }
-                      console.log(process.env.SHDW_BROWSER!)
-                      console.log(wallet)
+                      if (!proposals) {
+                        alert("No proposals");
+                        return;
+                      }
+
+
                       try {
-                        const proposal = await createProposal(
+                        await toast.promise(createProposal(
                           user.account.identifier,
                           organizations[0],
                           user.account.identifier,
@@ -147,10 +153,19 @@ export function Home() {
                           },
                           new BN(60 * 60 * 24 *3),
                           alignPrograms
-                        );
-                        
-                        console.log(proposal);
+                        ), {
+                          loading: "Create your proposal.",
+                          success: "Proposal created successfully!",
+                          error: "Failed to create proposal.",
+                        })
+                        setModalOpen(false)
+                        const treasury =await Api.fetchNativeTreasuryInfo(organizations[0], alignPrograms);
+                        const propIndex = treasury.account.totalProposals.sub(new BN(1))
+                        const address = Derivation.deriveProposalAddress(treasury.address, propIndex)
+                        const proposal = await Api.fetchProposal(address, alignPrograms)
+                        setProposals([...proposals, proposal])
                       } catch (err) {
+                        setModalOpen(false)
                         alert((err as any).toString());
                       }
                     }}

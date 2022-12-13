@@ -237,6 +237,7 @@ export function useDecentralizedSocial() {
         wallet,
         reputation,
         alignPrograms,
+        setProposals,
         error: wallet?.publicKey === undefined,
     };
 }

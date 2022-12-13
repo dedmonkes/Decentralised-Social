@@ -23,6 +23,8 @@ import {
 import LoadingSpinner from "./LoadingSpinner";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 import { BN } from "bn.js";
+import toast from "react-hot-toast";
+
 
 export function Proposal(props: { proposal: Account<ProposalAccount> }) {
     const [proposalMetadata, setProposalMetadata] =
@@ -115,13 +117,17 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
                             return;
                         }
                         try {
-                            const response = await castRankVote(
+                            await toast.promise(castRankVote(
                                 user.account.identifier,
                                 props.proposal.address,
                                 RankVoteType.Upvote,
                                 1,
                                 alignPrograms
-                            );
+                            ), {
+                                loading: "Voting for proposal.",
+                                success: "Vote created successfully!",
+                                error: "Failed to vote on proposal.",
+                            })
                             props.proposal.account.upvotes = props.proposal.account.upvotes.add(new BN(1))
                         } catch (err) {
                             alert(err);
