@@ -10,7 +10,7 @@ import {getMasterEditionAddress, getMetadataAddress, mineIdentifier, mintCollect
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { expect } from "chai";
-import { AlignPrograms, Api, castCouncilVote, CouncilVote, createAlignPrograms, createShadowAccount, createProposal, Proposal, ProposalData, stakeNfts, uploadProposalMetadata } from "align-sdk";
+import { AlignPrograms, Api, castCouncilVote, CouncilVote, createAlignPrograms, createShadowAccount, createProposal, Proposal, ProposalData, stakeNfts, uploadProposalMetadata, Derivation } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from 'fs' 
 import os from "os"
@@ -18,12 +18,58 @@ import path from "path"
 
 import {ShdwDrive} from "@shadow-drive/sdk";
 import { unstakeNfts } from "../sdk/src";
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
+import { BN } from "bn.js";
 
 
 const keyPath = path.join(os.homedir(), ".config", "solana", "id.json")
 const key = fs.readFileSync(keyPath, {encoding: "binary"});
 const wallet = new anchor.Wallet(anchor.web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(key))))
 
+const identifierSeed =  Uint8Array.from([
+  145,  53,  44,   5,  51, 214, 111, 194, 118, 210,  35,
+  159, 255, 177, 240,  62, 185, 210, 192,  47, 110,  37,
+  128, 190,  84, 226, 149, 152, 146,  58,  56, 126,  10,
+  170,  72, 180, 131,  42, 136, 171, 192, 119,   8,  44,
+  200,  19,   8, 208, 151,  19, 142, 108, 172, 197, 178,
+    7, 153, 139,  16,   7,  82, 128, 149, 146
+])
+
+const identifierSeed1 =  Uint8Array.from([
+    67, 144, 233, 146, 150, 202, 183, 100, 206, 100, 150,
+    96, 154,  58,  98,  55, 100, 253, 133, 177, 181,   2,
+    243, 252,  51,  72, 202,  80, 189,  87, 180, 151,  10,
+    169, 165,  80,  92, 104, 247, 150, 230, 105, 247, 234,
+    155,  97, 206, 115, 166, 251,  57, 200, 180, 252,  46,
+    70, 108, 140, 242,  40,  66, 190, 136,   8
+])
+
+const identifierSeed2 =  Uint8Array.from([
+  174,  27, 104,  11, 228, 162, 204,  55, 194,  11,  64,
+  186, 207,  79, 225, 177,  23, 252, 119,  28, 130, 207,
+  208, 115,  97, 255,  47, 119,  60, 126, 185,  60,  10,
+  169, 190, 204, 177,  33,  12, 143, 110,  99, 220, 149,
+  227,  71, 144,  89,  87, 130, 111, 169, 146, 245, 112,
+  68, 228,  96,  95,  78,  86,  63, 224, 212
+])
+
+const identifierSeed3 =  Uint8Array.from([
+  59,  94,  91,  69, 211,  82,  32, 198,  42, 230, 110,
+  6, 143, 146, 235, 181, 235, 246, 245, 129,  66, 224,
+  104, 173, 114, 100, 113,  40,  35, 142, 245,  12,  10,
+  169, 186,  17, 190,  80,  29, 109, 224,  66,  70, 140,
+  209,  46,  58,  13,  77, 211, 145,  94, 199, 136, 201,
+  69, 186, 200, 234,   7, 237,  50, 229,  99
+])
+
+
+
+const identifier1 = anchor.web3.Keypair.fromSecretKey(identifierSeed1)
+const identifier2 = anchor.web3.Keypair.fromSecretKey(identifierSeed2)
+const identifier3 = anchor.web3.Keypair.fromSecretKey(identifierSeed3)
+
+const owner1 = anchor.web3.Keypair.generate()
+const owner2 = anchor.web3.Keypair.generate()
 
 describe("identifiers", async () => {
     // Configure the client to use the local cluster.
@@ -35,15 +81,7 @@ describe("identifiers", async () => {
     const leafProgram = anchor.workspace.Leaf as Program<Leaf>
     const alignProgram = anchor.workspace.AlignGovernance as Program<AlignGovernance>
     
-    const identifierSeed =  Uint8Array.from([
-      145,  53,  44,   5,  51, 214, 111, 194, 118, 210,  35,
-      159, 255, 177, 240,  62, 185, 210, 192,  47, 110,  37,
-      128, 190,  84, 226, 149, 152, 146,  58,  56, 126,  10,
-      170,  72, 180, 131,  42, 136, 171, 192, 119,   8,  44,
-      200,  19,   8, 208, 151,  19, 142, 108, 172, 197, 178,
-        7, 153, 139,  16,   7,  82, 128, 149, 146
-    ])
-    
+
 
     const identifier = anchor.web3.Keypair.fromSecretKey(identifierSeed)
   
@@ -68,6 +106,19 @@ describe("identifiers", async () => {
     ],
       multigraphProgram.programId
     )
+
+    const [userNodeAddress1] = publicKey.findProgramAddressSync([
+      Buffer.from("node"),
+      Derivation.deriveIdentityAddress(identifier1.publicKey).toBuffer()
+    ],
+      multigraphProgram.programId
+    )
+    const [userNodeAddress2] = publicKey.findProgramAddressSync([
+      Buffer.from("node"),
+      Derivation.deriveIdentityAddress(identifier2.publicKey).toBuffer()
+    ],
+      multigraphProgram.programId
+    )
   
     it("Create Identity and graph!", async () => {
       console.log(identifierProgram.programId.toBase58())
@@ -75,9 +126,7 @@ describe("identifiers", async () => {
   
       const prebalance = await identifierProgram.provider.connection.getBalance(identifierProgram.provider.publicKey)
   
-  
-      // Add your test here.
-      const tx = await identifierProgram.methods.initializeIdentifier(
+      await identifierProgram.methods.initializeIdentifier(
         null
       ).accountsStrict({
         payer: identifierProgram.provider.publicKey,
@@ -95,9 +144,45 @@ describe("identifiers", async () => {
         .rpc({
           skipPreflight: true
         });
-  
-      console.log("Your transaction signature", tx);
-  
+
+        await identifierProgram.methods.initializeIdentifier(
+          null
+        ).accountsStrict({
+          payer: identifierProgram.provider.publicKey,
+          owner: owner1.publicKey,
+          identifierSigner: identifier1.publicKey,
+          identifier: identifier1.publicKey,
+          node: userNodeAddress1,
+          ownerRecord : Derivation.deriveOwnerRecordAddress(owner1.publicKey),
+          recoveryKey: new anchor.web3.Keypair().publicKey,
+          multigraph: multigraphProgram.programId,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          identity : Derivation.deriveIdentityAddress(identifier1.publicKey),
+        })
+          .signers([identifier1, owner1])
+          .rpc({
+            skipPreflight: true
+          });
+
+          await identifierProgram.methods.initializeIdentifier(
+            null
+          ).accountsStrict({
+            payer: identifierProgram.provider.publicKey,
+            owner: owner2.publicKey,
+            identifierSigner: identifier2.publicKey,
+            identifier: identifier2.publicKey,
+            node: userNodeAddress2,
+            ownerRecord : Derivation.deriveOwnerRecordAddress(owner2.publicKey),
+            recoveryKey: new anchor.web3.Keypair().publicKey,
+            multigraph: multigraphProgram.programId,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            identity: Derivation.deriveIdentityAddress(identifier2.publicKey),
+          })
+            .signers([identifier2, owner2])
+            .rpc({
+              skipPreflight: true
+            });
+    
       const idAccount = await identifierProgram.account.identifier.fetch(identifier.publicKey)
       console.log(JSON.parse(JSON.stringify(idAccount)))
   
@@ -115,16 +200,28 @@ describe("identifiers", async () => {
     });
   
   
-    it("Create user profile for identifier", async () => {
+    it("Create user profile for identifiers", async () => {
       console.log(profilesProgram.programId.toBase58())
       console.log("Minting a pfp..")
       
       const mintKeypair = new anchor.web3.Keypair();
       await mintCollectionNft(mintKeypair, identifierProgram.provider)
+
+      const mintKeypair1 = new anchor.web3.Keypair();
+      await mintNft(mintKeypair, mintKeypair1, identifierProgram.provider, owner1.publicKey)
+
+      const mintKeypair2 = new anchor.web3.Keypair();
+      await mintNft(mintKeypair, mintKeypair2, identifierProgram.provider, owner2.publicKey)
       console.log("Creating a profile..")
   
-      const username = "@professormint"
-      const displayName = "Professor Mint"
+      const username = "@extrahash"
+      const displayName = "Extra Hash"
+
+      const username1 = "@professormint"
+      const displayName1 = "Professor Mint"
+
+      const username2 = "@hi_im_adam"
+      const displayName2 = "hi im adam"
   
       const [userProfile] = publicKey.findProgramAddressSync([
         Buffer.from("user"),
@@ -139,8 +236,36 @@ describe("identifiers", async () => {
       ],
         profilesProgram.programId
       )
+
+      const [userProfile1] = publicKey.findProgramAddressSync([
+        Buffer.from("user"),
+        identifier1.publicKey.toBuffer()
+      ],
+        profilesProgram.programId
+      )
   
-      const tx = await profilesProgram.methods.createProfile(username, displayName)
+      const [usernameRecord1] = publicKey.findProgramAddressSync([
+        Buffer.from("username"),
+        anchor.utils.bytes.utf8.encode(username1)
+      ],
+        profilesProgram.programId
+      )
+
+      const [userProfile2] = publicKey.findProgramAddressSync([
+        Buffer.from("user"),
+        identifier2.publicKey.toBuffer()
+      ],
+        profilesProgram.programId
+      )
+  
+      const [usernameRecord2] = publicKey.findProgramAddressSync([
+        Buffer.from("username"),
+        anchor.utils.bytes.utf8.encode(username2)
+      ],
+        profilesProgram.programId
+      )
+  
+      await profilesProgram.methods.createProfile(username, displayName)
         .accountsStrict({
           payer: identifierProgram.provider.publicKey,
           owner: identifierProgram.provider.publicKey,
@@ -158,7 +283,49 @@ describe("identifiers", async () => {
           }
         )
   
-  
+
+      const ix1 =await profilesProgram.methods.createProfile(username1, displayName1)
+      .accountsStrict({
+        payer: identifierProgram.provider.publicKey,
+        owner: owner1.publicKey,
+        identifier: identifier1.publicKey,
+        ownerRecord : Derivation.deriveOwnerRecordAddress(owner1.publicKey),
+        systemProgram: anchor.web3.SystemProgram.programId,
+        userProfile: userProfile1,
+        usernameRecord : Derivation.deriveUsernameRecordAddress(username1),
+        pfpMint: mintKeypair1.publicKey,
+        pfpTokenAccount: await getAssociatedTokenAddress(mintKeypair1.publicKey, owner1.publicKey),
+        nftHolderOwnerRecord: Derivation.deriveOwnerRecordAddress(owner1.publicKey)
+      }).instruction()
+      // .signers([owner1])
+      // .rpc(
+      //   {
+      //     skipPreflight: true
+      //   }
+      // )
+
+
+    const ix2 = await profilesProgram.methods.createProfile(username2, displayName2)
+    .accountsStrict({
+      payer: identifierProgram.provider.publicKey,
+      owner: owner2.publicKey,
+      identifier: identifier2.publicKey,
+      ownerRecord : Derivation.deriveOwnerRecordAddress(owner2.publicKey),
+      systemProgram: anchor.web3.SystemProgram.programId,
+      userProfile: userProfile2,
+      usernameRecord : Derivation.deriveUsernameRecordAddress(username2),
+      pfpMint: mintKeypair2.publicKey,
+      pfpTokenAccount: await getAssociatedTokenAddress(mintKeypair2.publicKey, owner2.publicKey),
+      nftHolderOwnerRecord: Derivation.deriveOwnerRecordAddress(owner2.publicKey)
+    }).instruction()
+    // .signers([owner2])
+    // .rpc(
+    //   {
+    //     skipPreflight: true
+    //   }
+    // )
+
+      await profilesProgram.provider.sendAndConfirm(new web3.Transaction().add(ix1, ix2), [owner2, owner1],{skipPreflight : true})
       const profileAccount = await Api.fetchUserProfileByIdentifier(identifier.publicKey, programs)
       console.log(JSON.parse(JSON.stringify(profileAccount)))
   
@@ -416,6 +583,25 @@ describe("Align Governance Inergration Tests", async () => {
         multigraphProgram.programId
     )
 
+    const [edgeAddress1] = publicKey.findProgramAddressSync([
+      Buffer.from("edge"),
+      Derivation.deriveNodeAddress(Derivation.deriveIdentityAddress(identifier1.publicKey)).toBuffer(),
+      orgNodeAddress.toBuffer(),
+      Uint8Array.from([0]),
+      Uint8Array.from([1])
+  ],
+      multigraphProgram.programId
+  )
+  const [edgeAddress2] = publicKey.findProgramAddressSync([
+    Buffer.from("edge"),
+    Derivation.deriveNodeAddress(Derivation.deriveIdentityAddress(identifier2.publicKey)).toBuffer(),
+    orgNodeAddress.toBuffer(),
+    Uint8Array.from([0]),
+    Uint8Array.from([1])
+],
+    multigraphProgram.programId
+)
+
     const [reputationManagerAddress] = publicKey.findProgramAddressSync([
         Buffer.from("reputation-manager"),
         organisation.toBuffer(),
@@ -545,6 +731,50 @@ describe("Align Governance Inergration Tests", async () => {
                 
             })
 
+            await alignProgram.methods.joinOrganisation()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                fromNode: Derivation.deriveNodeAddress(Derivation.deriveIdentityAddress(identifier1.publicKey)),
+                ownerRecord: Derivation.deriveOwnerRecordAddress(owner1.publicKey),
+                multigraph: multigraphProgram.programId,
+                identifierProgram: identifierProgram.programId,
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: Derivation.deriveIdentityAddress(identifier1.publicKey),
+                owner: owner1.publicKey,
+                edge: edgeAddress1,
+                reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier1.publicKey)),
+                shadowDrive: web3.Keypair.generate().publicKey,
+                toNode: orgNodeAddress
+            })
+            .signers([owner1])
+            .rpc({
+                skipPreflight: true,
+                
+            })
+
+            await alignProgram.methods.joinOrganisation()
+            .accountsStrict({
+              payer: profilesProgram.provider.publicKey,
+              fromNode: Derivation.deriveNodeAddress(Derivation.deriveIdentityAddress(identifier2.publicKey)),
+              ownerRecord: Derivation.deriveOwnerRecordAddress(owner2.publicKey),
+              multigraph: multigraphProgram.programId,
+              identifierProgram: identifierProgram.programId,
+              systemProgram: web3.SystemProgram.programId,
+              organisation,
+              identity: Derivation.deriveIdentityAddress(identifier2.publicKey),
+              owner: owner2.publicKey,
+              edge: edgeAddress2,
+              reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier2.publicKey)),
+              shadowDrive: web3.Keypair.generate().publicKey,
+              toNode: orgNodeAddress
+            })
+            .signers([owner2])
+            .rpc({
+                skipPreflight: true,
+                
+            })
+
 
         console.log("Fetching Organisation Accounts")
 
@@ -561,11 +791,56 @@ describe("Align Governance Inergration Tests", async () => {
 
         let mint = web3.Keypair.generate()
         let mint2 = web3.Keypair.generate()
+        let mint3 = web3.Keypair.generate()
+        let mint4 = web3.Keypair.generate()
 
         await mintNft(collectionMintKeypair, mint, alignProgram.provider, councilKeypair.publicKey)
         await mintNft(collectionMintKeypair, mint2, alignProgram.provider, councilKeypair.publicKey)
 
+        await mintNft(collectionMintKeypair, mint3, alignProgram.provider, owner1.publicKey)
+        await mintNft(collectionMintKeypair, mint4, alignProgram.provider, owner2.publicKey)
+
         await stakeNfts(councilIdentifier.publicKey, [mint.publicKey, mint2.publicKey], organisation, programs)
+        
+        await programs.alignGovernanceProgram.methods.stakeNft().accountsStrict({
+          payer: profilesProgram.provider.publicKey,
+          owner: owner1.publicKey,
+          organisation: organisation,
+          reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier1.publicKey)),
+          identity: Derivation.deriveIdentityAddress(identifier1.publicKey),
+          ownerRecord: Derivation.deriveOwnerRecordAddress(owner1.publicKey),
+          systemProgram: SystemProgram.programId,
+          nftHolderOwnerRecord:Derivation.deriveOwnerRecordAddress(owner1.publicKey) ,
+          nftVault: Derivation.deriveNftVault(identifier1.publicKey, mint3.publicKey),
+          nftMint: mint3.publicKey,
+          nftTokenAccount: await getAssociatedTokenAddress(mint3.publicKey, owner1.publicKey),
+          nftMetadata: await getMetadataAddress(mint3.publicKey),
+          nftMasterEdition: await getMasterEditionAddress(mint3.publicKey),
+          tokenProgram: TOKEN_PROGRAM_ID,
+          rent: SYSVAR_RENT_PUBKEY
+        })
+        .signers([owner1])
+        .rpc()
+
+        await programs.alignGovernanceProgram.methods.stakeNft().accountsStrict({
+          payer: profilesProgram.provider.publicKey,
+          owner: owner2.publicKey,
+          organisation: organisation,
+          reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier2.publicKey)),
+          identity: Derivation.deriveIdentityAddress(identifier2.publicKey),
+          ownerRecord: Derivation.deriveOwnerRecordAddress(owner2.publicKey),
+          systemProgram: SystemProgram.programId,
+          nftHolderOwnerRecord:Derivation.deriveOwnerRecordAddress(owner2.publicKey) ,
+          nftVault: Derivation.deriveNftVault(identifier2.publicKey, mint4.publicKey),
+          nftMint: mint4.publicKey,
+          nftTokenAccount: await getAssociatedTokenAddress(mint4.publicKey, owner2.publicKey),
+          nftMetadata: await getMetadataAddress(mint4.publicKey),
+          nftMasterEdition: await getMasterEditionAddress(mint4.publicKey),
+          tokenProgram: TOKEN_PROGRAM_ID,
+          rent: SYSVAR_RENT_PUBKEY
+        })
+        .signers([owner2])
+        .rpc()
 
         console.log("Fetching proposal Accounts")
 
@@ -587,31 +862,68 @@ describe("Align Governance Inergration Tests", async () => {
     })
 
     it("Create Proposal", async () => {
-        
+      const propData1 = {
+        name : "Create Discord bot for royalty enforcement",
+        description : "Qui veritatis voluptatem et iusto velit aut voluptatem voluptas sit voluptas aliquam eos nihil atque et excepturi quae ut provident eaque. Sed natus voluptatibus eum tenetur temporibus ea adipisci similique."
+      }
+      const acc = await createShadowAccount("ALIGN_PROPOSAL", propData1, programs.shadowDriveInstance)
 
-        const tx = await identifierProgram.methods.initializeIdentifier(null)
+      await uploadProposalMetadata("ALIGN_PROPOSAL", propData1, new PublicKey(acc.shdw_bucket), programs.shadowDriveInstance)
+      const propData2 = {
+        name : "Promotional Music Video",
+        description : "Est omnis maxime rem atque nesciunt ut quis sapiente ea voluptate atque. 33 expedita beatae eos molestias sequi qui nihil earum sit molestiae Quis. Eum fuga dignissimos qui quod consequatur et optio veritatis et aspernatur quia qui autem vitae sit sint tenetur. At amet quod eum accusantium ullam qui esse quia aut consequatur amet in corporis voluptas quo veritatis voluptatem."
+      }
+      const acc2 = await createShadowAccount("ALIGN_PROPOSAL", propData2, programs.shadowDriveInstance)
+
+      await uploadProposalMetadata("ALIGN_PROPOSAL", propData2, new PublicKey(acc2.shdw_bucket), programs.shadowDriveInstance)
+
+        const tx = await alignProgram.methods.createProposal()
             .accountsStrict({
-                payer: profilesProgram.provider.publicKey,
-                owner: servicerKeypair.publicKey,
-                identifierSigner: servicerIdenitifier.publicKey,
-                identifier: servicerIdenitifier.publicKey,
-                identity: servicerIdentity,
-                node: servicerNodeAddress,
-                ownerRecord: servicerOwnerRecord,
-                recoveryKey: web3.Keypair.generate().publicKey,
-                multigraph: multigraphProgram.programId,
-                systemProgram: web3.SystemProgram.programId
+              payer: profilesProgram.provider.publicKey,
+              owner: owner1.publicKey,
+              ownerRecord: Derivation.deriveOwnerRecordAddress(owner1.publicKey),
+              systemProgram: web3.SystemProgram.programId,
+              organisation: organisation,
+              reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier1.publicKey)),
+              identity: Derivation.deriveIdentityAddress(identifier1.publicKey),
+              councilManager: councilManager,
+              proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(0)),
+              governance: nativeTreasuryAddress,
+              shadowDrive: acc.shdw_bucket,
+              servicerIdenitifier: identifier1.publicKey
             })
             // .signers([servicerIdenitifier, servicerKeypair])
             .transaction()
 
-        await alignProgram.provider.sendAndConfirm(tx, [servicerIdenitifier, servicerKeypair], { skipPreflight: true })
+        await alignProgram.provider.sendAndConfirm(tx, [ owner1], { skipPreflight: true })
+
+
+        const tx1 = await alignProgram.methods.createProposal()
+            .accountsStrict({
+              payer: profilesProgram.provider.publicKey,
+              owner: owner2.publicKey,
+              ownerRecord: Derivation.deriveOwnerRecordAddress(owner2.publicKey),
+              systemProgram: web3.SystemProgram.programId,
+              organisation: organisation,
+              reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier2.publicKey)),
+              identity: Derivation.deriveIdentityAddress(identifier2.publicKey),
+              councilManager: councilManager,
+              proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(1)),
+              governance: nativeTreasuryAddress,
+              shadowDrive: acc2.shdw_bucket,
+              servicerIdenitifier: identifier2.publicKey
+            })
+            // .signers([servicerIdenitifier, servicerKeypair])
+            .transaction()
+
+        await alignProgram.provider.sendAndConfirm(tx1, [ owner2], { skipPreflight: true })
         
         const proposalData : ProposalData= {
           name: "Create a onchain social network based DAO",
           description: "Qui harum facere et nesciunt internos ut veritatis optio! Et enim quisquam aut quasi repellendus sed possimus optio et quis dolorem ut laudantium velit non error iure At fugit consectetur. Qui quasi fugit id architecto totam est blanditiis autem. Ut consequuntur quae quo impedit molestiae est maxime perferendis eos nisi necessitatibus aut autem sapiente ut esse quos aut velit unde?",
       }
-      await createProposal(councilIdentifier.publicKey, organisation, servicerIdenitifier.publicKey, proposalData, programs)
+      await createProposal(councilIdentifier.publicKey, organisation, identifier1.publicKey, proposalData, programs)
+
 
 
 
@@ -640,9 +952,9 @@ describe("Align Governance Inergration Tests", async () => {
                 organisation,
                 identity: councilIdentity,
                 reputationManager: reputationManagerAddress,
-                proposal: proposalAddress,
+                proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
                 governance: nativeTreasuryAddress,
-                servicerIdenitifier: servicerIdenitifier.publicKey,
+                servicerIdenitifier: identifier1.publicKey,
                 owner: councilKeypair.publicKey,
             })
             .signers([councilKeypair])
@@ -668,10 +980,10 @@ describe("Align Governance Inergration Tests", async () => {
 
     it("Cast Rank on proposal", async () => {
 
-        await castRankVote(councilIdentifier.publicKey, proposalAddress, RankVoteType.Upvote, 1, programs) 
+        await castRankVote(councilIdentifier.publicKey, Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)), RankVoteType.Upvote, 1, programs) 
         console.log("Fetching proposal Accounts")
         
-        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        const propAccount = await alignProgram.account.proposal.fetch(Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
         console.log(JSON.parse(JSON.stringify(propAccount)))
         
         //@ts-ignore
@@ -695,7 +1007,7 @@ describe("Align Governance Inergration Tests", async () => {
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
                 systemProgram: web3.SystemProgram.programId,
-                proposal: proposalAddress,
+                proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
             })
             .transaction()
 
@@ -703,20 +1015,20 @@ describe("Align Governance Inergration Tests", async () => {
 
         console.log("Fetching proposal Accounts")
         
-        const propAccount = await alignProgram.account.proposal.fetch(proposalAddress)
+        const propAccount = await alignProgram.account.proposal.fetch(Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
         console.log(JSON.parse(JSON.stringify(propAccount)))
 
     })
 
     it("Cast Council vote", async () => {
 
-        await castCouncilVote(councilIdentifier.publicKey, proposalAddress, CouncilVote.Yes, programs)
+        await castCouncilVote(councilIdentifier.publicKey, Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)), CouncilVote.Yes, programs)
         console.log("Fetching proposal Accounts")
         
-        const propAccount : Proposal = await alignProgram.account.proposal.fetch(proposalAddress)
+        const propAccount : Proposal = await alignProgram.account.proposal.fetch(Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
         console.log(JSON.parse(JSON.stringify(propAccount)))
 
-        const votes = await Api.fetchCouncilVotesForProposal(organisation, proposalAddress, programs)
+        const votes = await Api.fetchCouncilVotesForProposal(organisation, Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)), programs)
         expect(votes).lengthOf(1)
         expect(votes[0].account.vote).to.deep.include({yes: {}})
         expect(propAccount.state).to.deep.include({servicing : {}})

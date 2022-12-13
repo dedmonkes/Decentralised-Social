@@ -88,7 +88,7 @@ export const getCreateMintIx = async (
 
 export const mintCollectionNft = async (
     mint : web3.Keypair,
-    provider : Provider
+    provider : Provider,
 ) =>{
     let instructions: web3.TransactionInstruction[] = [];
   const createMintIx = await getCreateMintIx(
