@@ -21,7 +21,7 @@ import {
     Organisation,
     Proposal as ProposalAccount,
     User,
-} from "@dedmonkes/align-sdk";
+} from "align-sdk";
 import { useReadOnlyWallet } from "./useReadOnlyWallet";
 import {
     AccountInfo,

@@ -1,4 +1,4 @@
-import { Account, AlignPrograms, Api, CouncilManager, createAlignPrograms, Proposal, ProposalData } from "@dedmonkes/align-sdk";
+import { Account, AlignPrograms, Api, CouncilManager, createAlignPrograms, Proposal, ProposalData } from "align-sdk";
 import { web3 } from "@project-serum/anchor";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { Carousel } from "antd";

@@ -16,7 +16,7 @@ A collection of programs that enable an open social network.
 
 | Client name                                   | Rust Crate | npm Package |
 | ---------------------------------------|------------|-------------|
-| [Align SDK](./programs/sdk) |N/A  |     @dedmonkes/align-sdk |
+| [Align SDK](./programs/sdk) |N/A  |     align-sdk |
 | [Align Webapp](./programs/leaf) |N/A  |      N/A    |
 
 
@@ -25,6 +25,8 @@ A collection of programs that enable an open social network.
 To run the demo webapp you must run the test suite in detach mode to start a local validator with some populated data.
 
 Import your keypair from ~/.config/solana/id.json into your wallet of choice we find solflare to work nicely with the dev enviroment.
+
+Our metadata for proposals uses shadow drive so you will need a small amout of Mainnet SOL and shadow upload the data. a couple of dollars worth should be suffcient
 
 Two .env files are needed one in the 'app' directory and other at root
 

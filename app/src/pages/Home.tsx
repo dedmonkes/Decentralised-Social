@@ -1,4 +1,4 @@
-import { Api, createProposal, Derivation } from "@dedmonkes/align-sdk";
+import { Api, createProposal, Derivation } from "align-sdk";
 import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import { BN } from "bn.js";
 import { Suspense, useEffect, useState } from "react";

@@ -8,7 +8,7 @@ import {
     ProposalData,
     RankVoteType,
     User,
-} from "@dedmonkes/align-sdk";
+} from "align-sdk";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
 import {

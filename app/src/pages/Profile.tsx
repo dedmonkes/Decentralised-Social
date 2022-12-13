@@ -10,7 +10,7 @@ import { TOKEN_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useEffect, useState } from "react";
-import { AlignPrograms, createAlignPrograms } from "@dedmonkes/align-sdk";
+import { AlignPrograms, createAlignPrograms } from "align-sdk";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { web3 } from "@project-serum/anchor";
 

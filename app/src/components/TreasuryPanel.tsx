@@ -1,6 +1,6 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Api, createAlignPrograms } from "@dedmonkes/align-sdk";
+import { Api, createAlignPrograms } from "align-sdk";
 import { useEffect, useState } from "react";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 import { web3 } from "@project-serum/anchor";
