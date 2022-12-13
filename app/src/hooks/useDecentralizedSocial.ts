@@ -171,6 +171,30 @@ export function useDecentralizedSocial() {
         getNFTs();
     }, [identifier, wallet]);
 
+    useEffect(() => {
+        if (!wallet.publicKey) {
+            return;
+        }
+        const getPoints = async () => {
+            if (!organizations || !user || !wallet || !wallet?.publicKey) {
+                return;
+            }
+            const alignPrograms = await createAlignPrograms(
+                connection,
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
+            );
+            const points = await getUsersPointsAvailable(
+                user.account.identifier,
+                organizations[0],
+                alignPrograms
+            );
+            setPointsBalance(points);
+            console.log(points);
+        };
+        getPoints();
+    }, [wallet.publicKey])
+
     useInterval(() => {
         const getPoints = async () => {
             if (!organizations || !user || !wallet || !wallet?.publicKey) {
