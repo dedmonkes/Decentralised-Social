@@ -1,6 +1,6 @@
 use crate::{
     error::AlignError,
-    state::{Proposal, ProposalState}, constants::DEFAULT_RANKING_PEROID,
+    state::{Proposal, ProposalState, Organisation}, constants::DEFAULT_RANKING_PEROID,
 };
 use anchor_lang::prelude::*;
 
@@ -15,7 +15,7 @@ pub fn push_proposal_state(ctx: Context<PushProposalState>) -> Result<()> {
                 .proposal
                 .ranking_at
                 .unwrap()
-                .checked_add(DEFAULT_RANKING_PEROID)
+                .checked_add(ctx.accounts.proposal.ranking_peroid)
                 .unwrap(),
         AlignError::RankingPeriodLapsed
     );
@@ -30,6 +30,9 @@ pub fn push_proposal_state(ctx: Context<PushProposalState>) -> Result<()> {
 pub struct PushProposalState<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
+
+    #[account()]
+    pub organisation: Box<Account<'info, Organisation>>,
 
     #[account(
         mut,

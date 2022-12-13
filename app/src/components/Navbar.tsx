@@ -33,13 +33,16 @@ export function Navbar() {
                                         {pointsBalance.toFixed(8)} VP
                                     </button>
 
-                                    {wallet?.publicKey && (
+                                    {wallet?.publicKey && wallet && (
                                         <button
                                             onClick={() => {
-                                                navigate(
-                                                    "/u/" +
-                                                        wallet.publicKey.toBase58()
-                                                );
+                                                if(wallet && wallet?.publicKey !== null){
+                                                    navigate(
+                                                        "/u/" +
+                                                            wallet?.publicKey.toBase58()
+                                                    );
+                                                }
+                                 
                                             }}
                                             className="mr-5 flex items-center gap-1 px-5 text-white"
                                         >

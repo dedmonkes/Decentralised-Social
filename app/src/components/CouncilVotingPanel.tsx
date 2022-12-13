@@ -60,7 +60,7 @@ const CouncilVotingPanel = () => {
                 return
             }
             console.log(organizations)
-            const programs = await createAlignPrograms(connection, wallet as any)
+            const programs = await createAlignPrograms(connection, wallet as any, new web3.Connection(process.env.REACT_APP_SHADOW_RPC!))
             const councilManager = await Api.fetchCouncilManager(organizations[0], programs)
             setCouncilManager(councilManager)
         }

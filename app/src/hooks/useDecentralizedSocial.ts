@@ -37,6 +37,7 @@ import {
 } from "@metaplex-foundation/mpl-token-metadata";
 import { concat } from "lodash";
 import { useInterval } from "./useInterval";
+import { web3 } from "@project-serum/anchor";
 
 export const getTokenAccountsByAddress = async (
     addr: string,
@@ -51,8 +52,8 @@ export const METADATA_PROGRAM_ID = new PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 export function useDecentralizedSocial() {
-    const wallet = useAnchorWallet();
-    const identifier = wallet?.publicKey.toBase58();
+    const wallet = useWallet();
+    const identifier = wallet?.publicKey?.toBase58();
 
     const { connection } = useConnection();
 
@@ -93,7 +94,8 @@ export function useDecentralizedSocial() {
 
             const alignPrograms = await createAlignPrograms(
                 connection,
-                wallet as any
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
             );
 
             setAlignPrograms(alignPrograms);
@@ -111,13 +113,14 @@ export function useDecentralizedSocial() {
 
     useEffect(() => {
         const getProfile = async () => {
-            if (!wallet) {
+            if (!wallet || !wallet?.publicKey) {
                 return;
             }
 
             const alignPrograms = await createAlignPrograms(
                 connection,
-                wallet as any
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
             );
             const user = await Api.fetchUserProfileByOwnerPubkey(
                 wallet.publicKey,
@@ -125,12 +128,6 @@ export function useDecentralizedSocial() {
             );
             setUser(user);
 
-            const pfpNft = await connection.getProgramAccounts(
-                user.account.profile.pfp,
-                {
-                    commitment: "confirmed",
-                }
-            );
         };
 
         const getNFTs = async () => {
@@ -176,12 +173,13 @@ export function useDecentralizedSocial() {
 
     useInterval(() => {
         const getPoints = async () => {
-            if (!organizations || !user) {
+            if (!organizations || !user || !wallet || !wallet?.publicKey) {
                 return;
             }
             const alignPrograms = await createAlignPrograms(
                 connection,
-                wallet as any
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
             );
             const points = await getUsersPointsAvailable(
                 user.account.identifier,
@@ -193,7 +191,7 @@ export function useDecentralizedSocial() {
         };
 
         getPoints();
-    }, 10000);
+    }, 100000);
 
     useEffect(() => {
         const getProposals = async () => {
@@ -202,7 +200,8 @@ export function useDecentralizedSocial() {
             }
             const alignPrograms = await createAlignPrograms(
                 connection,
-                wallet as any
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
             );
 
             const organizations =

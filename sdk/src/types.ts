@@ -38,6 +38,7 @@ export interface Organisation {
     identifier: PublicKey;
     collectionMint: PublicKey;
     subOrganisationCount: number;
+    rankingTime : BN,
     bump: number;
 }
 
@@ -194,6 +195,7 @@ export interface Proposal {
     totalCouncilNoVotes: number,
     totalCouncilAbstainVotes: number,
     upvotes: BN,
+    rankingPeroid : BN,
     downvotes: BN,
     bump: number,
 }

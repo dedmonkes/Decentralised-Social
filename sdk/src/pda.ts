@@ -120,7 +120,7 @@ export namespace Derivation {
     ) => {
 
         const [proposalAddress] = PublicKey.findProgramAddressSync(
-            [Buffer.from("proposal"), governanceAdddress.toBuffer(), index.toBuffer("le", 8)],
+            [Buffer.from("proposal"), governanceAdddress.toBuffer(), index.toArrayLike(Buffer, "le", 8)],
             ALIGN_PROGRAM_ID
         );
         return proposalAddress;

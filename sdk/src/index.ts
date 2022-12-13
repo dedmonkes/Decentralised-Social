@@ -38,7 +38,7 @@ import {
 } from "@solana/spl-token";
 import { ShadowUploadResponse, ShdwDrive } from "@shadow-drive/sdk";
 import { createShadowAccount, uploadProposalMetadata } from "./utils";
-import { BN } from "bn.js";
+import BN  from "bn.js";
 
 export { Derivation } from "./pda";
 export * from "./types";
@@ -56,7 +56,8 @@ export { Profiles } from "./idls/profiles";
 
 export const createAlignPrograms = async (
     connection: Connection,
-    wallet: Wallet
+    wallet: Wallet,
+    shadowConnection : Connection
 ): Promise<AlignPrograms> => {
     const provider = new AnchorProvider(connection, wallet, {
         commitment: "confirmed",
@@ -90,7 +91,7 @@ export const createAlignPrograms = async (
         profilesProgram,
         leafProgram,
         provider,
-        shadowDriveInstance: await new ShdwDrive(new web3.Connection(web3.clusterApiUrl("mainnet-beta"), {commitment : "max"}),  wallet).init()
+        shadowDriveInstance: await new ShdwDrive(shadowConnection,  wallet).init()
     };
 };
 
@@ -323,6 +324,7 @@ export const createProposal = async (
     organisationAddress : PublicKey,
     servicerIdentifier : PublicKey,
     proposalData : ProposalData,
+    ranking_peroid : BN,
     programs: AlignPrograms,
     onUpload : (res : ShadowUploadResponse) => void = () => {}
 ) => { 
@@ -341,13 +343,14 @@ export const createProposal = async (
     const nativeTreasuryAddress = Derivation.deriveNativeTreasuryAddress(organisationAddress)
 
     const accountRes = await createShadowAccount("ALIGN_PROPOSAL", proposalData, programs.shadowDriveInstance)
+    console.log(accountRes, proposalAddress, programs.shadowDriveInstance)
     const shadowDrive = new web3.PublicKey(accountRes.shdw_bucket)
     
     const shadowRes : ShadowUploadResponse = await uploadProposalMetadata(proposalAddress.toBase58(), proposalData, shadowDrive, programs.shadowDriveInstance)
     onUpload(shadowRes)
     
     const tx = await programs.alignGovernanceProgram.methods
-        .createProposal()
+        .createProposal(ranking_peroid)
         .accountsStrict({
             payer: programs.alignGovernanceProgram.provider.publicKey,
             owner: programs.alignGovernanceProgram.provider.publicKey,

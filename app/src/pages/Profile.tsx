@@ -11,7 +11,8 @@ import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { AlignPrograms, createAlignPrograms } from "@dedmonkes/align-sdk";
-import { useConnection } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { web3 } from "@project-serum/anchor";
 
 export const getTokenAccountsByAddress = async (
     addr: string,
@@ -39,7 +40,8 @@ const CollectionBadge = ({ img, name }: { img: any; name: any }) => {
     );
 };
 export function Profile() {
-    const { user, proposals, wallet, reputation } = useDecentralizedSocial();
+    const wallet = useWallet()
+    const { user, proposals, reputation } = useDecentralizedSocial();
     const { connection } = useConnection();
 
     const [royaltyGrade, setRoyaltyGrade] = useState<any | null>(null);
@@ -50,7 +52,8 @@ export function Profile() {
         const getPrograms = async () => {
             const programs = await createAlignPrograms(
                 connection,
-                wallet as any
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
             );
             setPrograms(programs);
         };
@@ -125,9 +128,12 @@ export function Profile() {
                                 <Clipboard
                                     className="inline-block h-4 cursor-pointer"
                                     onClick={() => {
-                                        navigator.clipboard.writeText(
-                                            wallet.publicKey.toBase58()
-                                        );
+                                        if(wallet && wallet?.publicKey){
+                                            navigator.clipboard.writeText(
+                                                wallet.publicKey.toBase58()
+                                            );
+                                        }
+                
                                     }}
                                 />
                             </p>

@@ -107,7 +107,12 @@ export type AlignGovernance = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "rankingPeroid",
+          "type": "i64"
+        }
+      ]
     },
     {
       "name": "joinOrganisation",
@@ -271,7 +276,12 @@ export type AlignGovernance = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "rankingPeroid",
+          "type": "i64"
+        }
+      ]
     },
     {
       "name": "stageProposalForRanking",
@@ -472,6 +482,11 @@ export type AlignGovernance = {
           "name": "payer",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "proposal",
@@ -862,7 +877,7 @@ export type AlignGovernance = {
           },
           {
             "name": "councilThreshold",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "bump",
@@ -887,6 +902,10 @@ export type AlignGovernance = {
           {
             "name": "subOrganisationCount",
             "type": "u8"
+          },
+          {
+            "name": "rankingTime",
+            "type": "i64"
           },
           {
             "name": "bump",
@@ -985,6 +1004,10 @@ export type AlignGovernance = {
           {
             "name": "totalCouncilAbstainVotes",
             "type": "u8"
+          },
+          {
+            "name": "rankingPeroid",
+            "type": "i64"
           },
           {
             "name": "upvotes",
@@ -1421,7 +1444,12 @@ export const IDL: AlignGovernance = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "rankingPeroid",
+          "type": "i64"
+        }
+      ]
     },
     {
       "name": "joinOrganisation",
@@ -1585,7 +1613,12 @@ export const IDL: AlignGovernance = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "rankingPeroid",
+          "type": "i64"
+        }
+      ]
     },
     {
       "name": "stageProposalForRanking",
@@ -1786,6 +1819,11 @@ export const IDL: AlignGovernance = {
           "name": "payer",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "proposal",
@@ -2176,7 +2214,7 @@ export const IDL: AlignGovernance = {
           },
           {
             "name": "councilThreshold",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "bump",
@@ -2201,6 +2239,10 @@ export const IDL: AlignGovernance = {
           {
             "name": "subOrganisationCount",
             "type": "u8"
+          },
+          {
+            "name": "rankingTime",
+            "type": "i64"
           },
           {
             "name": "bump",
@@ -2299,6 +2341,10 @@ export const IDL: AlignGovernance = {
           {
             "name": "totalCouncilAbstainVotes",
             "type": "u8"
+          },
+          {
+            "name": "rankingPeroid",
+            "type": "i64"
           },
           {
             "name": "upvotes",

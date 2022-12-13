@@ -31,7 +31,7 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
                 .proposal
                 .ranking_at
                 .unwrap()
-                .checked_add(DEFAULT_RANKING_PEROID)
+                .checked_add(ctx.accounts.organisation.ranking_time)
                 .unwrap(),
         AlignError::RankingPeriodLapsed
     );

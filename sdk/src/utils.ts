@@ -15,19 +15,21 @@ export const createShadowAccount = async (name : string, proposalData : Proposal
     let file;
     if(isBrowser){
       file = new File(
-        [JSON.parse(JSON.stringify(proposalData, null, 4))],
+        [JSON.stringify(proposalData, null, 4)],
         `${name}.json`,
         {
             type: "application/json",
         }
     );
     }
-    
-    file = {
+    else {
+      file = {
         name :`${name}.json`,
         file : dataBuff
       }
     
+    }
+
     
     const res = await drive.uploadFile(accountAddress, file, "v2")
     console.log('shadow result', res)

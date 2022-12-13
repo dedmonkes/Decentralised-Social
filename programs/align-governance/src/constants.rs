@@ -13,4 +13,4 @@ pub const DEFAULT_PROPOSAL_CREATED_WEIGHT: u8 = 5;
 
 pub const DEFAULT_COUNCIL_THRESHOLD: u32 = 7000;
 
-pub const DEFAULT_RANKING_PEROID: i64 = 10;
+pub const DEFAULT_RANKING_PEROID: i64 = 10; // 3 days ranking

@@ -36,8 +36,11 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
+import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config()
+
 import { ShdwDrive } from "@shadow-drive/sdk";
-import { unstakeNfts } from "../sdk/src";
+import { unstakeNfts } from "align-sdk";
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { BN } from "bn.js";
 
@@ -82,6 +85,9 @@ const identifier3 = anchor.web3.Keypair.fromSecretKey(identifierSeed3);
 const owner1 = anchor.web3.Keypair.generate();
 const owner2 = anchor.web3.Keypair.generate();
 
+console.log(process.env.SHADOW_RPC_URL)
+//@ts-ignore
+const shadowConnection = new web3.Connection(process.env.SHADOW_RPC_URL)
 describe("identifiers", async () => {
     // Configure the client to use the local cluster.
     anchor.setProvider(anchor.AnchorProvider.env());
@@ -99,7 +105,8 @@ describe("identifiers", async () => {
 
     const programs = await createAlignPrograms(
         leafProgram.provider.connection,
-        wallet
+        wallet,
+        shadowConnection
     );
     const [identity] = publicKey.findProgramAddressSync(
         [Buffer.from("identity"), identifier.publicKey.toBuffer()],
@@ -551,7 +558,8 @@ describe("Align Governance Inergration Tests", async () => {
 
     const programs = await createAlignPrograms(
         leafProgram.provider.connection,
-        wallet
+        wallet,
+        shadowConnection
     );
 
     const [identity] = publicKey.findProgramAddressSync(
@@ -709,7 +717,7 @@ describe("Align Governance Inergration Tests", async () => {
         console.log("Creating Organisation");
 
         const tx = await alignProgram.methods
-            .createOrganisation()
+            .createOrganisation(new BN(60 * 60 *24 *3))
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
                 identifierSigner: identifier.publicKey,
@@ -1062,7 +1070,7 @@ describe("Align Governance Inergration Tests", async () => {
         );
 
         const tx = await alignProgram.methods
-            .createProposal()
+            .createProposal(new BN(60 * 60 *24 *3))
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
                 owner: owner1.publicKey,
@@ -1095,7 +1103,7 @@ describe("Align Governance Inergration Tests", async () => {
         });
 
         const tx1 = await alignProgram.methods
-            .createProposal()
+            .createProposal(new BN(60 * 60 *24 *3))
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
                 owner: owner2.publicKey,
@@ -1137,6 +1145,7 @@ describe("Align Governance Inergration Tests", async () => {
             organisation,
             identifier1.publicKey,
             proposalData,
+            new BN(0),
             programs
         );
 
@@ -1178,6 +1187,46 @@ describe("Align Governance Inergration Tests", async () => {
                 owner: councilKeypair.publicKey,
             })
             .signers([councilKeypair])
+            .rpc();
+
+            await alignProgram.methods
+            .stageProposalForRanking()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: Derivation.deriveOwnerRecordAddress(owner1.publicKey),
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: Derivation.deriveIdentityAddress(identifier1.publicKey),
+                reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier1.publicKey)),
+                proposal: Derivation.deriveProposalAddress(
+                    nativeTreasuryAddress,
+                    new BN(0)
+                ),
+                governance: nativeTreasuryAddress,
+                servicerIdenitifier: identifier1.publicKey,
+                owner: owner1.publicKey,
+            })
+            .signers([owner1])
+            .rpc();
+
+            await alignProgram.methods
+            .stageProposalForRanking()
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                ownerRecord: Derivation.deriveOwnerRecordAddress(owner2.publicKey),
+                systemProgram: web3.SystemProgram.programId,
+                organisation,
+                identity: Derivation.deriveIdentityAddress(identifier2.publicKey),
+                reputationManager: Derivation.deriveReputationManagerAddress(organisation, Derivation.deriveIdentityAddress(identifier2.publicKey)),
+                proposal: Derivation.deriveProposalAddress(
+                    nativeTreasuryAddress,
+                    new BN(1)
+                ),
+                governance: nativeTreasuryAddress,
+                servicerIdenitifier: identifier2.publicKey,
+                owner: owner2.publicKey,
+            })
+            .signers([owner2])
             .rpc();
 
         console.log("Fetching proposal Accounts");
@@ -1239,6 +1288,7 @@ describe("Align Governance Inergration Tests", async () => {
             .pushProposalState()
             .accountsStrict({
                 payer: profilesProgram.provider.publicKey,
+                organisation,
                 systemProgram: web3.SystemProgram.programId,
                 proposal: Derivation.deriveProposalAddress(
                     nativeTreasuryAddress,

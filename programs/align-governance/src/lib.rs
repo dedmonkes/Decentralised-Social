@@ -19,16 +19,16 @@ pub mod align_governance {
 
     use super::*;
 
-    pub fn create_organisation(ctx: Context<CreateOrganisation>) -> Result<()> {
-        instructions::create_organisation(ctx)
+    pub fn create_organisation(ctx: Context<CreateOrganisation>, ranking_peroid : i64) -> Result<()> {
+        instructions::create_organisation(ctx, ranking_peroid)
     }
 
     pub fn join_organisation(ctx: Context<JoinOrganisation>) -> Result<()> {
         instructions::join_organisation(ctx)
     }
 
-    pub fn create_proposal(ctx: Context<CreateProposal>) -> Result<()> {
-        instructions::create_proposal(ctx)
+    pub fn create_proposal(ctx: Context<CreateProposal>, ranking_peroid : i64) -> Result<()> {
+        instructions::create_proposal(ctx, ranking_peroid)
     }
 
     pub fn stage_proposal_for_ranking(ctx: Context<StageProposalForRanking>) -> Result<()> {

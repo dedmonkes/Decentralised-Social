@@ -22,6 +22,7 @@ import {
 } from "react-feather";
 import LoadingSpinner from "./LoadingSpinner";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
+import { BN } from "bn.js";
 
 export function Proposal(props: { proposal: Account<ProposalAccount> }) {
     const [proposalMetadata, setProposalMetadata] =
@@ -121,6 +122,7 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
                                 1,
                                 alignPrograms
                             );
+                            props.proposal.account.upvotes = props.proposal.account.upvotes.add(new BN(1))
                         } catch (err) {
                             alert(err);
                             return;

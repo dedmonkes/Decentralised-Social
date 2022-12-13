@@ -1,5 +1,6 @@
 import { createProposal } from "@dedmonkes/align-sdk";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
+import { BN } from "bn.js";
 import { Suspense, useEffect, useState } from "react";
 import { Plus } from "react-feather";
 import CouncilVotingPanel from "../components/CouncilVotingPanel";
@@ -11,7 +12,7 @@ import { royaltyResponse } from "../constants";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
 
 export function Home() {
-  const wallet = useAnchorWallet();
+  const wallet = useWallet();
   const [modalOpen, setModalOpen] = useState(false);
   const { proposals, user, organizations, alignPrograms } =
     useDecentralizedSocial();
@@ -133,7 +134,8 @@ export function Home() {
                         alert("No alignprograms");
                         return;
                       }
-
+                      console.log(process.env.SHDW_BROWSER!)
+                      console.log(wallet)
                       try {
                         const proposal = await createProposal(
                           user.account.identifier,
@@ -143,9 +145,10 @@ export function Home() {
                             name,
                             description,
                           },
+                          new BN(60 * 60 * 24 *3),
                           alignPrograms
                         );
-
+                        
                         console.log(proposal);
                       } catch (err) {
                         alert((err as any).toString());
@@ -179,11 +182,11 @@ export function Home() {
             </div>
           </div>
 
-          <Suspense fallback={<ProposalSkeleton />}>
+          {/* <Suspense fallback={<ProposalSkeleton />}> */}
             {proposals?.map((prop) => (
               <Proposal proposal={prop} key={prop.address.toBase58()} />
             ))}
-          </Suspense>
+          {/* </Suspense> */}
 
           <div className="mt-auto">
             <button

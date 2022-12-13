@@ -46,6 +46,7 @@ pub struct Proposal {
     pub total_council_yes_votes: u8,
     pub total_council_no_votes: u8,
     pub total_council_abstain_votes: u8,
+    pub ranking_peroid : i64,
     pub upvotes: u64,
     pub downvotes: u64,
     pub bump: u8,
@@ -62,6 +63,7 @@ impl Proposal {
         std::mem::size_of::<Option<i64>>() + //ranking_at
         std::mem::size_of::<Option<i64>>() + //ranking_at
         std::mem::size_of::<Option<i64>>() + //ranking_at
+        std::mem::size_of::<i64>() + //ranking_at
         std::mem::size_of::<Option<i64>>() + //ranking_at
         std::mem::size_of::<i64>() + //draf_at
         std::mem::size_of::<Option<Pubkey>>() +

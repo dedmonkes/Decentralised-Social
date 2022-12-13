@@ -3,6 +3,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Api, createAlignPrograms } from "@dedmonkes/align-sdk";
 import { useEffect, useState } from "react";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
+import { web3 } from "@project-serum/anchor";
 
 const TreasuryPanel = () => {
     const { organizations, user } = useDecentralizedSocial();
@@ -18,7 +19,8 @@ const TreasuryPanel = () => {
             }
             const programs = await createAlignPrograms(
                 connection,
-                wallet as any
+                wallet as any,
+                new web3.Connection(process.env.REACT_APP_SHADOW_RPC!)
             );
             const balance = await Api.fetchNativeTreasuryBalance(
                 organizations[0],
