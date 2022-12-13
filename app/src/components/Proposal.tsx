@@ -30,14 +30,15 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
     const { user, alignPrograms } = useDecentralizedSocial();
 
     const [proposalAuthor, setProposalAuthor] = useState<Account<User> | null>(null)
+    const [proposalServicer, setProposalServicer] = useState<Account<User> | null>(null)
 
     useEffect(() => {
         const getProposalMetadata = async () => {
             if (!alignPrograms) {
                 return;
             }
-
-            const shadowDrive: PublicKey = (props.proposal as any).account
+            try {
+                const shadowDrive: PublicKey = (props.proposal as any).account
                 .shadowDrive;
 
             const res = await fetch(
@@ -46,17 +47,57 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
             if (res.status === 200) {
                 setProposalMetadata(await res.json());
             }
-
-            const id = props.proposal.account.servicer
-
-            if (id) {
-                const proposedUser = await Api.fetchUserProfileByIdentifier(id, alignPrograms);
-                setProposalAuthor(proposedUser)
+            } catch(err) {
+                console.warn((err as any).toString());
             }
+
         };
 
         getProposalMetadata();
-    }, [props.proposal]);
+    }, [props.proposal, alignPrograms]);
+
+    useEffect(() => {
+        const getProposalAuthor = async () => {
+            if (!alignPrograms) {
+                return;
+            }
+            
+            try {
+                const authorId = props.proposal.account.proposer;
+                const user = await Api.fetchUserProfileByIdentifier(authorId, alignPrograms);
+
+                setProposalAuthor(user);
+
+            } catch(err) {
+                console.log((err as any).toString());
+            }
+
+        };
+
+        getProposalAuthor();
+    }, [props.proposal, alignPrograms]);
+
+    useEffect(() => {
+        const getProposalServicer = async () => {
+            if (!alignPrograms) {
+                return;
+            }
+            
+            try {
+                const servicerId = props.proposal.account.servicer;
+                if (servicerId) {
+                    const user = await Api.fetchUserProfileByIdentifier(servicerId, alignPrograms);
+                    setProposalServicer(user);
+                }
+
+            } catch(err) {
+                console.log((err as any).toString());
+            }
+
+        };
+
+        getProposalServicer();
+    }, [props.proposal, alignPrograms]);
 
     if (!proposalMetadata) return <></>;
 
@@ -132,7 +173,7 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
                         <p className="text-lg">$500 USDC</p>
                         <p className="text-xs">Proposed By:</p>
                         <p className="text-xs text-primary">
-                            <a href="/">KEMOSABE</a>
+                             <a href="/">{proposalAuthor !== null && proposalAuthor.account.username}</a>
                         </p>
                     </div>
                 </div>
