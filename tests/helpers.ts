@@ -266,21 +266,21 @@ export const mintNft = async (collectionKey : web3.Keypair, mint : web3.Keypair,
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// export const createShadowAccount = async (name : string, proposalData : ProposalData, drive : ShdwDrive) =>{
-//   const proposalSize = (Buffer.byteLength(JSON.stringify(proposalData,null, 4)) / 1000) + 1
-//   const result = await drive.createStorageAccount(name, `${proposalSize}KB`, "v2")
-//   return result
-// }
+export const createShadowAccount = async (name : string, proposalData : ProposalData, drive : ShdwDrive) =>{
+  const proposalSize = (Buffer.byteLength(JSON.stringify(proposalData,null, 4)) / 1000) + 1
+  const result = await drive.createStorageAccount(name, `${proposalSize}KB`, "v2")
+  return result
+}
 
-// export const uploadProposalMetadata = async (name : string, proposalData : ProposalData, accountAddress : web3.PublicKey, drive : ShdwDrive) => {
-//   const dataBuff = Buffer.from(JSON.stringify(proposalData, null, 4))
+export const uploadProposalMetadata = async (name : string, proposalData : ProposalData, accountAddress : web3.PublicKey, drive : ShdwDrive) => {
+  const dataBuff = Buffer.from(JSON.stringify(proposalData, null, 4))
 
-//   let file = {
-//       name :`${name}.json`,
-//       file : dataBuff
-//     }
+  let file = {
+      name :`${name}.json`,
+      file : dataBuff
+    }
   
-//   const res = await drive.uploadFile(accountAddress, file, "v2")
-//   console.log('shadow result', res)
-//   return res
-// }
+  const res = await drive.uploadFile(accountAddress, file, "v2")
+  console.log('shadow result', res)
+  return res
+}

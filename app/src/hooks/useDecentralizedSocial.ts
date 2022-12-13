@@ -85,6 +85,8 @@ export function useDecentralizedSocial() {
         null
     );
 
+    
+
     useEffect(() => {
         const getReputation = async () => {
             if (!user || !organizations) return;
@@ -217,6 +219,8 @@ export function useDecentralizedSocial() {
                 );
                 proposals.push(...something);
             }
+
+            console.log(proposals)
 
             setOrganizations(organizations);
             setProposals(proposals);
