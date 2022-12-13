@@ -7,6 +7,7 @@ import {
     Proposal as ProposalAccount,
     ProposalData,
     RankVoteType,
+    User,
 } from "@dedmonkes/align-sdk";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ import {
     ChevronUp,
     MinusSquare,
     PlusSquare,
-    User,
+    User as UserIcon,
 } from "react-feather";
 import LoadingSpinner from "./LoadingSpinner";
 import { useDecentralizedSocial } from "../hooks/useDecentralizedSocial";
@@ -28,8 +29,14 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
 
     const { user, alignPrograms } = useDecentralizedSocial();
 
+    const [proposalAuthor, setProposalAuthor] = useState<Account<User> | null>(null)
+
     useEffect(() => {
         const getProposalMetadata = async () => {
+            if (!alignPrograms) {
+                return;
+            }
+
             const shadowDrive: PublicKey = (props.proposal as any).account
                 .shadowDrive;
 
@@ -38,6 +45,13 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
             );
             if (res.status === 200) {
                 setProposalMetadata(await res.json());
+            }
+
+            const id = props.proposal.account.servicer
+
+            if (id) {
+                const proposedUser = await Api.fetchUserProfileByIdentifier(id, alignPrograms);
+                setProposalAuthor(proposedUser)
             }
         };
 
@@ -126,8 +140,8 @@ export function Proposal(props: { proposal: Account<ProposalAccount> }) {
             <div className="box-container min-w-[180px] px-4 py-3">
                 <h4 className="mb-2 flex items-center gap-2 border-b border-b-white border-opacity-30 pb-2">
                     {" "}
-                    <User size={"20px"} />
-                    KEMOSABE
+                    <UserIcon size={"20px"} />
+                    {proposalAuthor?.account.username.slice(1)}
                 </h4>
                 <p className="text-xs opacity-75">439 XP</p>
                 <p className="text-xs opacity-75">12 PopHeadz</p>
