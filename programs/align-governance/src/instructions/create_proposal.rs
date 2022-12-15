@@ -29,6 +29,8 @@ pub fn create_proposal(ctx: Context<CreateProposal>, ranking_peroid : i64) -> Re
     ctx.accounts.proposal.downvotes = 0;
     ctx.accounts.proposal.bump = *ctx.bumps.get("proposal").unwrap();
     ctx.accounts.proposal.ranking_peroid = ranking_peroid;
+    ctx.accounts.proposal.transaction_count = 0;
+    ctx.accounts.proposal.executing_transaction_index = None;
 
     require_gte!(ctx.accounts.organisation.ranking_time, ranking_peroid);
 

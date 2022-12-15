@@ -18,6 +18,7 @@ pub enum CouncilVote {
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum ProposalState {
     Draft,
+    Executing,
     Ranking,
     Voting,
     Servicing,
@@ -38,6 +39,8 @@ pub struct Proposal {
     pub voting_at: Option<i64>,
     pub denied_at: Option<i64>,
     pub approved_at: Option<i64>,
+    pub transaction_count: u32,
+    pub executing_transaction_index : Option<u32>,
     pub draft_at: i64,
     pub servicer: Option<Pubkey>, // idenitfier of person to service the proposal
     pub id: u64,
@@ -65,6 +68,8 @@ impl Proposal {
         std::mem::size_of::<Option<i64>>() + //ranking_at
         std::mem::size_of::<i64>() + //ranking_at
         std::mem::size_of::<Option<i64>>() + //ranking_at
+        std::mem::size_of::<u32>() + //ranking_at
+        std::mem::size_of::<Option<u32>>() + //ranking_at
         std::mem::size_of::<i64>() + //draf_at
         std::mem::size_of::<Option<Pubkey>>() +
         std::mem::size_of::<u64>() + //id

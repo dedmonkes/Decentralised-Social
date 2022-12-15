@@ -30,3 +30,12 @@ pub mod stake_nft;
 
 pub use unstake_nft::*;
 pub mod unstake_nft;
+
+pub use finish_proposal_service::*;
+pub mod finish_proposal_service;
+
+pub use add_transaction::*;
+pub mod add_transaction;
+
+pub use add_instruction::*;
+pub mod add_instruction;

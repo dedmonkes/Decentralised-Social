@@ -15,6 +15,7 @@ pub struct ProposalTransaction{
     pub proposal : Pubkey,
     pub executed_at : Option<i64>,
     pub transaction_index : u32,
+    pub instruction_count : u8,
     pub executed_by : Option<Pubkey>,
     pub bump: u8,
 }
@@ -26,6 +27,7 @@ impl ProposalTransaction {
         std::mem::size_of::<Option<i64>>() +
         std::mem::size_of::<u32>() +
         std::mem::size_of::<Option<Pubkey>>() +
+        1 + 
         1
     }
 }
@@ -49,15 +51,22 @@ pub struct ProposalInstruction{
 }
 
 impl ProposalInstruction {
-    pub fn space(accounts : Vec<AccountMeta>) -> usize {
+    pub fn space(accounts : &Vec<AlignAccountMeta>, data : &Vec<u8>) -> usize {
         8 +
         32 +
         32 +
         1 +
         1 +
-        4 + (std::mem::size_of::<AccountMeta>() * accounts.len()) +
+        4 + (std::mem::size_of::<AlignAccountMeta>() * accounts.len()) +
+        4 + (1 * data.len()) +
         std::mem::size_of::<Option<Pubkey>>() +
         1
+    }
+
+    pub fn get_instruction_sise(accounts : &Vec<AlignAccountMeta>, data : &Vec<u8>) -> usize {
+        32 + // program_id
+        4 + (std::mem::size_of::<AlignAccountMeta>() * accounts.len()) +
+        4 + (1 * data.len())
     }
 }
 
