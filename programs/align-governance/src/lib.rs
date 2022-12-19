@@ -8,7 +8,7 @@ mod instructions;
 use instructions::{
     cast_council_vote::*, cast_rank::*, create_organisation::*, create_proposal::*,
     join_organisation::*, push_proposal_state::*, stage_proposal_for_ranking::*,
-    stake_nft::*, unstake_nft::*, add_instruction::*, add_transaction::*
+    stake_nft::*, unstake_nft::*, add_instruction::*, add_transaction::*, finish_proposal_service::*
 };
 
 use state::*;
@@ -62,4 +62,8 @@ pub mod align_governance {
         instructions::add_instruction(ctx, ix_program_id, data, meta_accounts )
     }
     
+    pub fn finish_servicing_proposal(ctx: Context<FinishProposalService>) -> Result<()> {
+        instructions::finish_proposal_service(ctx)
+    }
+
 }

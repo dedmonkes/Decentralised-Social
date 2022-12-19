@@ -38,6 +38,7 @@ pub struct Proposal {
     pub ranking_at: Option<i64>,
     pub voting_at: Option<i64>,
     pub denied_at: Option<i64>,
+    pub executed_at: Option<i64>,
     pub approved_at: Option<i64>,
     pub transaction_count: u32,
     pub executing_transaction_index : Option<u32>,

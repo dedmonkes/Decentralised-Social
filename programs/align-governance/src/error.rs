@@ -22,4 +22,7 @@ pub enum AlignError {
 
     #[msg("Incorrect NFT for collection that governs organisation")]
     CollectionMintMismatch,
+
+    #[msg("Not all transaction are executed")]
+    NotAllTransactionsExecuted,
 }

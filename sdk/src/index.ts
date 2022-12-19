@@ -160,7 +160,9 @@ export const castRankVote = async (
             proposal: proposal.address,
             contributionRecord: contributionRecord,
         })
-        .rpc();
+        .rpc({
+            skipPreflight: true
+        });
 
     return sig;
 };

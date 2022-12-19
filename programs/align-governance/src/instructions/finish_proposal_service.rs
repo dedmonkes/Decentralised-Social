@@ -1,6 +1,6 @@
 use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
-    state::{NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager},
+    state::{NativeTreasuryAccount, Organisation, Proposal, ProposalState, ReputationManager}, error::AlignError,
 };
 use anchor_lang::prelude::*;
 
@@ -8,6 +8,10 @@ use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal
 pub fn finish_proposal_service(ctx: Context<FinishProposalService>) -> Result<()> {
+    if ctx.accounts.proposal.transaction_count > 0 {
+        require!(ctx.accounts.proposal.executed_at.is_some(), AlignError::NotAllTransactionsExecuted);
+    }
+    
     ctx.accounts.proposal.state = ProposalState::Reviewing;
     Ok(())
 }

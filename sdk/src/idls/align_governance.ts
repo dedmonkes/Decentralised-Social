@@ -671,6 +671,163 @@ export type AlignGovernance = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "addTransaction",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "transaction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addInstruction",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "transaction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "ixProgramId",
+          "type": "publicKey"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "metaAccounts",
+          "type": {
+            "vec": {
+              "defined": "AlignAccountMeta"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "finishServicingProposal",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "servicerIdenitifier",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -970,6 +1127,16 @@ export type AlignGovernance = {
             }
           },
           {
+            "name": "transactionCount",
+            "type": "u32"
+          },
+          {
+            "name": "executingTransactionIndex",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
             "name": "draftAt",
             "type": "i64"
           },
@@ -1113,6 +1280,88 @@ export type AlignGovernance = {
           }
         ]
       }
+    },
+    {
+      "name": "proposalTransaction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "state",
+            "type": {
+              "defined": "TransactionState"
+            }
+          },
+          {
+            "name": "proposal",
+            "type": "publicKey"
+          },
+          {
+            "name": "executedAt",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "transactionIndex",
+            "type": "u32"
+          },
+          {
+            "name": "instructionCount",
+            "type": "u8"
+          },
+          {
+            "name": "executedBy",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "proposalInstruction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "transaction",
+            "type": "publicKey"
+          },
+          {
+            "name": "programId",
+            "type": "publicKey"
+          },
+          {
+            "name": "isExecuted",
+            "type": "bool"
+          },
+          {
+            "name": "instructionIndex",
+            "type": "u8"
+          },
+          {
+            "name": "accounts",
+            "type": {
+              "vec": {
+                "defined": "AlignAccountMeta"
+              }
+            }
+          },
+          {
+            "name": "data",
+            "type": "bytes"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -1156,6 +1405,26 @@ export type AlignGovernance = {
           {
             "name": "weight",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AlignAccountMeta",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSigner",
+            "type": "bool"
+          },
+          {
+            "name": "isWritable",
+            "type": "bool"
           }
         ]
       }
@@ -1228,6 +1497,9 @@ export type AlignGovernance = {
             "name": "Draft"
           },
           {
+            "name": "Executing"
+          },
+          {
             "name": "Ranking"
           },
           {
@@ -1291,6 +1563,29 @@ export type AlignGovernance = {
           },
           {
             "name": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TransactionState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Waiting"
+          },
+          {
+            "name": "ReadyToExecute"
+          },
+          {
+            "name": "Executing"
+          },
+          {
+            "name": "Success"
+          },
+          {
+            "name": "Failed"
           }
         ]
       }
@@ -2008,6 +2303,163 @@ export const IDL: AlignGovernance = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "addTransaction",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "transaction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addInstruction",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "CHECK : Checked in Identifier CPI"
+          ]
+        },
+        {
+          "name": "transaction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "ixProgramId",
+          "type": "publicKey"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "name": "metaAccounts",
+          "type": {
+            "vec": {
+              "defined": "AlignAccountMeta"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "finishServicingProposal",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "servicerIdenitifier",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -2307,6 +2759,16 @@ export const IDL: AlignGovernance = {
             }
           },
           {
+            "name": "transactionCount",
+            "type": "u32"
+          },
+          {
+            "name": "executingTransactionIndex",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
             "name": "draftAt",
             "type": "i64"
           },
@@ -2450,6 +2912,88 @@ export const IDL: AlignGovernance = {
           }
         ]
       }
+    },
+    {
+      "name": "proposalTransaction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "state",
+            "type": {
+              "defined": "TransactionState"
+            }
+          },
+          {
+            "name": "proposal",
+            "type": "publicKey"
+          },
+          {
+            "name": "executedAt",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "transactionIndex",
+            "type": "u32"
+          },
+          {
+            "name": "instructionCount",
+            "type": "u8"
+          },
+          {
+            "name": "executedBy",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "proposalInstruction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "transaction",
+            "type": "publicKey"
+          },
+          {
+            "name": "programId",
+            "type": "publicKey"
+          },
+          {
+            "name": "isExecuted",
+            "type": "bool"
+          },
+          {
+            "name": "instructionIndex",
+            "type": "u8"
+          },
+          {
+            "name": "accounts",
+            "type": {
+              "vec": {
+                "defined": "AlignAccountMeta"
+              }
+            }
+          },
+          {
+            "name": "data",
+            "type": "bytes"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -2493,6 +3037,26 @@ export const IDL: AlignGovernance = {
           {
             "name": "weight",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AlignAccountMeta",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSigner",
+            "type": "bool"
+          },
+          {
+            "name": "isWritable",
+            "type": "bool"
           }
         ]
       }
@@ -2565,6 +3129,9 @@ export const IDL: AlignGovernance = {
             "name": "Draft"
           },
           {
+            "name": "Executing"
+          },
+          {
             "name": "Ranking"
           },
           {
@@ -2628,6 +3195,29 @@ export const IDL: AlignGovernance = {
           },
           {
             "name": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TransactionState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Waiting"
+          },
+          {
+            "name": "ReadyToExecute"
+          },
+          {
+            "name": "Executing"
+          },
+          {
+            "name": "Success"
+          },
+          {
+            "name": "Failed"
           }
         ]
       }
