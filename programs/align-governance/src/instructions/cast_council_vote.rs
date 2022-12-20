@@ -15,6 +15,8 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
     ctx.accounts.council_vote_record.proposal = ctx.accounts.proposal.key();
     ctx.accounts.council_vote_record.vote = vote_type;
     ctx.accounts.council_vote_record.bump = *ctx.bumps.get("council_vote_record").unwrap();
+    ctx.accounts.council_vote_record.identifier = ctx.accounts.identity.identifier;
+    ctx.accounts.council_vote_record.review_score = None;
 
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
     let threshold = ctx.accounts.governance.council_threshold;

@@ -25,4 +25,7 @@ pub enum AlignError {
 
     #[msg("Not all transaction are executed")]
     NotAllTransactionsExecuted,
+
+    #[msg("Review score not valid")]
+    ReviewScoreNotValid,
 }

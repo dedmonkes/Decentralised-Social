@@ -8,7 +8,8 @@ mod instructions;
 use instructions::{
     cast_council_vote::*, cast_rank::*, create_organisation::*, create_proposal::*,
     join_organisation::*, push_proposal_state::*, stage_proposal_for_ranking::*,
-    stake_nft::*, unstake_nft::*, add_instruction::*, add_transaction::*, finish_proposal_service::*
+    stake_nft::*, unstake_nft::*, add_instruction::*, add_transaction::*, finish_proposal_service::*,
+    review_proposal::*
 };
 
 use state::*;
@@ -64,6 +65,10 @@ pub mod align_governance {
     
     pub fn finish_servicing_proposal(ctx: Context<FinishProposalService>) -> Result<()> {
         instructions::finish_proposal_service(ctx)
+    }
+
+    pub fn review_proposal(ctx: Context<ReviewProposal>, score : i8) -> Result<()> {
+        instructions::review_proposal(ctx, score)
     }
 
 }

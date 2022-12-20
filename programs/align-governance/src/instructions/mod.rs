@@ -40,3 +40,6 @@ pub mod add_transaction;
 pub use add_instruction::*;
 pub mod add_instruction;
 
+pub use review_proposal::*;
+pub mod review_proposal;
+

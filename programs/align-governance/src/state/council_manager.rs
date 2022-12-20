@@ -39,8 +39,10 @@ impl CouncilManager {
 #[account]
 pub struct CouncilVoteRecord {
     pub organisation: Pubkey, // Sub org or Organisation
+    pub identifier : Pubkey, 
     pub proposal: Pubkey,
     pub vote: CouncilVote,
+    pub review_score : Option<i8>,
     pub bump: u8,
 }
 
@@ -49,7 +51,9 @@ impl CouncilVoteRecord {
         8 +
         32 +
         32 +
+        32 +
         std::mem::size_of::<CouncilVote>() + //recovery count
+        std::mem::size_of::<Option<i8>>() + //recovery count
         1
     }
 }
