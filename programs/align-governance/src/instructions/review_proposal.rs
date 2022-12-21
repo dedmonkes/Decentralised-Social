@@ -1,16 +1,15 @@
 use crate::{
     error::AlignError,
     state::{
-        CouncilManager, CouncilVote, CouncilVoteRecord, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, proposal,
+        proposal, CouncilManager, CouncilVote, CouncilVoteRecord, NativeTreasuryAccount,
+        Organisation, Proposal, ProposalState,
     },
 };
 use anchor_lang::prelude::*;
 
 use identifiers::state::{Identity, OwnerRecord};
 
-pub fn review_proposal(ctx: Context<ReviewProposal>, score : i8) -> Result<()> {
-
+pub fn review_proposal(ctx: Context<ReviewProposal>, score: i8) -> Result<()> {
     let council_idenitfiers = &ctx.accounts.council_manager.council_identifiers;
 
     require!(
@@ -20,22 +19,26 @@ pub fn review_proposal(ctx: Context<ReviewProposal>, score : i8) -> Result<()> {
 
     require!(score == -1 || score == 1, AlignError::ReviewScoreNotValid);
 
-    ctx.accounts.proposal.council_review_count = ctx.accounts.proposal.council_review_count.checked_add(1).unwrap();
+    ctx.accounts.proposal.council_review_count = ctx
+        .accounts
+        .proposal
+        .council_review_count
+        .checked_add(1)
+        .unwrap();
 
-    ctx.accounts.proposal.council_review_rating = match ctx.accounts.proposal.council_review_rating {
+    ctx.accounts.proposal.council_review_rating = match ctx.accounts.proposal.council_review_rating
+    {
         Some(current_score) => current_score.checked_add(score),
-        None => Some(score)
+        None => Some(score),
     };
 
     ctx.accounts.council_vote_record.review_score = Some(score);
 
     if council_idenitfiers.len() == ctx.accounts.proposal.council_review_count.into() {
-
         ctx.accounts.proposal.state = match ctx.accounts.proposal.transaction_count {
             0 => ProposalState::Complete,
-            _ => ProposalState::Executing
+            _ => ProposalState::Executing,
         };
-        
     }
 
     Ok(())

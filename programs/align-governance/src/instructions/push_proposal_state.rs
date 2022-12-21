@@ -1,6 +1,7 @@
 use crate::{
+    constants::DEFAULT_RANKING_PEROID,
     error::AlignError,
-    state::{Proposal, ProposalState, Organisation}, constants::DEFAULT_RANKING_PEROID,
+    state::{Organisation, Proposal, ProposalState},
 };
 use anchor_lang::prelude::*;
 

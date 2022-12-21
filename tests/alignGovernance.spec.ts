@@ -30,6 +30,8 @@ import {
     ProposalData,
     stakeNfts,
     Derivation,
+    ReputationManager,
+    ContributionRecord,
 } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from "fs";
@@ -1391,20 +1393,21 @@ describe("Align Governance Inergration Tests", async () => {
     });
 
     it("Review Servicing proposal", async () => {
-        
-        await alignProgram.methods.finishServicingProposal()
+
+        await alignProgram.methods.reviewProposal(1)
             .accountsStrict({
                 organisation: organisation,
                 proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
                 payer: profilesProgram.provider.publicKey,
                 systemProgram: web3.SystemProgram.programId,
-                owner: owner1.publicKey,
-                servicerIdenitifier: identifier1.publicKey,
-                ownerRecord: Derivation.deriveOwnerRecordAddress(
-                    owner1.publicKey
-                )
+                owner: councilKeypair.publicKey,
+                ownerRecord:councilOwnerRecord,
+                councilManager: councilManager,
+                councilVoteRecord: Derivation.deriveCouncilVoteRecord(councilIdentifier.publicKey, Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2))),
+                governance: nativeTreasuryAddress,
+                identity: councilIdentity
             })
-            .signers([owner1])
+            .signers([councilKeypair])
             .rpc();
 
         const propAccount: Proposal = await alignProgram.account.proposal.fetch(
@@ -1412,6 +1415,49 @@ describe("Align Governance Inergration Tests", async () => {
         );
         console.log(JSON.parse(JSON.stringify(propAccount)));
 
-        expect(propAccount.state).to.deep.include({ reviewing: {} });
+        expect(propAccount.state).to.deep.include({ complete: {} });
+    });
+
+    it("claim reputation from proposal", async () => {
+
+        const preContributionRecordAccount: ContributionRecord = await alignProgram.account.contributionRecord.fetch(
+            Derivation.deriveContributionRecord(councilIdentifier.publicKey,Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
+        );
+
+        const preReputationAccount: ReputationManager = await alignProgram.account.reputationManager.fetch(
+            reputationManagerAddress
+        );
+        
+
+        const sig = await alignProgram.methods.claimReputation()
+            .accountsStrict({
+                organisation: organisation,
+                proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
+                payer: profilesProgram.provider.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                identity: councilIdentity,
+                contributionRecord: Derivation.deriveContributionRecord(councilIdentifier.publicKey,Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2))),
+                reputationManager: reputationManagerAddress
+            })
+            .rpc({
+                skipPreflight: true
+            });
+        console.log(sig)
+        const contributionRecordAccount: ContributionRecord = await alignProgram.account.contributionRecord.fetch(
+            Derivation.deriveContributionRecord(councilIdentifier.publicKey,Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
+        );
+
+        const reputationAccount: ReputationManager = await alignProgram.account.reputationManager.fetch(
+            reputationManagerAddress
+        );
+            console.log("Pre reputation", preReputationAccount)
+            console.log("Post reputation", reputationAccount)
+            console.log("Pre contribution", preContributionRecordAccount)
+            console.log("Post contribution", contributionRecordAccount)
+
+            expect(contributionRecordAccount.isClaimed).to.be.true;
+
     });
 });
+
+

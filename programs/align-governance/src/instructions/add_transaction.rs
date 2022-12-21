@@ -2,8 +2,9 @@ use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
     error::AlignError,
     state::{
+        transactions::{ProposalTransaction, TransactionState},
         CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        ReputationManager, transactions::{ProposalTransaction, TransactionState},
+        ReputationManager,
     },
 };
 use anchor_lang::prelude::*;
@@ -12,7 +13,6 @@ use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal
 pub fn add_transaction(ctx: Context<AddTransaction>) -> Result<()> {
-
     ctx.accounts.transaction.state = TransactionState::Waiting;
     ctx.accounts.transaction.proposal = ctx.accounts.proposal.key();
     ctx.accounts.transaction.executed_at = None;
@@ -21,7 +21,12 @@ pub fn add_transaction(ctx: Context<AddTransaction>) -> Result<()> {
     ctx.accounts.transaction.executed_by = None;
     ctx.accounts.transaction.bump = *ctx.bumps.get("transaction").unwrap();
 
-    ctx.accounts.proposal.transaction_count = ctx.accounts.proposal.transaction_count.checked_add(1).unwrap();
+    ctx.accounts.proposal.transaction_count = ctx
+        .accounts
+        .proposal
+        .transaction_count
+        .checked_add(1)
+        .unwrap();
 
     Ok(())
 }

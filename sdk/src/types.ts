@@ -91,7 +91,7 @@ export interface Identity {
 }
 
 export interface ContributionReputation {
-    proposalVotes: number,
+    proposalVotes: BN,
     servicedProposals: number,
     aggregatedProposalOutcomes: BN,
     proposalsCreated: number,

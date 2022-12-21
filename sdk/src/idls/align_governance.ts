@@ -828,6 +828,108 @@ export type AlignGovernance = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "reviewProposal",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governance",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "councilManager",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "councilVoteRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "score",
+          "type": "i8"
+        }
+      ]
+    },
+    {
+      "name": "claimReputation",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "contributionRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "reputationManager",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -927,6 +1029,10 @@ export type AlignGovernance = {
             "type": "publicKey"
           },
           {
+            "name": "identifier",
+            "type": "publicKey"
+          },
+          {
             "name": "proposal",
             "type": "publicKey"
           },
@@ -934,6 +1040,12 @@ export type AlignGovernance = {
             "name": "vote",
             "type": {
               "defined": "CouncilVote"
+            }
+          },
+          {
+            "name": "reviewScore",
+            "type": {
+              "option": "i8"
             }
           },
           {
@@ -1121,6 +1233,12 @@ export type AlignGovernance = {
             }
           },
           {
+            "name": "executedAt",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
             "name": "approvedAt",
             "type": {
               "option": "i64"
@@ -1157,8 +1275,12 @@ export type AlignGovernance = {
           {
             "name": "councilReviewRating",
             "type": {
-              "option": "u8"
+              "option": "i8"
             }
+          },
+          {
+            "name": "councilReviewCount",
+            "type": "u8"
           },
           {
             "name": "totalCouncilYesVotes",
@@ -1388,7 +1510,7 @@ export type AlignGovernance = {
         "fields": [
           {
             "name": "proposalVotes",
-            "type": "u32"
+            "type": "u64"
           },
           {
             "name": "servicedProposals",
@@ -1626,6 +1748,16 @@ export type AlignGovernance = {
       "code": 6006,
       "name": "CollectionMintMismatch",
       "msg": "Incorrect NFT for collection that governs organisation"
+    },
+    {
+      "code": 6007,
+      "name": "NotAllTransactionsExecuted",
+      "msg": "Not all transaction are executed"
+    },
+    {
+      "code": 6008,
+      "name": "ReviewScoreNotValid",
+      "msg": "Review score not valid"
     }
   ]
 };
@@ -2460,6 +2592,108 @@ export const IDL: AlignGovernance = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "reviewProposal",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governance",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "councilManager",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "councilVoteRecord",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "ownerRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "score",
+          "type": "i8"
+        }
+      ]
+    },
+    {
+      "name": "claimReputation",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "organisation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "contributionRecord",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "reputationManager",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "identity",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -2559,6 +2793,10 @@ export const IDL: AlignGovernance = {
             "type": "publicKey"
           },
           {
+            "name": "identifier",
+            "type": "publicKey"
+          },
+          {
             "name": "proposal",
             "type": "publicKey"
           },
@@ -2566,6 +2804,12 @@ export const IDL: AlignGovernance = {
             "name": "vote",
             "type": {
               "defined": "CouncilVote"
+            }
+          },
+          {
+            "name": "reviewScore",
+            "type": {
+              "option": "i8"
             }
           },
           {
@@ -2753,6 +2997,12 @@ export const IDL: AlignGovernance = {
             }
           },
           {
+            "name": "executedAt",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
             "name": "approvedAt",
             "type": {
               "option": "i64"
@@ -2789,8 +3039,12 @@ export const IDL: AlignGovernance = {
           {
             "name": "councilReviewRating",
             "type": {
-              "option": "u8"
+              "option": "i8"
             }
+          },
+          {
+            "name": "councilReviewCount",
+            "type": "u8"
           },
           {
             "name": "totalCouncilYesVotes",
@@ -3020,7 +3274,7 @@ export const IDL: AlignGovernance = {
         "fields": [
           {
             "name": "proposalVotes",
-            "type": "u32"
+            "type": "u64"
           },
           {
             "name": "servicedProposals",
@@ -3258,6 +3512,16 @@ export const IDL: AlignGovernance = {
       "code": 6006,
       "name": "CollectionMintMismatch",
       "msg": "Incorrect NFT for collection that governs organisation"
+    },
+    {
+      "code": 6007,
+      "name": "NotAllTransactionsExecuted",
+      "msg": "Not all transaction are executed"
+    },
+    {
+      "code": 6008,
+      "name": "ReviewScoreNotValid",
+      "msg": "Review score not valid"
     }
   ]
 };

@@ -43,3 +43,5 @@ pub mod add_instruction;
 pub use review_proposal::*;
 pub mod review_proposal;
 
+pub use claim_reputation::*;
+pub mod claim_reputation;

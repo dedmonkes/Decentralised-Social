@@ -2,8 +2,11 @@ use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
     error::AlignError,
     state::{
+        transactions::{
+            AlignAccountMeta, ProposalInstruction, ProposalTransaction, TransactionState,
+        },
         CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        ReputationManager, transactions::{ProposalTransaction, TransactionState, ProposalInstruction, AlignAccountMeta},
+        ReputationManager,
     },
 };
 use anchor_lang::{prelude::*, solana_program::sysvar::instructions};
@@ -11,8 +14,12 @@ use anchor_lang::{prelude::*, solana_program::sysvar::instructions};
 use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal
-pub fn add_instruction(ctx: Context<AddInstruction>, ix_program_id : Pubkey, data : Vec<u8>, meta_accounts : Vec<AlignAccountMeta>) -> Result<()> {
-
+pub fn add_instruction(
+    ctx: Context<AddInstruction>,
+    ix_program_id: Pubkey,
+    data: Vec<u8>,
+    meta_accounts: Vec<AlignAccountMeta>,
+) -> Result<()> {
     ctx.accounts.instruction.accounts = meta_accounts;
     ctx.accounts.instruction.transaction = ctx.accounts.transaction.key();
     ctx.accounts.instruction.program_id = ix_program_id;
@@ -21,7 +28,12 @@ pub fn add_instruction(ctx: Context<AddInstruction>, ix_program_id : Pubkey, dat
     ctx.accounts.instruction.data = data;
     ctx.accounts.instruction.bump = *ctx.bumps.get("instruction").unwrap();
 
-    ctx.accounts.transaction.instruction_count = ctx.accounts.transaction.instruction_count.checked_add(1).unwrap();
+    ctx.accounts.transaction.instruction_count = ctx
+        .accounts
+        .transaction
+        .instruction_count
+        .checked_add(1)
+        .unwrap();
 
     Ok(())
 }

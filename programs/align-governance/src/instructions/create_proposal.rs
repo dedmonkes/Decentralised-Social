@@ -11,7 +11,7 @@ use anchor_lang::prelude::*;
 use identifiers::state::{Identifier, Identity, OwnerRecord};
 
 // TODO add link in graph to show proposal
-pub fn create_proposal(ctx: Context<CreateProposal>, ranking_peroid : i64) -> Result<()> {
+pub fn create_proposal(ctx: Context<CreateProposal>, ranking_peroid: i64) -> Result<()> {
     ctx.accounts.proposal.state = ProposalState::Draft;
     ctx.accounts.proposal.organisation = ctx.accounts.organisation.key();
     ctx.accounts.proposal.sub_org_type = None;

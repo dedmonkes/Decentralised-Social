@@ -1,8 +1,6 @@
 use crate::{
     error::AlignError,
-    state::{
-        Organisation, ReputationManager,
-    },
+    state::{Organisation, ReputationManager},
 };
 use anchor_lang::prelude::*;
 
@@ -72,10 +70,9 @@ pub fn stake_nft(ctx: Context<StakeNft>) -> Result<()> {
         .reputation
         .checked_add(weight)
         .unwrap();
-        
+
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
     ctx.accounts.reputation_manager.snapshot_at = current_timestamp;
-
 
     Ok(())
 }

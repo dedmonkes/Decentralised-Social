@@ -1,5 +1,5 @@
 use crate::{
-    constants::{MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL, DEFAULT_RANKING_PEROID},
+    constants::{DEFAULT_RANKING_PEROID, MIN_REP_TO_CREATE_PROPOSAL, POINTS_DECIMAL},
     error::AlignError,
     state::{
         ContributionRecord, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
@@ -44,7 +44,10 @@ pub fn cast_rank(ctx: Context<CastRank>, vote_type: RankVoteType, amount: u32) -
     );
 
     msg!("Points avaliable to use: {}", points_avaliable);
-    msg!("Points needed for vote: {}", amount.checked_mul(POINTS_DECIMAL).unwrap());
+    msg!(
+        "Points needed for vote: {}",
+        amount.checked_mul(POINTS_DECIMAL).unwrap()
+    );
 
     require!(
         points_avaliable > 0_u64.checked_mul(POINTS_DECIMAL.into()).unwrap(),
