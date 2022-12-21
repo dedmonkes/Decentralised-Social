@@ -1,8 +1,4 @@
-use crate::{
-    state::{
-        Organisation, ReputationManager,
-    },
-};
+use crate::state::{Organisation, ReputationManager};
 use anchor_lang::prelude::*;
 
 use anchor_spl::{
@@ -16,7 +12,12 @@ pub fn unstake_nft(ctx: Context<UnstakeNft>) -> Result<()> {
     let identity = ctx.accounts.identity.key();
     let bump = &[ctx.accounts.reputation_manager.bump];
 
-    let seeds = vec![b"reputation-manager".as_ref(), organisation.as_ref(), identity.as_ref(), bump];
+    let seeds = vec![
+        b"reputation-manager".as_ref(),
+        organisation.as_ref(),
+        identity.as_ref(),
+        bump,
+    ];
 
     let signers = vec![seeds.as_slice()];
 

@@ -10,12 +10,12 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use identifiers::{cpi::accounts::InitializeIdentifier, state::is_valid_prefix};
 
-pub fn create_organisation(ctx: Context<CreateOrganisation>, ranking_period : i64) -> Result<()> {
+pub fn create_organisation(ctx: Context<CreateOrganisation>, ranking_period: i64) -> Result<()> {
     ctx.accounts.organisation.identifier = ctx.accounts.identifier.key();
     ctx.accounts.organisation.collection_mint = ctx.accounts.collection_mint.key();
     ctx.accounts.organisation.bump = *ctx.bumps.get("organisation").unwrap();
     ctx.accounts.organisation.sub_organisation_count = 0;
-    ctx.accounts.organisation.ranking_time= ranking_period;
+    ctx.accounts.organisation.ranking_time = ranking_period;
     let cpi_program = ctx.accounts.identifier_program.to_account_info();
 
     let identity_key = ctx.accounts.identifier.key();

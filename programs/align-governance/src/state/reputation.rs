@@ -13,7 +13,7 @@ pub struct CapitalReputation {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub struct ContributionReputation {
-    pub proposal_votes: u32,
+    pub proposal_votes: u64,
     pub serviced_proposals: u32,
     pub aggregated_proposal_outcomes: u64,
     pub proposals_created: u32,

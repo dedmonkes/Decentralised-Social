@@ -15,6 +15,8 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
     ctx.accounts.council_vote_record.proposal = ctx.accounts.proposal.key();
     ctx.accounts.council_vote_record.vote = vote_type;
     ctx.accounts.council_vote_record.bump = *ctx.bumps.get("council_vote_record").unwrap();
+    ctx.accounts.council_vote_record.identifier = ctx.accounts.identity.identifier;
+    ctx.accounts.council_vote_record.review_score = None;
 
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
     let threshold = ctx.accounts.governance.council_threshold;
@@ -61,10 +63,9 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
         },
         None => return Err(AlignError::NumericalOverflow.into()),
     };
-    let yes_votes : u32 = ctx.accounts.proposal.total_council_yes_votes.into();
-    let no_votes : u32 = ctx.accounts.proposal.total_council_no_votes.into();
-    let abstain_votes : u32 = ctx.accounts.proposal.total_council_abstain_votes.into();
-
+    let yes_votes: u32 = ctx.accounts.proposal.total_council_yes_votes.into();
+    let no_votes: u32 = ctx.accounts.proposal.total_council_no_votes.into();
+    let abstain_votes: u32 = ctx.accounts.proposal.total_council_abstain_votes.into();
 
     if minimum_yes_votes <= yes_votes.checked_mul(100).unwrap().into() {
         ctx.accounts.proposal.approved_at = Some(current_timestamp);
@@ -78,11 +79,14 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
         .checked_add(abstain_votes)
         .unwrap();
 
-    let remaining_votes : u32 = council_seats.checked_mul(100).unwrap().checked_sub(total_votes.checked_mul(100).unwrap()).unwrap().into();
+    let remaining_votes: u32 = council_seats
+        .checked_mul(100)
+        .unwrap()
+        .checked_sub(total_votes.checked_mul(100).unwrap())
+        .unwrap()
+        .into();
 
-    if minimum_yes_votes.saturating_sub(yes_votes.checked_mul(100).unwrap())
-        > remaining_votes
-    {
+    if minimum_yes_votes.saturating_sub(yes_votes.checked_mul(100).unwrap()) > remaining_votes {
         ctx.accounts.proposal.denied_at = Some(current_timestamp);
         ctx.accounts.proposal.state = ProposalState::Denied;
     }

@@ -6,9 +6,10 @@ pub mod state;
 
 mod instructions;
 use instructions::{
-    cast_council_vote::*, cast_rank::*, create_organisation::*, create_proposal::*,
-    join_organisation::*, push_proposal_state::*, stage_proposal_for_ranking::*,
-    stake_nft::*, unstake_nft::*
+    add_instruction::*, add_transaction::*, cast_council_vote::*, cast_rank::*,
+    claim_reputation::*, create_organisation::*, create_proposal::*, finish_proposal_service::*,
+    join_organisation::*, push_proposal_state::*, review_proposal::*,
+    stage_proposal_for_ranking::*, stake_nft::*, unstake_nft::*,
 };
 
 use state::*;
@@ -19,7 +20,10 @@ pub mod align_governance {
 
     use super::*;
 
-    pub fn create_organisation(ctx: Context<CreateOrganisation>, ranking_peroid : i64) -> Result<()> {
+    pub fn create_organisation(
+        ctx: Context<CreateOrganisation>,
+        ranking_peroid: i64,
+    ) -> Result<()> {
         instructions::create_organisation(ctx, ranking_peroid)
     }
 
@@ -27,7 +31,7 @@ pub mod align_governance {
         instructions::join_organisation(ctx)
     }
 
-    pub fn create_proposal(ctx: Context<CreateProposal>, ranking_peroid : i64) -> Result<()> {
+    pub fn create_proposal(ctx: Context<CreateProposal>, ranking_peroid: i64) -> Result<()> {
         instructions::create_proposal(ctx, ranking_peroid)
     }
 
@@ -51,5 +55,30 @@ pub mod align_governance {
 
     pub fn unstake_nft(ctx: Context<UnstakeNft>) -> Result<()> {
         instructions::unstake_nft(ctx)
+    }
+
+    pub fn add_transaction(ctx: Context<AddTransaction>) -> Result<()> {
+        instructions::add_transaction(ctx)
+    }
+
+    pub fn add_instruction(
+        ctx: Context<AddInstruction>,
+        ix_program_id: Pubkey,
+        data: Vec<u8>,
+        meta_accounts: Vec<AlignAccountMeta>,
+    ) -> Result<()> {
+        instructions::add_instruction(ctx, ix_program_id, data, meta_accounts)
+    }
+
+    pub fn finish_servicing_proposal(ctx: Context<FinishProposalService>) -> Result<()> {
+        instructions::finish_proposal_service(ctx)
+    }
+
+    pub fn review_proposal(ctx: Context<ReviewProposal>, score: i8) -> Result<()> {
+        instructions::review_proposal(ctx, score)
+    }
+
+    pub fn claim_reputation(ctx: Context<ClaimReputation>) -> Result<()> {
+        instructions::claim_reputation(ctx)
     }
 }

@@ -30,6 +30,8 @@ import {
     ProposalData,
     stakeNfts,
     Derivation,
+    ReputationManager,
+    ContributionRecord,
 } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from "fs";
@@ -1028,46 +1030,46 @@ describe("Align Governance Inergration Tests", async () => {
     });
 
     it("Create Proposal", async () => {
-        const propData1 = {
-            name: "Create Discord bot for royalty enforcement",
-            description:
-                "Qui veritatis voluptatem et iusto velit aut voluptatem voluptas sit voluptas aliquam eos nihil atque et excepturi quae ut provident eaque. Sed natus voluptatibus eum tenetur temporibus ea adipisci similique.",
-        };
-        const acc = await createShadowAccount(
-            "ALIGN_PROPOSAL",
-            propData1,
-            programs.shadowDriveInstance
-        );
+        // const propData1 = {
+        //     name: "Create Discord bot for royalty enforcement",
+        //     description:
+        //         "Qui veritatis voluptatem et iusto velit aut voluptatem voluptas sit voluptas aliquam eos nihil atque et excepturi quae ut provident eaque. Sed natus voluptatibus eum tenetur temporibus ea adipisci similique.",
+        // };
+        // const acc = await createShadowAccount(
+        //     "ALIGN_PROPOSAL",
+        //     propData1,
+        //     programs.shadowDriveInstance
+        // );
 
-        await uploadProposalMetadata(
-            Derivation.deriveProposalAddress(
-                nativeTreasuryAddress,
-                new BN(0)
-            ).toBase58(),
-            propData1,
-            new PublicKey(acc.shdw_bucket),
-            programs.shadowDriveInstance
-        );
-        const propData2 = {
-            name: "Promotional Music Video",
-            description:
-                "Est omnis maxime rem atque nesciunt ut quis sapiente ea voluptate atque. 33 expedita beatae eos molestias sequi qui nihil earum sit molestiae Quis. Eum fuga dignissimos qui quod consequatur et optio veritatis et aspernatur quia qui autem vitae sit sint tenetur. At amet quod eum accusantium ullam qui esse quia aut consequatur amet in corporis voluptas quo veritatis voluptatem.",
-        };
-        const acc2 = await createShadowAccount(
-            "ALIGN_PROPOSAL",
-            propData2,
-            programs.shadowDriveInstance
-        );
+        // await uploadProposalMetadata(
+        //     Derivation.deriveProposalAddress(
+        //         nativeTreasuryAddress,
+        //         new BN(0)
+        //     ).toBase58(),
+        //     propData1,
+        //     new PublicKey(acc.shdw_bucket),
+        //     programs.shadowDriveInstance
+        // );
+        // const propData2 = {
+        //     name: "Promotional Music Video",
+        //     description:
+        //         "Est omnis maxime rem atque nesciunt ut quis sapiente ea voluptate atque. 33 expedita beatae eos molestias sequi qui nihil earum sit molestiae Quis. Eum fuga dignissimos qui quod consequatur et optio veritatis et aspernatur quia qui autem vitae sit sint tenetur. At amet quod eum accusantium ullam qui esse quia aut consequatur amet in corporis voluptas quo veritatis voluptatem.",
+        // };
+        // const acc2 = await createShadowAccount(
+        //     "ALIGN_PROPOSAL",
+        //     propData2,
+        //     programs.shadowDriveInstance
+        // );
 
-        await uploadProposalMetadata(
-            Derivation.deriveProposalAddress(
-                nativeTreasuryAddress,
-                new BN(1)
-            ).toBase58(),
-            propData2,
-            new PublicKey(acc2.shdw_bucket),
-            programs.shadowDriveInstance
-        );
+        // await uploadProposalMetadata(
+        //     Derivation.deriveProposalAddress(
+        //         nativeTreasuryAddress,
+        //         new BN(1)
+        //     ).toBase58(),
+        //     propData2,
+        //     new PublicKey(acc2.shdw_bucket),
+        //     programs.shadowDriveInstance
+        // );
 
         const tx = await alignProgram.methods
             .createProposal(new BN(60 * 60 *24 *3))
@@ -1092,7 +1094,7 @@ describe("Align Governance Inergration Tests", async () => {
                     new BN(0)
                 ),
                 governance: nativeTreasuryAddress,
-                shadowDrive: acc.shdw_bucket,
+                shadowDrive: web3.Keypair.generate().publicKey,
                 servicerIdenitifier: identifier1.publicKey,
             })
             // .signers([servicerIdenitifier, servicerKeypair])
@@ -1125,7 +1127,7 @@ describe("Align Governance Inergration Tests", async () => {
                     new BN(1)
                 ),
                 governance: nativeTreasuryAddress,
-                shadowDrive: acc2.shdw_bucket,
+                shadowDrive: web3.Keypair.generate().publicKey,
                 servicerIdenitifier: identifier2.publicKey,
             })
             // .signers([servicerIdenitifier, servicerKeypair])
@@ -1135,19 +1137,53 @@ describe("Align Governance Inergration Tests", async () => {
             skipPreflight: true,
         });
 
-        const proposalData: ProposalData = {
-            name: "Create a onchain social network based DAO",
-            description:
-                "Qui harum facere et nesciunt internos ut veritatis optio! Et enim quisquam aut quasi repellendus sed possimus optio et quis dolorem ut laudantium velit non error iure At fugit consectetur. Qui quasi fugit id architecto totam est blanditiis autem. Ut consequuntur quae quo impedit molestiae est maxime perferendis eos nisi necessitatibus aut autem sapiente ut esse quos aut velit unde?",
-        };
-        await createProposal(
-            councilIdentifier.publicKey,
-            organisation,
-            identifier1.publicKey,
-            proposalData,
-            new BN(0),
-            programs
-        );
+
+        const tx2 = await alignProgram.methods
+            .createProposal(new BN(10))
+            .accountsStrict({
+                payer: profilesProgram.provider.publicKey,
+                owner: councilKeypair.publicKey,
+                ownerRecord: Derivation.deriveOwnerRecordAddress(
+                    councilKeypair.publicKey
+                ),
+                systemProgram: web3.SystemProgram.programId,
+                organisation: organisation,
+                reputationManager: Derivation.deriveReputationManagerAddress(
+                    organisation,
+                    Derivation.deriveIdentityAddress(councilIdentifier.publicKey)
+                ),
+                identity: Derivation.deriveIdentityAddress(
+                    councilIdentifier.publicKey
+                ),
+                councilManager: councilManager,
+                proposal: Derivation.deriveProposalAddress(
+                    nativeTreasuryAddress,
+                    new BN(2)
+                ),
+                governance: nativeTreasuryAddress,
+                shadowDrive: web3.Keypair.generate().publicKey,
+                servicerIdenitifier: identifier1.publicKey,
+            })
+            // .signers([servicerIdenitifier, servicerKeypair])
+            .transaction();
+
+        await alignProgram.provider.sendAndConfirm(tx2, [councilKeypair], {
+            skipPreflight: true,
+        });
+
+        // const proposalData: ProposalData = {
+        //     name: "Create a onchain social network based DAO",
+        //     description:
+        //         "Qui harum facere et nesciunt internos ut veritatis optio! Et enim quisquam aut quasi repellendus sed possimus optio et quis dolorem ut laudantium velit non error iure At fugit consectetur. Qui quasi fugit id architecto totam est blanditiis autem. Ut consequuntur quae quo impedit molestiae est maxime perferendis eos nisi necessitatibus aut autem sapiente ut esse quos aut velit unde?",
+        // };
+        // await createProposal(
+        //     councilIdentifier.publicKey,
+        //     organisation,
+        //     identifier1.publicKey,
+        //     proposalData,
+        //     new BN(0),
+        //     programs
+        // );
 
         console.log("Fetching proposal Accounts");
 
@@ -1273,7 +1309,6 @@ describe("Align Governance Inergration Tests", async () => {
             await alignProgram.account.nativeTreasuryAccount.fetch(
                 nativeTreasuryAddress
             );
-        console.log(JSON.parse(JSON.stringify(govAccount)));
 
         const repAccount = await alignProgram.account.reputationManager.fetch(
             reputationManagerAddress
@@ -1332,4 +1367,97 @@ describe("Align Governance Inergration Tests", async () => {
         expect(votes[0].account.vote).to.deep.include({ yes: {} });
         expect(propAccount.state).to.deep.include({ servicing: {} });
     });
+
+    it("Finishing Servicing proposal", async () => {
+        await alignProgram.methods.finishServicingProposal()
+            .accountsStrict({
+                organisation: organisation,
+                proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
+                payer: profilesProgram.provider.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                owner: owner1.publicKey,
+                servicerIdenitifier: identifier1.publicKey,
+                ownerRecord: Derivation.deriveOwnerRecordAddress(
+                    owner1.publicKey
+                )
+            })
+            .signers([owner1])
+            .rpc();
+
+        const propAccount: Proposal = await alignProgram.account.proposal.fetch(
+            Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2))
+        );
+        console.log(JSON.parse(JSON.stringify(propAccount)));
+
+        expect(propAccount.state).to.deep.include({ reviewing: {} });
+    });
+
+    it("Review Servicing proposal", async () => {
+
+        await alignProgram.methods.reviewProposal(1)
+            .accountsStrict({
+                organisation: organisation,
+                proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
+                payer: profilesProgram.provider.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                owner: councilKeypair.publicKey,
+                ownerRecord:councilOwnerRecord,
+                councilManager: councilManager,
+                councilVoteRecord: Derivation.deriveCouncilVoteRecord(councilIdentifier.publicKey, Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2))),
+                governance: nativeTreasuryAddress,
+                identity: councilIdentity
+            })
+            .signers([councilKeypair])
+            .rpc();
+
+        const propAccount: Proposal = await alignProgram.account.proposal.fetch(
+            Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2))
+        );
+        console.log(JSON.parse(JSON.stringify(propAccount)));
+
+        expect(propAccount.state).to.deep.include({ complete: {} });
+    });
+
+    it("claim reputation from proposal", async () => {
+
+        const preContributionRecordAccount: ContributionRecord = await alignProgram.account.contributionRecord.fetch(
+            Derivation.deriveContributionRecord(councilIdentifier.publicKey,Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
+        );
+
+        const preReputationAccount: ReputationManager = await alignProgram.account.reputationManager.fetch(
+            reputationManagerAddress
+        );
+        
+
+        const sig = await alignProgram.methods.claimReputation()
+            .accountsStrict({
+                organisation: organisation,
+                proposal: Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)),
+                payer: profilesProgram.provider.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                identity: councilIdentity,
+                contributionRecord: Derivation.deriveContributionRecord(councilIdentifier.publicKey,Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2))),
+                reputationManager: reputationManagerAddress
+            })
+            .rpc({
+                skipPreflight: true
+            });
+        console.log(sig)
+        const contributionRecordAccount: ContributionRecord = await alignProgram.account.contributionRecord.fetch(
+            Derivation.deriveContributionRecord(councilIdentifier.publicKey,Derivation.deriveProposalAddress(nativeTreasuryAddress, new BN(2)))
+        );
+
+        const reputationAccount: ReputationManager = await alignProgram.account.reputationManager.fetch(
+            reputationManagerAddress
+        );
+            console.log("Pre reputation", preReputationAccount)
+            console.log("Post reputation", reputationAccount)
+            console.log("Pre contribution", preContributionRecordAccount)
+            console.log("Post contribution", contributionRecordAccount)
+
+            expect(contributionRecordAccount.isClaimed).to.be.true;
+
+    });
 });
+
+
