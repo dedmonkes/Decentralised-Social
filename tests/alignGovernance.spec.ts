@@ -32,6 +32,8 @@ import {
     Derivation,
     ReputationManager,
     ContributionRecord,
+    ProposalTransaction,
+    ProposalInstruction,
 } from "align-sdk";
 import { castRankVote, RankVoteType } from "align-sdk";
 import fs from "fs";
@@ -1203,6 +1205,109 @@ describe("Align Governance Inergration Tests", async () => {
         );
         console.log(JSON.parse(JSON.stringify(repAccount)));
     });
+
+    it("Add transaction to proposal", async () => {
+
+        const proposal = Derivation.deriveProposalAddress(
+            nativeTreasuryAddress,
+            new BN(2)
+        )
+    
+        const tx = await alignProgram.methods.addTransaction()
+        .accountsStrict({
+            payer: alignProgram.provider.publicKey,
+            owner: councilKeypair.publicKey,
+            proposal,
+            identity: councilIdentity,
+            ownerRecord: councilOwnerRecord,
+            systemProgram: SystemProgram.programId,
+            transaction: Derivation.deriveTransaction(proposal, 0)
+        }).transaction()
+
+        await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], {
+            skipPreflight: true,
+        });
+
+        const transactionAccount : ProposalTransaction = await alignProgram.account.proposalTransaction.fetch(
+            Derivation.deriveTransaction(proposal, 0)
+        );
+
+        const proposalAccount : Proposal = await alignProgram.account.proposal.fetch(
+            proposal
+        );
+
+
+        expect(transactionAccount.executedAt).to.be.null
+        expect(transactionAccount.executedBy).to.be.null
+        expect(transactionAccount.instructionCount).to.equal(0)
+        expect(transactionAccount.proposal.toBase58()).to.equal(proposal.toBase58())
+        expect(transactionAccount.state?.waiting).to.not.be.undefined
+        expect(transactionAccount.transactionIndex).to.eq(0)
+
+        expect(proposalAccount.executedAt).to.be.null
+        expect(proposalAccount.transactionCount).to.eq(1)
+        expect(proposalAccount.executingTransactionIndex).to.be.null
+
+        
+    })
+
+    it("Add instruction to proposal", async () => {
+
+        const proposal = Derivation.deriveProposalAddress(
+            nativeTreasuryAddress,
+            new BN(2)
+        )
+        
+       const transferInstruction = SystemProgram.transfer({
+            fromPubkey : nativeTreasuryAddress,
+            toPubkey : councilKeypair.publicKey,
+            lamports : 1 * web3.LAMPORTS_PER_SOL
+        })
+
+        const instructionAddress = Derivation.deriveProposalInstructionAddress(Derivation.deriveTransaction(proposal, 0), 0)
+
+        const tx = await alignProgram.methods.addInstruction(
+            SystemProgram.programId,
+            transferInstruction.data,
+            transferInstruction.keys,
+            0
+        )
+        .accountsStrict({
+            payer: alignProgram.provider.publicKey,
+            owner: councilKeypair.publicKey,
+            proposal,
+            identity: councilIdentity,
+            ownerRecord: councilOwnerRecord,
+            systemProgram: SystemProgram.programId,
+            transaction: Derivation.deriveTransaction(proposal, 0),
+            instruction: instructionAddress
+        }).transaction()
+
+        await alignProgram.provider.sendAndConfirm(tx, [councilKeypair], {
+            skipPreflight: true,
+        });
+
+        const transactionAccount : ProposalTransaction = await alignProgram.account.proposalTransaction.fetch(
+            Derivation.deriveTransaction(proposal, 0)
+        );
+
+        const instructionAccount : ProposalInstruction = await alignProgram.account.proposal.fetch(
+            proposal
+        );
+
+
+        expect(transactionAccount.executedAt).to.be.null
+        expect(transactionAccount.executedBy).to.be.null
+        expect(transactionAccount.instructionCount).to.equal(1)
+        expect(transactionAccount.proposal.toBase58()).to.equal(proposal.toBase58())
+        expect(transactionAccount.state?.waiting).to.not.be.undefined
+        expect(transactionAccount.transactionIndex).to.eq(0)
+
+        expect(instructionAccount.programId.toBase58()).to.eq(SystemProgram.programId.toBase58())
+
+        
+    })
+
 
     it("Stage Proposal for ranking", async () => {
         await alignProgram.methods

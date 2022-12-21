@@ -19,6 +19,7 @@ pub fn add_instruction(
     ix_program_id: Pubkey,
     data: Vec<u8>,
     meta_accounts: Vec<AlignAccountMeta>,
+    transaction_index : u32
 ) -> Result<()> {
     ctx.accounts.instruction.accounts = meta_accounts;
     ctx.accounts.instruction.transaction = ctx.accounts.transaction.key();
@@ -39,7 +40,7 @@ pub fn add_instruction(
 }
 
 #[derive(Accounts)]
-#[instruction(ix_program_id : Pubkey, data : Vec<u8>, meta_accounts : Vec<AlignAccountMeta>)]
+#[instruction(ix_program_id : Pubkey, data : Vec<u8>, meta_accounts : Vec<AlignAccountMeta>, transaction_index : u32)]
 pub struct AddInstruction<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -51,11 +52,10 @@ pub struct AddInstruction<'info> {
 
     #[account(
         constraint = proposal.state == ProposalState::Draft,
-        constraint = proposal.proposer == identity.key()
+        constraint = proposal.proposer == identity.identifier.key()
     )]
     pub proposal: Box<Account<'info, Proposal>>,
 
-    /// CHECK : Checked in Identifier CPI
     identity: Account<'info, Identity>,
 
     #[account(
@@ -65,11 +65,11 @@ pub struct AddInstruction<'info> {
         bump = owner_record.bump,
         seeds::program = identifiers::id(),
     )]
-    /// CHECK : Checked in Identifier CPI
     pub owner_record: Account<'info, OwnerRecord>,
 
     #[account(
-        seeds = [b"transaction", proposal.key().as_ref(), proposal.transaction_count.to_le_bytes().as_ref()],
+        mut,
+        seeds = [b"transaction", proposal.key().as_ref(), transaction_index.to_le_bytes().as_ref()],
         bump = transaction.bump,
         constraint = transaction.state == TransactionState::Waiting
     )]

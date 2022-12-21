@@ -214,4 +214,34 @@ export namespace Derivation {
       
         return councilVoteRecord;
       };
+
+      export const deriveTransaction = (proposalAddress: web3.PublicKey, transaction_index : number) => {
+        
+        const indexBuff = Buffer.alloc(4);
+        indexBuff.writeInt32LE(transaction_index)
+        
+        const [transactionAccount] = PublicKey.findProgramAddressSync([
+            Buffer.from("transaction"),
+            proposalAddress.toBuffer(),
+            indexBuff    
+        ],
+            ALIGN_PROGRAM_ID
+        )
+      
+        return transactionAccount;
+      };
+
+      export const deriveProposalInstructionAddress = (transactionAddress: web3.PublicKey, instructionIndex : number) => {
+    
+        
+        const [transactionAccount] = PublicKey.findProgramAddressSync([
+            Buffer.from("instruction"),
+            transactionAddress.toBuffer(),
+            Uint8Array.from([instructionIndex])   
+        ],
+            ALIGN_PROGRAM_ID
+        )
+      
+        return transactionAccount;
+      };
 }

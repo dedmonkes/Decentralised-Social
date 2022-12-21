@@ -1,4 +1,4 @@
-import { Program, AnchorProvider, BN } from "@project-serum/anchor";
+ import { Program, AnchorProvider, BN, web3 } from "@project-serum/anchor";
 import { ShdwDrive } from "@shadow-drive/sdk";
 import { PublicKey } from "@solana/web3.js";
 import { AlignGovernance } from "./idls/align_governance";
@@ -184,13 +184,17 @@ export interface Proposal {
     governance: PublicKey,
     rankingAt: BN | null,
     votingAt: BN | null,
+    executedAt: BN | null,
     deniedAt: BN | null,
     approvedAt: BN | null,
+    transactionCount: number,
+    executingTransactionIndex: number | null,
     draftAt: BN,
     servicer: PublicKey | null, // idenitfier of person to service the proposal
     id: BN,
     shadowDrive: PublicKey,
     councilReviewRating: number | null
+    councilReviewCount: number,
     totalCouncilYesVotes: number,
     totalCouncilNoVotes: number,
     totalCouncilAbstainVotes: number,
@@ -243,4 +247,38 @@ export interface ProposalData {
     name: string;
     description: string;
     // image: string;
+}
+
+export interface TransactionState {
+    waiting?: {},
+    readyToExecute? : {},
+    executing? : {},
+    success? : {},
+    failed? : {},
+}
+
+export interface ProposalTransaction {
+    state: TransactionState,
+    proposal: web3.PublicKey,
+    executedAt: BN | null,
+    transactionIndex: number,
+    instructionCount: number,
+    executedBy: web3.PublicKey | null,
+    bump: number,
+}
+
+export interface AlignAccountMeta {
+    pubkey: web3.PublicKey,
+    isSigner: boolean,
+    isWritable: boolean,
+}
+
+export interface ProposalInstruction {
+    transaction: web3.PublicKey,
+    programId: web3.PublicKey,
+    isExecuted: boolean,
+    instructionIndex: number,
+    accounts: AlignAccountMeta[],
+    data: number[],
+    bump: number,
 }

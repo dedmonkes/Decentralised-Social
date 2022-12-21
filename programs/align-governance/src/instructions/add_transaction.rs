@@ -42,8 +42,9 @@ pub struct AddTransaction<'info> {
     pub owner: Signer<'info>,
 
     #[account(
+        mut,
         constraint = proposal.state == ProposalState::Draft,
-        constraint = proposal.proposer == identity.key()
+        constraint = proposal.proposer == identity.identifier.key()
     )]
     pub proposal: Box<Account<'info, Proposal>>,
 

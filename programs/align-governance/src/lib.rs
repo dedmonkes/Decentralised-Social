@@ -66,8 +66,9 @@ pub mod align_governance {
         ix_program_id: Pubkey,
         data: Vec<u8>,
         meta_accounts: Vec<AlignAccountMeta>,
+        transaction_index : u32
     ) -> Result<()> {
-        instructions::add_instruction(ctx, ix_program_id, data, meta_accounts)
+        instructions::add_instruction(ctx, ix_program_id, data, meta_accounts, transaction_index)
     }
 
     pub fn finish_servicing_proposal(ctx: Context<FinishProposalService>) -> Result<()> {
