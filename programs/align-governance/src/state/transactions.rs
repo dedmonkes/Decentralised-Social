@@ -22,11 +22,12 @@ pub struct ProposalTransaction {
 
 impl ProposalTransaction {
     pub fn space() -> usize {
-        8 + 32
+        8 + 
+        1 +
+        32
             + std::mem::size_of::<Option<i64>>()
             + std::mem::size_of::<u32>()
             + std::mem::size_of::<Option<Pubkey>>()
-            + 1
             + 1
     }
 }
