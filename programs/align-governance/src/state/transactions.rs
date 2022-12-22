@@ -3,7 +3,6 @@ use anchor_lang::{prelude::*, solana_program::instruction::Instruction};
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum TransactionState {
     Waiting,
-    ReadyToExecute,
     Executing,
     Success,
     Failed,
