@@ -28,4 +28,11 @@ pub enum AlignError {
 
     #[msg("Review score not valid")]
     ReviewScoreNotValid,
+
+    #[msg("Governance threshold must be above zero")]
+    GovernanceThresholdNotValid,
+
+    #[msg("Instruction is not valid for execution")]
+    InstructionInvalid,
+
 }

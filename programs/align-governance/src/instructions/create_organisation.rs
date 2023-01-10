@@ -2,8 +2,8 @@ use crate::{
     constants::DEFAULT_COUNCIL_THRESHOLD,
     error::AlignError,
     state::{
-        CouncilGovernanceAccount, CouncilManager, CouncilManagerState, ElectionManager,
-        NativeTreasuryAccount, Organisation,
+        CouncilManager, CouncilManagerState, ElectionManager,
+        NativeTreasuryAccount, Organisation, GovernanceAccount,
     },
 };
 use anchor_lang::prelude::*;
@@ -109,12 +109,12 @@ pub struct CreateOrganisation<'info> {
 
     #[account(
         init,
-        seeds = [b"council-governance", organisation.key().as_ref()],
+        seeds = [b"governance", organisation.key().as_ref(), council_manager.key().as_ref()],
         bump,
-        space = CouncilGovernanceAccount::space(),
+        space = GovernanceAccount::space(),
         payer = payer,
     )]
-    pub council_governance: Box<Account<'info, CouncilGovernanceAccount>>,
+    pub council_governance: Box<Account<'info, GovernanceAccount>>,
 
     #[account(
         init,

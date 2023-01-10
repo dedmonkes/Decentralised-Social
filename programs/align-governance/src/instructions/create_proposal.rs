@@ -3,7 +3,7 @@ use crate::{
     error::AlignError,
     state::{
         CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        ReputationManager,
+        ReputationManager, GovernanceAccount,
     },
 };
 use anchor_lang::prelude::*;
@@ -62,7 +62,7 @@ pub struct CreateProposal<'info> {
         mut,
         constraint = governance.organisation == organisation.key()
     )]
-    pub governance: Box<Account<'info, NativeTreasuryAccount>>,
+    pub governance: Box<Account<'info, GovernanceAccount>>,
 
     #[account(
         constraint = reputation_manager.identifier == identity.identifier,

@@ -2,7 +2,7 @@ use crate::{
     error::AlignError,
     state::{
         CouncilManager, CouncilVote, CouncilVoteRecord, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState,
+        Proposal, ProposalState, GovernanceAccount,
     },
 };
 use anchor_lang::prelude::*;
@@ -19,7 +19,7 @@ pub fn cast_council_vote(ctx: Context<CastCouncilVote>, vote_type: CouncilVote) 
     ctx.accounts.council_vote_record.review_score = None;
 
     let current_timestamp = Clock::get().unwrap().unix_timestamp;
-    let threshold = ctx.accounts.governance.council_threshold;
+    let threshold = ctx.accounts.governance.threshold;
     let council_seats: u32 = ctx.accounts.council_manager.council_count.into();
 
     let council_idenitfiers = &ctx.accounts.council_manager.council_identifiers;
@@ -108,9 +108,10 @@ pub struct CastCouncilVote<'info> {
     pub organisation: Box<Account<'info, Organisation>>,
 
     #[account(
-        constraint = governance.organisation == organisation.key()
+        constraint = governance.organisation == organisation.key(),
+        address = proposal.governance
     )]
-    pub governance: Box<Account<'info, NativeTreasuryAccount>>,
+    pub governance: Box<Account<'info, GovernanceAccount>>,
 
     #[account(
         constraint = council_manager.organisation == organisation.key(),
