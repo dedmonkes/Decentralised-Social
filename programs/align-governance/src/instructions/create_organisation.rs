@@ -2,8 +2,8 @@ use crate::{
     constants::DEFAULT_COUNCIL_THRESHOLD,
     error::AlignError,
     state::{
-        CouncilManager, CouncilManagerState, ElectionManager,
-        NativeTreasuryAccount, Organisation, GovernanceAccount,
+        CouncilManager, CouncilManagerState, ElectionManager, GovernanceAccount,
+        NativeTreasuryAccount, Organisation,
     },
 };
 use anchor_lang::prelude::*;

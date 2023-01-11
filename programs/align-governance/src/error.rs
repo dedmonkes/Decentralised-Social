@@ -35,4 +35,6 @@ pub enum AlignError {
     #[msg("Instruction is not valid for execution")]
     InstructionInvalid,
 
+    #[msg("The feature requested is not yet implemented in this version of Align")]
+    FeatureNotYetImplemented,
 }

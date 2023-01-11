@@ -19,7 +19,7 @@ pub fn add_instruction(
     ix_program_id: Pubkey,
     data: Vec<u8>,
     meta_accounts: Vec<AlignAccountMeta>,
-    transaction_index : u32
+    transaction_index: u32,
 ) -> Result<()> {
     ctx.accounts.instruction.accounts = meta_accounts;
     ctx.accounts.instruction.transaction = ctx.accounts.transaction.key();
@@ -79,7 +79,7 @@ pub struct AddInstruction<'info> {
         init,
         seeds = [b"instruction", transaction.key().as_ref(), &[transaction.instruction_count as u8]],
         space = ProposalInstruction::space(&meta_accounts, &data),
-        constraint = ProposalInstruction::get_instruction_sise(&meta_accounts, &data) <=  1232, // Max instruction size
+        constraint = ProposalInstruction::get_instruction_size(&meta_accounts, &data) <=  1232, // Max instruction size
         bump,
         payer = payer
     )]

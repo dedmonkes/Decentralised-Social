@@ -4,47 +4,57 @@ use crate::{
     constants::MIN_REP_TO_CREATE_PROPOSAL,
     error::AlignError,
     state::{
-        transactions::{ProposalTransaction, TransactionState, ProposalInstruction},
-        CouncilManager, NativeTreasuryAccount, Organisation, Proposal, ProposalState,
-        ReputationManager, GovernanceAccount,
+        transactions::{ProposalInstruction, ProposalTransaction, TransactionState},
+        CouncilManager, GovernanceAccount, NativeTreasuryAccount, Organisation, Proposal,
+        ProposalState, ReputationManager,
     },
 };
-use anchor_lang::{prelude::*, solana_program::{program::invoke_signed, instruction::{self, Instruction}}};
-
-use identifiers::state::{Identifier, Identity, OwnerRecord};
+use anchor_lang::{
+    prelude::*,
+    solana_program::{
+        instruction::{self, Instruction},
+        program::invoke_signed,
+    },
+};
 
 pub fn execute_transaction(ctx: Context<ExecuteTransaction>) -> Result<()> {
     let instruction_count = ctx.accounts.transaction.instruction_count;
-    let instruction_accounts : Vec<ProposalInstruction> = ctx.remaining_accounts
-                                                                            .iter()
-                                                                            .enumerate()
-                                                                            .filter(|(i, info)| i < &(instruction_count as usize))
-                                                                            .map(|(i, info)| info.try_borrow_data().unwrap())
-                                                                            .map(|data| ProposalInstruction::try_deserialize(  &mut &**data ).unwrap())
-                                                                            .collect();
-    let mut instruction_account_infos : Vec<AccountInfo> = vec![];
+    let instruction_accounts: Vec<ProposalInstruction> = ctx
+        .remaining_accounts
+        .iter()
+        .enumerate()
+        .filter(|(i, info)| i < &(instruction_count as usize))
+        .map(|(i, info)| info.try_borrow_data().unwrap())
+        .map(|data| ProposalInstruction::try_deserialize(&mut &**data).unwrap())
+        .collect();
+    let mut instruction_account_infos: Vec<AccountInfo> = vec![];
 
     for i in instruction_count..ctx.remaining_accounts.len() as u8 {
-        instruction_account_infos.push(ctx.remaining_accounts)
+        instruction_account_infos.push(ctx.remaining_accounts[i as usize])
     }
-    
-    
+
+    let signers_seeds = ctx.accounts.governance.get_seeds()?;
 
     for inst in instruction_accounts {
-        require!(inst.transaction == ctx.accounts.transaction.key(), AlignError::InstructionInvalid);
-        let instruction : Instruction = inst.try_into().unwrap();
+        require!(
+            inst.transaction == ctx.accounts.transaction.key(),
+            AlignError::InstructionInvalid
+        );
+        let instruction: Instruction = inst.try_into().unwrap();
 
-            // Loop here after using governance seeeds to sign
-        invoke_signed(instruction, instruction_account_infos, signers_seeds)
+        // Loop here after using governance seeeds to sign
+        invoke_signed(
+            &instruction,
+            instruction_account_infos.as_slice(),
+            &[&signers_seeds],
+        );
     }
-
 
     Ok(())
 }
 
 #[derive(Accounts)]
 pub struct ExecuteTransaction<'info> {
-
     #[account(
         mut,
         constraint = proposal.state == ProposalState::Servicing,

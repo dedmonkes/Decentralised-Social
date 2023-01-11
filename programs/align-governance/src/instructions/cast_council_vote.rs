@@ -1,8 +1,8 @@
 use crate::{
     error::AlignError,
     state::{
-        CouncilManager, CouncilVote, CouncilVoteRecord, NativeTreasuryAccount, Organisation,
-        Proposal, ProposalState, GovernanceAccount,
+        CouncilManager, CouncilVote, CouncilVoteRecord, GovernanceAccount, NativeTreasuryAccount,
+        Organisation, Proposal, ProposalState,
     },
 };
 use anchor_lang::prelude::*;
